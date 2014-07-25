@@ -8,7 +8,6 @@ function Compiler(source) {
   this.out = [];
 
   this.fns = [];
-  this.stmts = [];
   this.returns = [];
 }
 exports.Compiler = Compiler;
@@ -51,14 +50,6 @@ Compiler.prototype.compile = function compile() {
     }, this);
 
     var rtn = this.add([ 'RTN' ]);
-
-    // Visit all queued statements
-    while (this.stmts.length) {
-      var stmt = this.stmts.shift();
-      if (stmt.index !== -1)
-        stmt.instr[stmt.index] = this.out.length;
-      this.visitStmt(stmt.stmt);
-    }
 
     // Link-in all returns
     for (var i = 0; i < this.returns.length; i++) {
@@ -151,9 +142,8 @@ Compiler.prototype.visitStmt = function visitStmt(stmt) {
     this.visitIf(stmt);
   } else if (stmt.type === 'WhileStatement') {
     this.visitWhile(stmt);
-  } else if (stmt.type === 'JoinStatement') {
-    // Artificial
-    this.add([ 'JOIN' ]);
+  } else if (stmt.type === 'ThrowStatement') {
+    this.visitThrow(stmt);
   } else if (stmt.type === 'JumpStatement') {
     // Artificial
     this.add([ 'LDC', 0 ]);
@@ -354,17 +344,24 @@ Compiler.prototype.visitRet = function visitRet(stmt) {
 Compiler.prototype.visitIf = function visitIf(stmt) {
   this.visitExpr(stmt.test);
 
-  var instr = [ 'SEL', null, null ];
+  var instr = [ 'TSEL', this.out.length + 1, null ];
+
   this.add(instr, 'if test');
-  this.stmts.push({ stmt: stmt.consequent, instr: instr, index: 1 });
+  this.visitStmt(stmt.consequent);
   if (stmt.alternate) {
-    this.stmts.push({ stmt: stmt.alternate, instr: instr, index: 2 });
+    var jmp = [ 'TSEL', null, null ];
+
+    this.add([ 'LDC', 0 ]);
+    this.add(jmp);
+    instr[2] = this.out.length;
+
+    this.visitStmt(stmt.alternate);
+    this.add([ 'LDC', 0 ]);
+
+    jmp[1] = this.out.length;
+    jmp[2] = this.out.length;
   } else {
-    this.stmts.push({
-      stmt: { type: 'JoinStatement' },
-      instr: instr,
-      index: 2
-    });
+    instr[2] = this.out.length;
   }
 };
 
@@ -372,15 +369,13 @@ Compiler.prototype.visitWhile = function visitWhile(stmt) {
   var start = this.out.length;
   this.visitExpr(stmt.test);
 
-  var instr = [ 'TSEL', null, this.out.length + 1 ];
+  var instr = [ 'TSEL', this.out.length + 1, null ];
   this.add(instr, 'while test');
+  this.visitStmt(stmt.body);
+  this.add([ 'LDC' , 0 ]);
+  this.add([ 'TSEL', start, start ]);
 
-  this.stmts.push({ stmt: stmt.body, instr: instr, index: 1 });
-  this.stmts.push({
-    stmt: { type: 'JumpStatement', target: start },
-    instr: instr,
-    index: -1
-  });
+  instr[2] = this.out.length;
 };
 
 Compiler.prototype.visitBlock = function visitBlock(stmt) {
@@ -409,4 +404,8 @@ Compiler.prototype.visitArray = function visitArray(stmt) {
   this.visitExpr(elems[0]);
   this.visitExpr(elems[1]);
   this.add([ 'CONS' ]);
+};
+
+Compiler.prototype.visitThrow = function visitThrow() {
+  this.add([ 'STOP' ]);
 };
