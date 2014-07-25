@@ -1,7 +1,7 @@
 var a, b = 2;
 
 function dup(a) {
-  $$push(b);
+  $$push(a + b);
 }
 
 a = 1;

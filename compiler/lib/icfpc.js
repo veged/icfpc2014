@@ -130,6 +130,8 @@ Compiler.prototype.visitExpr = function visitExpr(expr, stmt) {
     return this.visitLiteral(expr);
   else if (expr.type == 'Identifier')
     return this.visitIdentifier(expr, stmt);
+  else if (expr.type == 'BinaryExpression')
+    return this.visitBinop(expr, stmt);
 };
 
 Compiler.prototype.visitAsgn = function visitAsgn(expr) {
@@ -187,4 +189,39 @@ Compiler.prototype.visitVar = function visitVar(stmt) {
     this.visitExpr(val);
     this.add([ 'st', slot.depth, slot.index ]);
   }
+};
+
+Compiler.prototype.visitBinop = function visitBinop(expr, stmt) {
+  assert(!stmt);
+
+  var op = expr.operator;
+  if (op === '<' || op === '<=') {
+    if (op === '<')
+      op = '>';
+    else
+      op = '>=';
+    this.visitExpr(expr.right);
+    this.visitExpr(expr.left);
+  } else {
+    this.visitExpr(expr.left);
+    this.visitExpr(expr.right);
+  }
+
+  if (op === '+')
+    op = 'add';
+  else if (op === '-')
+    op = 'sub';
+  else if (op === '*')
+    op = 'mul';
+  else if (op === '/')
+    op = 'div';
+  else if (op === '==' || op === '===')
+    op = 'ceq';
+  else if (op === '>')
+    op = 'cgt';
+  else if (op === '>=')
+    op = 'cgte';
+  else
+    throw new Error('Unsupported operation: ' + op);
+  this.add([ op ]);
 };
