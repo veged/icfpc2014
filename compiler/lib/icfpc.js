@@ -70,6 +70,8 @@ Compiler.prototype.evalScopes = function evalScopes() {
 
   function add(name, arg) {
     var scope = scopes[scopes.length - 1];
+    if (scope.map[name] !== undefined)
+      return { depth: 0, index: scope.map[name] };
 
     if (!arg)
       scope.context++;
@@ -144,6 +146,8 @@ Compiler.prototype.visitStmt = function visitStmt(stmt) {
     this.visitWhile(stmt);
   } else if (stmt.type === 'ThrowStatement') {
     this.visitThrow(stmt);
+  } else if (stmt.type === 'DebuggerStatement') {
+    this.visitDebugger(stmt);
   } else if (stmt.type === 'JumpStatement') {
     // Artificial
     this.add([ 'LDC', 0 ]);
@@ -171,13 +175,15 @@ Compiler.prototype.visitExpr = function visitExpr(expr, stmt) {
   if (expr.type === 'AssignmentExpression')
     this.visitAsgn(expr, stmt);
   else if (expr.type === 'CallExpression')
-    this.visitCall(expr);
+    this.visitCall(expr, stmt);
   else if (expr.type === 'Literal')
     this.visitLiteral(expr);
   else if (expr.type === 'Identifier')
     this.visitIdentifier(expr);
   else if (expr.type === 'BinaryExpression')
     this.visitBinop(expr);
+  else if (expr.type === 'LogicalExpression')
+    this.visitLogic(expr);
   else if (expr.type === 'MemberExpression')
     this.visitMember(expr);
   else if (expr.type === 'ArrayExpression')
@@ -189,6 +195,9 @@ Compiler.prototype.visitExpr = function visitExpr(expr, stmt) {
     return;
 
   if (stmt === this.ast.body[this.ast.body.length - 1])
+    return;
+
+  if (stmt._dbug)
     return;
 
   // Auto-Consume returned value
@@ -206,7 +215,7 @@ Compiler.prototype.visitAsgn = function visitAsgn(expr, stmt) {
     this.add([ 'LD', scope.depth, scope.index ]);
 };
 
-Compiler.prototype.visitCall = function visitCall(expr) {
+Compiler.prototype.visitCall = function visitCall(expr, stmt) {
   if (expr.callee.type === 'MemberExpression') {
     var obj = expr.callee.object;
     var prop = expr.callee.property;
@@ -220,6 +229,7 @@ Compiler.prototype.visitCall = function visitCall(expr) {
       assert.equal(expr.arguments.length, 1);
       this.visitExpr(expr.arguments[0]);
       this.add([ 'DBUG' ]);
+      stmt._dbug = true;
       return;
     }
   }
@@ -330,6 +340,22 @@ Compiler.prototype.visitBinop = function visitBinop(expr) {
   this.add([ op ]);
 };
 
+Compiler.prototype.visitLogic = function visitLogic(expr) {
+  var op = expr.operator;
+
+  this.visitExpr(expr.left);
+  this.visitExpr(expr.right);
+  if (op === '&&') {
+    this.add([ 'MUL' ]);
+    this.add([ 'LDC', 1 ]);
+    this.add([ 'CEQ' ]);
+  } else {
+    this.add([ 'ADD' ]);
+    this.add([ 'LDC', 0 ]);
+    this.add([ 'CGT' ]);
+  }
+}
+
 Compiler.prototype.visitRet = function visitRet(stmt) {
   if (stmt.argument)
     this.visitExpr(stmt.argument);
@@ -408,4 +434,8 @@ Compiler.prototype.visitArray = function visitArray(stmt) {
 
 Compiler.prototype.visitThrow = function visitThrow() {
   this.add([ 'STOP' ]);
+};
+
+Compiler.prototype.visitDebugger = function visitDebugger() {
+  this.add([ 'BRK' ]);
 };
