@@ -166,33 +166,43 @@ Compiler.prototype.visitStmt = function visitStmt(stmt) {
 
 Compiler.prototype.visitExpr = function visitExpr(expr, stmt) {
   if (expr.type === 'AssignmentExpression')
-    return this.visitAsgn(expr);
+    return this.visitAsgn(expr, stmt);
   else if (expr.type === 'CallExpression')
     return this.visitCall(expr);
   else if (expr.type === 'Literal')
     return this.visitLiteral(expr);
   else if (expr.type == 'Identifier')
-    return this.visitIdentifier(expr, stmt);
+    return this.visitIdentifier(expr);
   else if (expr.type == 'BinaryExpression')
-    return this.visitBinop(expr, stmt);
+    return this.visitBinop(expr);
+  else if (expr.type == 'MemberExpression')
+    return this.visitMember(expr);
+  else if (expr.type === 'ArrayExpression')
+    return this.visitArray(expr);
+  else
+    throw new Error('Unsupported expression type: ' + expr.type);
+
+  // Auto-Consume returned value
+  if (stmt && expr.type !== 'AssignmentExpression')
+    this.add([ 'ATOM', '; cleanup' ]);
 };
 
-Compiler.prototype.visitAsgn = function visitAsgn(expr) {
+Compiler.prototype.visitAsgn = function visitAsgn(expr, stmt) {
   var scope = expr.left._scope;
   assert(scope);
   this.visitExpr(expr.right);
   this.add([ 'ST', scope.depth, scope.index ]);
+
+  // Load the result of the assignment
+  if (!stmt)
+    this.add([ 'LD', scope.depth, scope.index ]);
 };
 
 Compiler.prototype.visitCall = function visitCall(expr) {
-  assert.equal(expr.callee.type, 'Identifier');
-  assert(expr.callee._scope);
-
-  var slot = expr.callee._scope;
   for (var i = 0; i < expr.arguments.length; i++)
     this.visitExpr(expr.arguments[0]);
 
-  this.add([ 'LD', slot.depth, slot.index ]);
+  this.visitExpr(expr.callee);
   this.add([ 'AP', expr.arguments.length ]);
 };
 
@@ -215,8 +225,8 @@ Compiler.prototype.queueFn = function queueFn(fn, instr, index) {
   });
 };
 
-Compiler.prototype.visitIdentifier = function visitIdentifier(id, stmt) {
-  assert(id._scope && !stmt);
+Compiler.prototype.visitIdentifier = function visitIdentifier(id) {
+  assert(id._scope);
   this.add([ 'LD', id._scope.depth, id._scope.index ]);
 };
 
@@ -233,9 +243,7 @@ Compiler.prototype.visitVar = function visitVar(stmt) {
   }
 };
 
-Compiler.prototype.visitBinop = function visitBinop(expr, stmt) {
-  assert(!stmt);
-
+Compiler.prototype.visitBinop = function visitBinop(expr) {
   var op = expr.operator;
   if (op === '<' || op === '<=') {
     if (op === '<')
@@ -314,4 +322,27 @@ Compiler.prototype.visitWhile = function visitWhile(stmt) {
 Compiler.prototype.visitBlock = function visitBlock(stmt) {
   for (var i = 0; i < stmt.body.length; i++)
     this.visitStmt(stmt.body[i]);
+};
+
+Compiler.prototype.visitMember = function visitMember(stmt) {
+  assert(stmt.computed);
+  assert.equal(stmt.property.type, 'Literal');
+  assert.equal(typeof stmt.property.value, 'number');
+
+  var idx = stmt.property.value;
+  assert(0 <= idx && idx < 2);
+  this.visitExpr(stmt.object);
+  if (idx === 0)
+    this.add([ 'CAR' ]);
+  else
+    this.add([ 'CDR' ]);
+};
+
+Compiler.prototype.visitArray = function visitArray(stmt) {
+  var elems = stmt.elements;
+  assert.equal(elems.length, 2);
+
+  this.visitExpr(elems[0]);
+  this.visitExpr(elems[1]);
+  this.add([ 'CONS' ]);
 };
