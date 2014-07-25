@@ -4,7 +4,7 @@ var estraverse = require('estraverse');
 
 function Compiler(source) {
   this.source = source;
-  this.ast = esprima.parse(source);
+  this.ast = esprima.parse(source, { range: true });
   this.out = [];
 
   this.fns = [];
@@ -137,8 +137,9 @@ Compiler.prototype.evalScopes = function evalScopes() {
 };
 
 Compiler.prototype.visitStmt = function visitStmt(stmt) {
+  var pos = this.out.length;
   if (stmt.type === 'ExpressionStatement') {
-    return this.visitExpr(stmt.expression, true);
+    this.visitExpr(stmt.expression, true);
   } else if (stmt.type === 'FunctionDeclaration') {
     this.visitFn(stmt);
     this.add([ 'ST', stmt.id._scope.depth, stmt.id._scope.index ]);
@@ -161,6 +162,18 @@ Compiler.prototype.visitStmt = function visitStmt(stmt) {
     this.visitBlock(stmt);
   } else {
     throw new Error('Unsupported statement type: ' + stmt.type);
+  }
+
+  // Add comment
+  if (stmt.range && this.out.length > pos) {
+    var src = this.source.slice(stmt.range[0], stmt.range[1])
+        .replace(/[\r\n]+/g, '');
+    if (src.length > 20)
+      src = src.slice(0, 17) + '...';
+
+    if (!this.out[pos].comment)
+      this.out[pos].comment = '';
+    this.out[pos].comment += ' (js: `' + src + '`)';
   }
 };
 
