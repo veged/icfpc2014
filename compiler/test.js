@@ -1,11 +1,8 @@
-var a, b = 2;
-
 function dup(a) {
-  if (a < 2) {
-    return dup(a + 1);
+  while (a < 10) {
+    a = a + 1;
   }
+  return a;
 }
 
-a = 1;
-
-dup(a);
+dup(1);

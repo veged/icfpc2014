@@ -50,19 +50,21 @@ Compiler.prototype.compile = function compile() {
       this.visitStmt(stmt);
     }, this);
 
+    var rtn = this.add([ 'RTN' ]);
+
     // Visit all queued statements
     while (this.stmts.length) {
       var stmt = this.stmts.shift();
-      stmt.instr[stmt.index] = this.out.length;
+      if (stmt.index !== -1)
+        stmt.instr[stmt.index] = this.out.length;
       this.visitStmt(stmt.stmt);
     }
 
     // Link-in all returns
     for (var i = 0; i < this.returns.length; i++) {
       var ret = this.returns[i];
-      ret.instr[ret.index ] = this.out.length;
+      ret.instr[ret.index ] = rtn;
     }
-    this.add([ 'RTN' ]);
   }
 
   return this.out.map(function(instr) {
@@ -146,9 +148,15 @@ Compiler.prototype.visitStmt = function visitStmt(stmt) {
     this.visitRet(stmt);
   } else if (stmt.type === 'IfStatement') {
     this.visitIf(stmt);
+  } else if (stmt.type === 'WhileStatement') {
+    this.visitWhile(stmt);
   } else if (stmt.type === 'JoinStatement') {
     // Artificial
     this.add([ 'JOIN' ]);
+  } else if (stmt.type === 'JumpStatement') {
+    // Artificial
+    this.add([ 'LDC', 0 ]);
+    this.add([ 'TSEL', stmt.target, stmt.target ]);
   } else if (stmt.type === 'BlockStatement') {
     this.visitBlock(stmt);
   } else {
@@ -274,7 +282,7 @@ Compiler.prototype.visitRet = function visitRet(stmt) {
 Compiler.prototype.visitIf = function visitIf(stmt) {
   this.visitExpr(stmt.test);
 
-  var instr = [ 'SEL', null, null ];
+  var instr = [ 'SEL', null, null, '; if test' ];
   this.add(instr);
   this.stmts.push({ stmt: stmt.consequent, instr: instr, index: 1 });
   if (stmt.alternate) {
@@ -286,6 +294,21 @@ Compiler.prototype.visitIf = function visitIf(stmt) {
       index: 2
     });
   }
+};
+
+Compiler.prototype.visitWhile = function visitWhile(stmt) {
+  var start = this.out.length;
+  this.visitExpr(stmt.test);
+
+  var instr = [ 'TSEL', null, this.out.length + 1, '; while test' ];
+  this.add(instr);
+
+  this.stmts.push({ stmt: stmt.body, instr: instr, index: 1 });
+  this.stmts.push({
+    stmt: { type: 'JumpStatement', target: start },
+    instr: instr,
+    index: -1
+  });
 };
 
 Compiler.prototype.visitBlock = function visitBlock(stmt) {
