@@ -6,27 +6,47 @@ function Compiler(source) {
   this.source = source;
   this.ast = esprima.parse(source);
   this.out = [];
-  this.scopes = [];
-  this.scope = null;
+
+  this.fns = [];
 }
 exports.Compiler = Compiler;
 
 Compiler.prototype.add = function add(instr) {
-  this.out.push(instr);
+  return this.out.push(instr) - 1;
 };
 
 Compiler.prototype.compile = function compile() {
   this.evalScopes();
 
+  var instr = [ 'ldf', null ];
+
   // Push-out first scope
-  this.add([ 'dum', this.scope.size ]);
-  this.add([ 'ldf', 4 ]);
-  this.add([ 'rap', 0 ]);
+  this.add(instr);
+  this.add([ 'ap', 0 ]);
   this.add([ 'rtn' ]);
 
-  this.ast.body.forEach(function(stmt) {
-    this.visitStmt(stmt);
-  }, this);
+  this.queueFn(this.ast, instr, 1);
+
+  while (this.fns.length) {
+    var item = this.fns.shift();
+    item.instr[item.index] = this.out.length;
+
+    if (item.fn._scope.size != 0) {
+      // Push-out scope
+      this.add([ 'dum', item.fn._scope.size ]);
+      this.add([ 'ldf', this.out.length + 3 ]);
+      this.add([ 'rap', 0 ]);
+      this.add([ 'rtn' ]);
+    }
+
+    var body = item.fn.body;
+    while (body.body)
+      body = body.body;
+    body.forEach(function(stmt) {
+      this.visitStmt(stmt);
+    }, this);
+    this.add([ 'rtn' ]);
+  }
 
   return this.out.map(function(instr) {
     return instr.join(' ');
@@ -61,7 +81,7 @@ Compiler.prototype.evalScopes = function evalScopes() {
     enter: function(node) {
       if (/function/i.test(node.type)) {
         if (node.id)
-          add(node.id.name);
+          node.id._scope = add(node.id.name);
 
         scopes.push({
           fn: node,
@@ -75,7 +95,8 @@ Compiler.prototype.evalScopes = function evalScopes() {
       } else if (node.type === 'VariableDeclarator') {
         add(node.id.name);
       } else if (node.type === 'Identifier') {
-        node._scope = get(node.name);
+        if (!node._scope)
+          node._scope = get(node.name);
       }
     },
     leave: function(node) {
@@ -84,21 +105,31 @@ Compiler.prototype.evalScopes = function evalScopes() {
     }
   });
 
-  this.scope = scopes.pop();
-  this.scopes.push(this.scope);
+  this.ast._scope = scopes.pop();
 };
 
 Compiler.prototype.visitStmt = function visitStmt(stmt) {
-  if (stmt.type === 'ExpressionStatement')
-    return this.visitExpr(stmt.expression);
-
+  if (stmt.type === 'ExpressionStatement') {
+    return this.visitExpr(stmt.expression, true);
+  } else if (stmt.type === 'FunctionDeclaration') {
+    this.visitFn(stmt);
+    this.add([ 'st', stmt.id._scope.depth, stmt.id._scope.index ]);
+  } else if (stmt.type === 'VariableDeclaration') {
+    this.visitVar(stmt);
+  } else {
+    throw new Error('Unsupported statement type: ' + stmt.type);
+  }
 };
 
-Compiler.prototype.visitExpr = function visitExpr(expr) {
+Compiler.prototype.visitExpr = function visitExpr(expr, stmt) {
   if (expr.type === 'AssignmentExpression')
     return this.visitAsgn(expr);
+  else if (expr.type === 'CallExpression')
+    return this.visitCall(expr);
   else if (expr.type === 'Literal')
     return this.visitLiteral(expr);
+  else if (expr.type == 'Identifier')
+    return this.visitIdentifier(expr, stmt);
 };
 
 Compiler.prototype.visitAsgn = function visitAsgn(expr) {
@@ -108,7 +139,52 @@ Compiler.prototype.visitAsgn = function visitAsgn(expr) {
   this.add([ 'st', scope.depth, scope.index ]);
 };
 
+Compiler.prototype.visitCall = function visitCall(expr) {
+  assert.equal(expr.callee.type, 'Identifier');
+  assert(expr.callee._scope);
+
+  var slot = expr.callee._scope;
+  for (var i = 0; i < expr.arguments.length; i++)
+    this.visitExpr(expr.arguments[0]);
+  if (slot.depth === -1 && slot.index === '$$push')
+    return;
+  this.add([ 'lt', slot.depth, slot.index ]);
+  this.add([ 'ap', expr.arguments.length ]);
+};
+
 Compiler.prototype.visitLiteral = function visitLiteral(expr) {
   assert(typeof expr.value === 'number');
   this.add([ 'ldc', expr.value ]);
+};
+
+Compiler.prototype.visitFn = function visitFn(expr) {
+  var instr = [ 'ldf', null ];
+  this.add(instr);
+  this.queueFn(expr, instr, 1);
+};
+
+Compiler.prototype.queueFn = function queueFn(fn, instr, index) {
+  this.fns.push({
+    fn: fn,
+    instr: instr,
+    index: index
+  });
+};
+
+Compiler.prototype.visitIdentifier = function visitIdentifier(id, stmt) {
+  assert(id._scope && !stmt);
+  this.add([ 'ld', id._scope.depth, id._scope.index ]);
+};
+
+Compiler.prototype.visitVar = function visitVar(stmt) {
+  var decls = stmt.declarations;
+  for (var i = 0; i < decls.length; i++) {
+    if (!decls[i].init)
+      continue;
+
+    var val = decls[i].init;
+    var slot = decls[i].id._scope;
+    this.visitExpr(val);
+    this.add([ 'st', slot.depth, slot.index ]);
+  }
 };

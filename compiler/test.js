@@ -1,8 +1,9 @@
-var a, b;
+var a, b = 2;
+
+function dup(a) {
+  $$push(b);
+}
 
 a = 1;
 
-function dup(a) {
-  b;
-  return a;
-}
+dup(a);
