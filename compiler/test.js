@@ -1,8 +1,9 @@
 var a, b = 2;
 
 function dup(a) {
-  var c = (a + b) * b;
-  return a + b;
+  if (a < 2) {
+    return dup(a + 1);
+  }
 }
 
 a = 1;

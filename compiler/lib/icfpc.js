@@ -8,6 +8,7 @@ function Compiler(source) {
   this.out = [];
 
   this.fns = [];
+  this.stmts = [];
   this.returns = [];
 }
 exports.Compiler = Compiler;
@@ -48,6 +49,13 @@ Compiler.prototype.compile = function compile() {
     body.forEach(function(stmt) {
       this.visitStmt(stmt);
     }, this);
+
+    // Visit all queued statements
+    while (this.stmts.length) {
+      var stmt = this.stmts.shift();
+      stmt.instr[stmt.index] = this.out.length;
+      this.visitStmt(stmt.stmt);
+    }
 
     // Link-in all returns
     for (var i = 0; i < this.returns.length; i++) {
@@ -136,6 +144,13 @@ Compiler.prototype.visitStmt = function visitStmt(stmt) {
     this.visitVar(stmt);
   } else if (stmt.type === 'ReturnStatement') {
     this.visitRet(stmt);
+  } else if (stmt.type === 'IfStatement') {
+    this.visitIf(stmt);
+  } else if (stmt.type === 'JoinStatement') {
+    // Artificial
+    this.add([ 'JOIN' ]);
+  } else if (stmt.type === 'BlockStatement') {
+    this.visitBlock(stmt);
   } else {
     throw new Error('Unsupported statement type: ' + stmt.type);
   }
@@ -254,4 +269,26 @@ Compiler.prototype.visitRet = function visitRet(stmt) {
   this.returns.push({ instr: instr, index: 2 });
   this.add([ 'LDC', 0 ]);
   this.add(instr);
+};
+
+Compiler.prototype.visitIf = function visitIf(stmt) {
+  this.visitExpr(stmt.test);
+
+  var instr = [ 'SEL', null, null ];
+  this.add(instr);
+  this.stmts.push({ stmt: stmt.consequent, instr: instr, index: 1 });
+  if (stmt.alternate) {
+    this.stmts.push({ stmt: stmt.alternate, instr: instr, index: 2 });
+  } else {
+    this.stmts.push({
+      stmt: { type: 'JoinStatement' },
+      instr: instr,
+      index: 2
+    });
+  }
+};
+
+Compiler.prototype.visitBlock = function visitBlock(stmt) {
+  for (var i = 0; i < stmt.body.length; i++)
+    this.visitStmt(stmt.body[i]);
 };
