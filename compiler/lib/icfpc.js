@@ -18,12 +18,12 @@ Compiler.prototype.add = function add(instr) {
 Compiler.prototype.compile = function compile() {
   this.evalScopes();
 
-  var instr = [ 'ldf', null ];
+  var instr = [ 'LDF', null ];
 
   // Push-out first scope
   this.add(instr);
-  this.add([ 'ap', 0 ]);
-  this.add([ 'rtn' ]);
+  this.add([ 'AP', 0 ]);
+  this.add([ 'RTN' ]);
 
   this.queueFn(this.ast, instr, 1);
 
@@ -33,10 +33,10 @@ Compiler.prototype.compile = function compile() {
 
     if (item.fn._scope.size != 0) {
       // Push-out scope
-      this.add([ 'dum', item.fn._scope.size ]);
-      this.add([ 'ldf', this.out.length + 3 ]);
-      this.add([ 'rap', 0 ]);
-      this.add([ 'rtn' ]);
+      this.add([ 'DUM', item.fn._scope.size ]);
+      this.add([ 'LDF', this.out.length + 3 ]);
+      this.add([ 'RAP', 0 ]);
+      this.add([ 'RTN' ]);
     }
 
     var body = item.fn.body;
@@ -45,7 +45,7 @@ Compiler.prototype.compile = function compile() {
     body.forEach(function(stmt) {
       this.visitStmt(stmt);
     }, this);
-    this.add([ 'rtn' ]);
+    this.add([ 'RTN' ]);
   }
 
   return this.out.map(function(instr) {
@@ -113,7 +113,7 @@ Compiler.prototype.visitStmt = function visitStmt(stmt) {
     return this.visitExpr(stmt.expression, true);
   } else if (stmt.type === 'FunctionDeclaration') {
     this.visitFn(stmt);
-    this.add([ 'st', stmt.id._scope.depth, stmt.id._scope.index ]);
+    this.add([ 'ST', stmt.id._scope.depth, stmt.id._scope.index ]);
   } else if (stmt.type === 'VariableDeclaration') {
     this.visitVar(stmt);
   } else {
@@ -138,7 +138,7 @@ Compiler.prototype.visitAsgn = function visitAsgn(expr) {
   var scope = expr.left._scope;
   assert(scope);
   this.visitExpr(expr.right);
-  this.add([ 'st', scope.depth, scope.index ]);
+  this.add([ 'ST', scope.depth, scope.index ]);
 };
 
 Compiler.prototype.visitCall = function visitCall(expr) {
@@ -150,17 +150,17 @@ Compiler.prototype.visitCall = function visitCall(expr) {
     this.visitExpr(expr.arguments[0]);
   if (slot.depth === -1 && slot.index === '$$push')
     return;
-  this.add([ 'lt', slot.depth, slot.index ]);
-  this.add([ 'ap', expr.arguments.length ]);
+  this.add([ 'LT', slot.depth, slot.index ]);
+  this.add([ 'AP', expr.arguments.length ]);
 };
 
 Compiler.prototype.visitLiteral = function visitLiteral(expr) {
   assert(typeof expr.value === 'number');
-  this.add([ 'ldc', expr.value ]);
+  this.add([ 'LDC', expr.value ]);
 };
 
 Compiler.prototype.visitFn = function visitFn(expr) {
-  var instr = [ 'ldf', null ];
+  var instr = [ 'LDF', null ];
   this.add(instr);
   this.queueFn(expr, instr, 1);
 };
@@ -175,7 +175,7 @@ Compiler.prototype.queueFn = function queueFn(fn, instr, index) {
 
 Compiler.prototype.visitIdentifier = function visitIdentifier(id, stmt) {
   assert(id._scope && !stmt);
-  this.add([ 'ld', id._scope.depth, id._scope.index ]);
+  this.add([ 'LD', id._scope.depth, id._scope.index ]);
 };
 
 Compiler.prototype.visitVar = function visitVar(stmt) {
@@ -187,7 +187,7 @@ Compiler.prototype.visitVar = function visitVar(stmt) {
     var val = decls[i].init;
     var slot = decls[i].id._scope;
     this.visitExpr(val);
-    this.add([ 'st', slot.depth, slot.index ]);
+    this.add([ 'ST', slot.depth, slot.index ]);
   }
 };
 
@@ -208,19 +208,19 @@ Compiler.prototype.visitBinop = function visitBinop(expr, stmt) {
   }
 
   if (op === '+')
-    op = 'add';
+    op = 'ADD';
   else if (op === '-')
-    op = 'sub';
+    op = 'SUB';
   else if (op === '*')
-    op = 'mul';
+    op = 'MUL';
   else if (op === '/')
-    op = 'div';
+    op = 'DIV';
   else if (op === '==' || op === '===')
-    op = 'ceq';
+    op = 'CEQ';
   else if (op === '>')
-    op = 'cgt';
+    op = 'CGT';
   else if (op === '>=')
-    op = 'cgte';
+    op = 'CGTE';
   else
     throw new Error('Unsupported operation: ' + op);
   this.add([ op ]);
