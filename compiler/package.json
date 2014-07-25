@@ -1,0 +1,23 @@
+{
+  "name": "icfpc2014",
+  "version": "0.0.0",
+  "description": "",
+  "main": "lib/icfpc.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/veged/icfpc2014.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/veged/icfpc2014/issues"
+  },
+  "homepage": "https://github.com/veged/icfpc2014",
+  "dependencies": {
+    "esprima": "^1.2.2",
+    "estraverse": "^1.5.1"
+  }
+}

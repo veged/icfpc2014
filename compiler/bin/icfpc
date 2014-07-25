@@ -1,0 +1,22 @@
+#!/usr/bin/env node
+var icfpc = require('../');
+
+function read(cb) {
+  var data = '';
+
+  process.stdin.resume();
+
+  process.stdin.on('data', function(chunk) {
+    data += chunk;
+  });
+
+  process.stdin.on('end', function() {
+    cb(data);
+  });
+}
+
+read(function(src) {
+  var c = new icfpc.Compiler(src);
+
+  console.log(c.compile());
+});
