@@ -150,7 +150,7 @@ Compiler.prototype.visitCall = function visitCall(expr) {
     this.visitExpr(expr.arguments[0]);
   if (slot.depth === -1 && slot.index === '$$push')
     return;
-  this.add([ 'LT', slot.depth, slot.index ]);
+  this.add([ 'LD', slot.depth, slot.index ]);
   this.add([ 'AP', expr.arguments.length ]);
 };
 
