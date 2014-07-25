@@ -5,4 +5,4 @@ function dup(a) {
   return [ a, a * 2 ];
 }
 
-dup(1)[1];
+[ dup(1)[1], typeof 1 ];

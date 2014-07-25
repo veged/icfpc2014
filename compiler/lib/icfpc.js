@@ -139,7 +139,7 @@ Compiler.prototype.evalScopes = function evalScopes() {
 Compiler.prototype.visitStmt = function visitStmt(stmt) {
   var pos = this.out.length;
   if (stmt.type === 'ExpressionStatement') {
-    this.visitExpr(stmt.expression, true);
+    this.visitExpr(stmt.expression, stmt);
   } else if (stmt.type === 'FunctionDeclaration') {
     this.visitFn(stmt);
     this.add([ 'ST', stmt.id._scope.depth, stmt.id._scope.index ]);
@@ -179,25 +179,32 @@ Compiler.prototype.visitStmt = function visitStmt(stmt) {
 
 Compiler.prototype.visitExpr = function visitExpr(expr, stmt) {
   if (expr.type === 'AssignmentExpression')
-    return this.visitAsgn(expr, stmt);
+    this.visitAsgn(expr, stmt);
   else if (expr.type === 'CallExpression')
-    return this.visitCall(expr);
+    this.visitCall(expr);
   else if (expr.type === 'Literal')
-    return this.visitLiteral(expr);
+    this.visitLiteral(expr);
   else if (expr.type == 'Identifier')
-    return this.visitIdentifier(expr);
+    this.visitIdentifier(expr);
   else if (expr.type == 'BinaryExpression')
-    return this.visitBinop(expr);
+    this.visitBinop(expr);
   else if (expr.type == 'MemberExpression')
-    return this.visitMember(expr);
+    this.visitMember(expr);
   else if (expr.type === 'ArrayExpression')
-    return this.visitArray(expr);
+    this.visitArray(expr);
+  else if (expr.type === 'UnaryExpression' && expr.operator === 'typeof')
+    this.visitTypeof(expr);
   else
     throw new Error('Unsupported expression type: ' + expr.type);
 
+  if (!stmt || expr.type === 'AssignmentExpression')
+    return;
+
+  if (stmt === this.ast.body[this.ast.body.length - 1])
+    return;
+
   // Auto-Consume returned value
-  if (stmt && expr.type !== 'AssignmentExpression')
-    this.add([ 'ATOM' ], 'cleanup');
+  this.add([ 'ATOM' ], 'cleanup');
 };
 
 Compiler.prototype.visitAsgn = function visitAsgn(expr, stmt) {
@@ -358,4 +365,9 @@ Compiler.prototype.visitArray = function visitArray(stmt) {
   this.visitExpr(elems[0]);
   this.visitExpr(elems[1]);
   this.add([ 'CONS' ]);
+};
+
+Compiler.prototype.visitTypeof = function visitTypeof(expr) {
+  this.visitExpr(expr.argument);
+  this.add([ 'ATOM' ]);
 };
