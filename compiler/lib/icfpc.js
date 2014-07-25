@@ -262,6 +262,7 @@ Compiler.prototype.queueFn = function queueFn(fn, instr, index) {
 
 Compiler.prototype.visitIdentifier = function visitIdentifier(id) {
   assert(id._scope);
+  assert(id._scope.depth !== -1);
   this.add([ 'LD', id._scope.depth, id._scope.index ]);
 };
 
