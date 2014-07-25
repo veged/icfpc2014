@@ -13,8 +13,8 @@ function Compiler(source) {
 }
 exports.Compiler = Compiler;
 
-Compiler.prototype.add = function add(instr) {
-  return this.out.push(instr) - 1;
+Compiler.prototype.add = function add(instr, comment) {
+  return this.out.push({ instr: instr, comment: comment }) - 1;
 };
 
 Compiler.prototype.compile = function compile() {
@@ -31,11 +31,11 @@ Compiler.prototype.compile = function compile() {
     if (item.fn._scope.context != 0) {
       // Push-out arguments
       for (var i = 0; i < item.fn._scope.size - item.fn._scope.context; i++)
-        this.add([ 'LD' , 0, i, '; adapt=' + i ]);
+        this.add([ 'LD' , 0, i ], 'adapt=' + i);
 
       // Stub-out scope
       for (; i < item.fn._scope.size; i++)
-        this.add([ 'LDC' , 0, ' ; init_ctx=' + i ]);
+        this.add([ 'LDC' , 0 ], 'init_ctx=' + i);
 
       // Call adaptor function
       this.add([ 'LDF', this.out.length + 3 ]);
@@ -68,7 +68,7 @@ Compiler.prototype.compile = function compile() {
   }
 
   return this.out.map(function(instr) {
-    return instr.join(' ');
+    return instr.instr.join(' ') + (instr.comment ? '; ' + instr.comment : '');
   }).join('\n');
 };
 
@@ -184,7 +184,7 @@ Compiler.prototype.visitExpr = function visitExpr(expr, stmt) {
 
   // Auto-Consume returned value
   if (stmt && expr.type !== 'AssignmentExpression')
-    this.add([ 'ATOM', '; cleanup' ]);
+    this.add([ 'ATOM' ], 'cleanup');
 };
 
 Compiler.prototype.visitAsgn = function visitAsgn(expr, stmt) {
@@ -290,8 +290,8 @@ Compiler.prototype.visitRet = function visitRet(stmt) {
 Compiler.prototype.visitIf = function visitIf(stmt) {
   this.visitExpr(stmt.test);
 
-  var instr = [ 'SEL', null, null, '; if test' ];
-  this.add(instr);
+  var instr = [ 'SEL', null, null ];
+  this.add(instr, 'if test');
   this.stmts.push({ stmt: stmt.consequent, instr: instr, index: 1 });
   if (stmt.alternate) {
     this.stmts.push({ stmt: stmt.alternate, instr: instr, index: 2 });
@@ -308,8 +308,8 @@ Compiler.prototype.visitWhile = function visitWhile(stmt) {
   var start = this.out.length;
   this.visitExpr(stmt.test);
 
-  var instr = [ 'TSEL', null, this.out.length + 1, '; while test' ];
-  this.add(instr);
+  var instr = [ 'TSEL', null, this.out.length + 1 ];
+  this.add(instr, 'while test');
 
   this.stmts.push({ stmt: stmt.body, instr: instr, index: 1 });
   this.stmts.push({
