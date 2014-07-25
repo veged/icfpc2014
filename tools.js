@@ -5,7 +5,7 @@ function tree_alloc(n) {
     return 0;
 
   var half = n / 2;
-  return [ alloc(n - half), alloc(half) ];
+  return [ tree_alloc(n - half), tree_alloc(half) ];
 }
 
 function tree_get(a, i) {
@@ -15,9 +15,9 @@ function tree_get(a, i) {
   var half = i / 2;
   var r = i - half * 2;
   if (r === 0)
-    return get(a[0], half);
+    return tree_get(a[0], half);
   else
-    return get(a[1], half);
+    return tree_get(a[1], half);
 }
 
 function tree_set(a, i, v) {
@@ -27,7 +27,7 @@ function tree_set(a, i, v) {
   var half = i / 2;
   var r = i - half * 2;
   if (r === 0)
-    return [ set(a[0], half, v), a[1] ];
+    return [ tree_set(a[0], half, v), a[1] ];
   else
-    return [ a[0], set(a[1], half, v) ];
+    return [ a[0], tree_set(a[1], half, v) ];
 }
