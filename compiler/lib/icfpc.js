@@ -217,6 +217,23 @@ Compiler.prototype.visitAsgn = function visitAsgn(expr, stmt) {
 };
 
 Compiler.prototype.visitCall = function visitCall(expr) {
+  if (expr.callee.type === 'MemberExpression') {
+    var obj = expr.callee.object;
+    var prop = expr.callee.property;
+
+    // console.log()
+    if (obj.type === 'Identifier' &&
+        obj.name === 'console' &&
+        expr.callee.computed === false &&
+        prop.type === 'Identifier' &&
+        prop.name === 'log') {
+      assert.equal(expr.arguments.length, 1);
+      this.visitExpr(expr.arguments[0]);
+      this.add([ 'DBUG' ]);
+      return;
+    }
+  }
+
   for (var i = 0; i < expr.arguments.length; i++)
     this.visitExpr(expr.arguments[i]);
 
