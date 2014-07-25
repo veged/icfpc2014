@@ -1,8 +1,12 @@
-function dup(a) {
-  while (a < 10) {
-    a = a + 1;
-  }
-  return [ a, a * 2 ];
+var state = 0;
+
+function step(world, state) {
+  state = state + 1;
+  if (state >= 40)
+    state = 0;
+  return [ state, state / 10 ];
 }
 
-[ dup(1)[1], typeof 1 ];
+var p = [ state, step ];
+
+p[1](0, p[0]);

@@ -220,7 +220,7 @@ Compiler.prototype.visitAsgn = function visitAsgn(expr, stmt) {
 
 Compiler.prototype.visitCall = function visitCall(expr) {
   for (var i = 0; i < expr.arguments.length; i++)
-    this.visitExpr(expr.arguments[0]);
+    this.visitExpr(expr.arguments[i]);
 
   this.visitExpr(expr.callee);
   this.add([ 'AP', expr.arguments.length ]);
