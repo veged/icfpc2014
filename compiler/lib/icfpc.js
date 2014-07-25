@@ -8,6 +8,7 @@ function Compiler(source) {
   this.out = [];
 
   this.fns = [];
+  this.returns = [];
 }
 exports.Compiler = Compiler;
 
@@ -19,23 +20,25 @@ Compiler.prototype.compile = function compile() {
   this.evalScopes();
 
   var instr = [ 'LDF', null ];
-
-  // Push-out first scope
-  this.add(instr);
-  this.add([ 'AP', 0 ]);
-  this.add([ 'RTN' ]);
-
   this.queueFn(this.ast, instr, 1);
 
   while (this.fns.length) {
     var item = this.fns.shift();
     item.instr[item.index] = this.out.length;
 
-    if (item.fn._scope.size != 0) {
-      // Push-out scope
-      this.add([ 'DUM', item.fn._scope.size ]);
+    // Add adaptor frame
+    if (item.fn._scope.context != 0) {
+      // Push-out arguments
+      for (var i = 0; i < item.fn._scope.size - item.fn._scope.context; i++)
+        this.add([ 'LD' , 0, i, '; adapt=' + i ]);
+
+      // Stub-out scope
+      for (; i < item.fn._scope.size; i++)
+        this.add([ 'LDC' , 0, ' ; init_ctx=' + i ]);
+
+      // Call adaptor function
       this.add([ 'LDF', this.out.length + 3 ]);
-      this.add([ 'RAP', 0 ]);
+      this.add([ 'AP', item.fn._scope.size ]);
       this.add([ 'RTN' ]);
     }
 
@@ -45,6 +48,12 @@ Compiler.prototype.compile = function compile() {
     body.forEach(function(stmt) {
       this.visitStmt(stmt);
     }, this);
+
+    // Link-in all returns
+    for (var i = 0; i < this.returns.length; i++) {
+      var ret = this.returns[i];
+      ret.instr[ret.index ] = this.out.length;
+    }
     this.add([ 'RTN' ]);
   }
 
@@ -55,11 +64,14 @@ Compiler.prototype.compile = function compile() {
 
 Compiler.prototype.evalScopes = function evalScopes() {
   var scopes = [
-    { fn: null, map: {}, size: 0 }
+    { fn: null, map: {}, size: 0, context: 0 }
   ];
 
-  function add(name) {
+  function add(name, arg) {
     var scope = scopes[scopes.length - 1];
+
+    if (!arg)
+      scope.context++;
 
     return {
       depth: 0,
@@ -68,11 +80,16 @@ Compiler.prototype.evalScopes = function evalScopes() {
   }
 
   function get(name) {
-    for (var i = scopes.length - 1; i >= 0; i--) {
-      if (scopes[i].map[name] === undefined)
+    var depth = 0;
+    for (var i = scopes.length - 1; i >= 0; i--, depth++) {
+      if (scopes[i].map[name] === undefined) {
+        // Skip adaptor frame
+        if (scopes[i].context != 0)
+          depth++;
         continue;
+      }
 
-      return { depth: scopes.length - 1 - i, index: scopes[i].map[name] };
+      return { depth: depth, index: scopes[i].map[name] };
     }
     return { depth: -1, index: name };
   }
@@ -86,11 +103,12 @@ Compiler.prototype.evalScopes = function evalScopes() {
         scopes.push({
           fn: node,
           map: {},
-          size: 0
+          size: 0,
+          context: 0
         });
 
         node.params.forEach(function(param) {
-          param._scope = add(param.name);
+          param._scope = add(param.name, true);
         });
       } else if (node.type === 'VariableDeclarator') {
         add(node.id.name);
@@ -116,6 +134,8 @@ Compiler.prototype.visitStmt = function visitStmt(stmt) {
     this.add([ 'ST', stmt.id._scope.depth, stmt.id._scope.index ]);
   } else if (stmt.type === 'VariableDeclaration') {
     this.visitVar(stmt);
+  } else if (stmt.type === 'ReturnStatement') {
+    this.visitRet(stmt);
   } else {
     throw new Error('Unsupported statement type: ' + stmt.type);
   }
@@ -148,8 +168,7 @@ Compiler.prototype.visitCall = function visitCall(expr) {
   var slot = expr.callee._scope;
   for (var i = 0; i < expr.arguments.length; i++)
     this.visitExpr(expr.arguments[0]);
-  if (slot.depth === -1 && slot.index === '$$push')
-    return;
+
   this.add([ 'LD', slot.depth, slot.index ]);
   this.add([ 'AP', expr.arguments.length ]);
 };
@@ -224,4 +243,15 @@ Compiler.prototype.visitBinop = function visitBinop(expr, stmt) {
   else
     throw new Error('Unsupported operation: ' + op);
   this.add([ op ]);
+};
+
+Compiler.prototype.visitRet = function visitRet(stmt) {
+  if (stmt.argument)
+    this.visitExpr(stmt.argument);
+
+  var instr = [ 'TSEL', null, null ];
+  this.returns.push({ instr: instr, index: 1 });
+  this.returns.push({ instr: instr, index: 2 });
+  this.add([ 'LDC', 0 ]);
+  this.add(instr);
 };
