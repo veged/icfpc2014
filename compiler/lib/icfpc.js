@@ -184,16 +184,14 @@ Compiler.prototype.visitExpr = function visitExpr(expr, stmt) {
     this.visitCall(expr);
   else if (expr.type === 'Literal')
     this.visitLiteral(expr);
-  else if (expr.type == 'Identifier')
+  else if (expr.type === 'Identifier')
     this.visitIdentifier(expr);
-  else if (expr.type == 'BinaryExpression')
+  else if (expr.type === 'BinaryExpression')
     this.visitBinop(expr);
-  else if (expr.type == 'MemberExpression')
+  else if (expr.type === 'MemberExpression')
     this.visitMember(expr);
   else if (expr.type === 'ArrayExpression')
     this.visitArray(expr);
-  else if (expr.type === 'UnaryExpression' && expr.operator === 'typeof')
-    this.visitTypeof(expr);
   else
     throw new Error('Unsupported expression type: ' + expr.type);
 
@@ -263,8 +261,37 @@ Compiler.prototype.visitVar = function visitVar(stmt) {
   }
 };
 
+function isTypeof(expr) {
+  return expr.type === 'UnaryExpression' && expr.operator === 'typeof';
+}
+
 Compiler.prototype.visitBinop = function visitBinop(expr) {
   var op = expr.operator;
+
+  // typeof a === '...'
+  if (op === '===') {
+    if (isTypeof(expr.left) || isTypeof(expr.right)) {
+      var check;
+      var value;
+      if (isTypeof(expr.left)) {
+        check = expr.left.argument;
+        value = expr.right;
+      } else {
+        check = expr.right.argument;
+        value = expr.left;
+      }
+
+      assert.equal(value.type, 'Literal');
+      assert(value.value === 'number' || value.value === 'object');
+
+      this.visitExpr(check);
+      this.add([ 'ATOM' ]);
+      this.add([ 'LDC', value.value === 'number' ? 1 : 0 ]);
+      this.add([ 'CEQ' ]);
+      return;
+    }
+  }
+
   if (op === '<' || op === '<=') {
     if (op === '<')
       op = '>';
@@ -365,9 +392,4 @@ Compiler.prototype.visitArray = function visitArray(stmt) {
   this.visitExpr(elems[0]);
   this.visitExpr(elems[1]);
   this.add([ 'CONS' ]);
-};
-
-Compiler.prototype.visitTypeof = function visitTypeof(expr) {
-  this.visitExpr(expr.argument);
-  this.add([ 'ATOM' ]);
 };
