@@ -21,24 +21,7 @@ function listGet(list2, n) {
     return list;
 }
 
-function _listSet(size, list, n, x) {
-    if (size === 1) {
-        return x;
-    }
-    var m = (size / 2) | 0;
-    if (n < m) {
-        return [ _listSet(m, list[0], n, x), list[1] ];
-    } else {
-        return [ list[0], _listSet(size - m, list[1], n - m, x) ];
-    }
-}
-
 function listSet(list, n, x) {
-    //return [list[0], _listSet(list[0], list[1], n, x)];
-    return fastListSet(list, n, x);
-}
-
-function fastListSet(list, n, x) {
     var size = list[0];
     var s = size;
     list = list[1];
@@ -71,11 +54,6 @@ function fastListSet(list, n, x) {
     }
     return [size, res];
 }
-
-//var l = listFromSlowList([0,[1,[2,[3,[4,[5,[6,[7, [8, [9, 0]]]]]]]]]], id);
-//console.log(JSON.stringify(l));
-//console.log(JSON.stringify(fastListSet( l, 4, 40)));
-//return;
 
 function listLength(list) {
     return list[0];
