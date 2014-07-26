@@ -35,7 +35,7 @@ read(function(src) {
     lines[i] = line.slice(match[0].length);
 
     // Skip the line
-    if (line.length === 0) {
+    if (lines[i].length === 0) {
       lines.splice(i, 1);
       i--;
     }

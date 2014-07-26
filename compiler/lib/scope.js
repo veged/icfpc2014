@@ -136,7 +136,7 @@ ScopeEntry.prototype.isConst = function isConst() {
   if (this.sets.length !== 1)
     return false;
 
-  var a = this.sets[0];
+  var a = this.sets[0].value;
   return a.type === 'Literal' && typeof a.value === 'number';
 };
 
