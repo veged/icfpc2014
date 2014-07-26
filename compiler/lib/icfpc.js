@@ -157,6 +157,8 @@ Compiler.prototype.visitExpr = function visitExpr(expr, stmt) {
     this.visitIdentifier(expr);
   else if (expr.type === 'BinaryExpression')
     this.visitBinop(expr);
+  else if (expr.type === 'UnaryExpression')
+    this.visitUnop(expr);
   else if (expr.type === 'LogicalExpression')
     this.visitLogic(expr);
   else if (expr.type === 'MemberExpression')
@@ -337,6 +339,16 @@ Compiler.prototype.visitBinop = function visitBinop(expr) {
     this.add([ 'SUB' ]);
   this.add([ op ]);
 };
+
+Compiler.prototype.visitUnop = function visitUnop(expr) {
+  var op = expr.operator;
+  if (op !== '-')
+    throw new Error('Unsupported unary: ' + op);
+
+  this.add([ 'LDC', 0 ]);
+  this.visitExpr(expr.argument);
+  this.add([ 'SUB' ]);
+}
 
 Compiler.prototype.visitLogic = function visitLogic(expr) {
   var op = expr.operator;
