@@ -142,31 +142,6 @@ function bounty(cell) {
     return 0;
 }
 
-/*
-function slowListSet(list, n, x) {
-    if (n === 0)
-        return [x, list[1]];
-    else
-        return [list[0], slowListSet(list[1], n - 1, x)];
-}
-
-function slowListGet(list, n) {
-    while (n > 0) {
-        list = list[1];
-        n = n - 1;
-    }
-    return list[0];
-}
-
-function slowMatrixSet(mx, pos, x) {
-    return slowListSet(mx, pos[1], slowListSet(slowListGet(mx, pos[1]), pos[0], x));
-}
-
-function slowMatrixGet(mx, pos, x) {
-    return slowListGet(slowListGet(mx, pos[1]), pos[0]);
-}
-*/
-
 function isInt(x) {
     return (typeof x === 'number');
 }
@@ -174,47 +149,6 @@ function isInt(x) {
 function isObject(x) {
     return typeof x === 'object';
 }
-/*
-function slowListRemove(list, n) {
-    if (n === 0)
-        return list[1];
-    return [list[0], slowListRemove(list[1], n - 1)];
-}
-
-function extractMinBy2(list) {
-    var minVal = list[0], minIdx = 0;
-    var idx = 1;
-    var iter = list[1];
-    while (isArray(iter)) {
-        var val = iter[0];
-        if (val[1] < minVal[1]) {
-            minVal = val;
-            minIdx = idx;
-        }
-        idx = idx + 1;
-        iter = iter[1];
-    }
-
-    return [minVal, slowListRemove(list, minIdx)];
-}
-
-function elemToSlowList(x) {
-    return [x, 0];
-}
-
-function genSlowList(n, f) {
-    if (n === 0)
-        return 0;
-    return [f(), genList(n-1, f)];
-}
-
-function genSlowMatrix(X, Y, f) {
-    function genSlowListF() {
-        return genSlowList(X, f);
-    }
-    return genSlowList(Y, genSlowListF);
-}
-*/
 
 // heap struct: [[value, size], [ptr1, ptr2]]
 
@@ -299,21 +233,20 @@ function calcPaths(map, pos) {
     var Y = listLength(map);
     var X = listLength(listGet(map, 0));
 
-    var T = 0;
     function genCell() {
         return -1;
     }
     var res = genMatrix(X, Y, genCell);
-    console.log(JSON.stringify(res));
     res = matrixSet(res, pos, 0);
+
     var toDo = 0;
-    heapPush(toDo, [pos, 0]);
+    toDo = heapPush(toDo, [pos, 0]);
 
     while (heapSize(toDo) > 0) {
-        var extractRes = heapPop(toDo);
-        var t = extractRes[0][1];
-        pos = extractRes[0][0];
-        toDo = extractRes[1];
+        var popRes = heapPop(toDo);
+        var t = popRes[0][1];
+        pos = popRes[0][0];
+        toDo = popRes[1];
 
         var d = 0;
         while (d < 4) {
@@ -321,7 +254,7 @@ function calcPaths(map, pos) {
             if (canGo(matrixGet(map, newPos)) >= 0 && matrixGet(res, newPos) === -1) {
                 var dt = canGo(matrixGet(map, pos)); //TODO: save in toDo!
                 res = matrixSet(res, newPos, t + dt);
-                toDo = heapPush([newPos, t + dt]);
+                toDo = heapPush(toDo, [newPos, t + dt]);
             }
             d = d + 1;
         }
@@ -330,49 +263,40 @@ function calcPaths(map, pos) {
     return res;
 }
 
-function _flatRow(row, f, x, n, tail) {
-    if (n === 1)
-        return [[f(x, row), tail]];
-    var m = div(n, 2);
-    tail = _flatRow(row[1], f, x + m, n - m, tail);
-    return _flatRow(row[0], f, x, m, tail);
-}
+function flatRow(row, f, b) {
 
-function flatRow(row, f) {
-    return _flatRow(row[1], f, 0, row[0], 0);
+    function _flatRow(row, x, n, a) {
+        if (n === 1) {
+            return f(x, row, a);
+        }
+        var m = div(n, 2);
+        a = _flatRow(row[1], x + m, n - m, a);
+        return _flatRow(row[0], x, m, a);
+    }
+
+    return _flatRow(row[1], 0, row[0], b);
 }
 
 function flatMatrix(mx) {
-    function xxx(y, d) {
-        function yyy(x, r) {
-            return [[x, y], r];
+
+    function processRow(y, d, tail) {
+
+        function processCell(x, r, tail) {
+            if (r >= 0) {
+                return [[[x, y], r], tail];
+            } else {
+                return tail;
+            }
         }
-        return flatRow(d, yyy);
+
+        return flatRow(d, processCell, tail);
     }
-    return flatRow(mx, xxx);
+
+    return flatRow(mx, processRow, 0);
 }
 
 function flatAndSort(mx) {
-    /*
-    var res = 0;
-
-    var y = 0;
-    while (isArray(mx)) {
-        var row = mx[0];
-        var x = 0;
-        while (isArray(row)) {
-            if (row[0] >= 0) {
-               res = [[[x, y], row[0]], res];
-            }
-            x = x + 1;
-            row = row[1];
-        }
-        y = y + 1;
-        mx = mx[1];
-    }
-    */
     var val = flatMatrix(mx);
-    //console.log(JSON.stringify(val));
     return heapSort(val);
 }
 
@@ -423,9 +347,7 @@ function run(map, myPos) {
     map = listFromSlowList(map, convertRow);
 
     var paths = calcPaths(map, myPos);
-    console.log(JSON.stringify(paths));
     var smell = calcSmell(map, paths);
-    console.log(JSON.stringify(smell));
     var d = 0;
     var bestSmell = 0;
     var bestD = 0;
@@ -489,6 +411,9 @@ var FS = require('fs'),
 map.pop();
 
 var res = run(fixMap(map), [3, 2]);
+
+console.log(JSON.stringify(res[1][0]));
+console.log(JSON.stringify(res[1][1]));
 console.log("res: ", res[0]);
 //FS.writeFileSync('map.html', toHtml(map, unFixMap(res[0][0])) + toHtml(map, unFixMap(res[0][1])) + "<br/>" + res[1]);
 //*/
