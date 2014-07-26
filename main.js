@@ -216,44 +216,6 @@ function heapSort(arr) {
     return res;
 }
 
-function calcPaths(map, pos, canGo, bounty) {
-
-    var Y = listLength(map);
-    var X = listLength(listGet(map, 0));
-
-    function genCell() {
-        return -1;
-    }
-    var res = genMatrix(X, Y, genCell);
-    res = matrixSet(res, pos, 0);
-
-    var toDo = 0;
-    toDo = heapPush(toDo, [pos, 0]);
-
-    while (heapSize(toDo) > 0) {
-        var popRes = heapPop(toDo);
-        var t = popRes[0][1];
-        pos = popRes[0][0];
-        toDo = popRes[1];
-
-        if (t < 127 * 80) {
-
-            var d = 0;
-            while (d < 4) {
-                var newPos = shiftDir(pos, d);
-                if (canGo(matrixGet(map, newPos)) >= 0 && matrixGet(res, newPos) === -1) {
-                    var dt = canGo(matrixGet(map, pos)); //TODO: save in toDo!
-                    res = matrixSet(res, newPos, t + dt);
-                    toDo = heapPush(toDo, [newPos, t + dt]);
-                }
-                d = d + 1;
-            }
-
-        }
-    }
-
-    return res;
-}
 
 function flatRow(row, f, b) {
 
@@ -290,40 +252,6 @@ function flatMatrix(mx) {
 function flatAndSort(mx) {
     var val = flatMatrix(mx);
     return heapSort(val);
-}
-
-function calcSmell(map, paths, canGo, bounty) {
-    var Y = listLength(map);
-    var X = listLength(listGet(map, 0));
-    var res;
-    function genCell() {
-        return 0;
-    }
-    var res = genMatrix(X, Y, genCell);
-    var sortedPaths = flatAndSort(paths);
-
-    while (typeof sortedPaths === 'object') {
-        var pos = sortedPaths[0][0];
-        var myVal = matrixGet(res, pos) + bounty(matrixGet(map, pos));
-        res = matrixSet(res, pos, myVal);
-        var d = 0;
-        while (d < 4) {
-            var newPos = shiftDir(pos, d);
-            if (canGo(matrixGet(map, newPos)) > 0) {
-                var t0 = matrixGet(paths, pos);
-                var t = matrixGet(paths, newPos);
-                if (t === t0 - 127 || t === t0 - 137) {
-                    var newVal = (myVal * 8 / 10) | 0; // ALPHA
-                    if (matrixGet(res, newPos) < newVal) {
-                        res = matrixSet(res, newPos, newVal);
-                    }
-                }
-            }
-            d = d + 1;
-        }
-        sortedPaths = sortedPaths[1];
-    }
-    return res;
 }
 
 function run(map, myPos) {
@@ -382,7 +310,8 @@ function rand() {
 function step(aiState, worldState) {
     worldState = tplGetter(worldState, 4);
     var map = worldState(0),
-        lmStatus = worldState(1),
+        lmStatus = tplGetter(worldState(1), 5),
+        lmVitality = lmStatus(0),
         ghostsStatuses = worldState(2),
         fruitStatus = worldState(3);
     map = matrixFromSlowMatrix(map);
@@ -398,12 +327,9 @@ function step(aiState, worldState) {
      * 6: Ghost starting position
     */
     function canGo(cell) {
-        if (cell === 5)
-            return 0;
-        if (cell === 1)
-            return 127;
-        if (cell === 2 || cell === 3 || cell === 4)
-            return 137;
+        if (cell === 5) return 0;
+        if (cell === 1) return 127;
+        if (cell === 2 || cell === 3 || cell === 4) return 137;
         return -1;
     }
 
@@ -417,9 +343,81 @@ function step(aiState, worldState) {
         return 0;
     }
 
-    var myPos = tplGet(lmStatus, 5, 1),
-        paths = calcPaths(map, myPos, canGo, bounty),
-        smell = calcSmell(map, paths, canGo, bounty),
+    function calcPaths() {
+        var Y = listLength(map);
+        var X = listLength(listGet(map, 0));
+
+        function genCell() {
+            return -1;
+        }
+        var res = genMatrix(X, Y, genCell);
+        res = matrixSet(res, pos, 0);
+
+        var toDo = 0;
+        toDo = heapPush(toDo, [pos, 0]);
+
+        while (heapSize(toDo) > 0) {
+            var popRes = heapPop(toDo);
+            var t = popRes[0][1];
+            pos = popRes[0][0];
+            toDo = popRes[1];
+
+            if (t < 127 * 80) {
+
+                var d = 0;
+                while (d < 4) {
+                    var newPos = shiftDir(pos, d);
+                    if (canGo(matrixGet(map, newPos)) >= 0 && matrixGet(res, newPos) === -1) {
+                        var dt = canGo(matrixGet(map, pos)); //TODO: save in toDo!
+                        res = matrixSet(res, newPos, t + dt);
+                        toDo = heapPush(toDo, [newPos, t + dt]);
+                    }
+                    d = d + 1;
+                }
+
+            }
+        }
+
+        return res;
+    }
+
+    function calcSmell(paths) {
+        var Y = listLength(map);
+        var X = listLength(listGet(map, 0));
+        var res;
+        function genCell() {
+            return 0;
+        }
+        var res = genMatrix(X, Y, genCell);
+        var sortedPaths = flatAndSort(paths);
+
+        while (typeof sortedPaths === 'object') {
+            var pos = sortedPaths[0][0];
+            var myVal = matrixGet(res, pos) + bounty(matrixGet(map, pos));
+            res = matrixSet(res, pos, myVal);
+            var d = 0;
+            while (d < 4) {
+                var newPos = shiftDir(pos, d);
+                if (canGo(matrixGet(map, newPos)) > 0) {
+                    var t0 = matrixGet(paths, pos);
+                    var t = matrixGet(paths, newPos);
+                    if (t === t0 - 127 || t === t0 - 137) {
+                        var newVal = (myVal * 8 / 10) | 0; // ALPHA
+                        if (matrixGet(res, newPos) < newVal) {
+                            res = matrixSet(res, newPos, newVal);
+                        }
+                    }
+                }
+                d = d + 1;
+            }
+            sortedPaths = sortedPaths[1];
+        }
+        return res;
+    }
+
+    var myPos = lmStatus(1),
+        paths = calcPaths(),
+        smell = calcSmell(paths),
         d = 0,
         bestSmell = -1,
         bestD = 0;
@@ -482,7 +480,7 @@ function nodejsMain() {
                 } else if(y === '=') {
                     ghostsStatuses = [[0, [[i, j], 0]], ghostsStatuses];
                 }
-                return [{ '#': 0, ' ': 1, '.': 2, 'o': 3, '%': 4, '\\': 5, '=': 6 }[y], b];
+                return [{ '#': 0, ' ': 1, '.': 2, 'o': 3, '%': 4, '\\': 1, '=': 6 }[y], b];
             }, 0);
             return [x, a];
         }, 0);
