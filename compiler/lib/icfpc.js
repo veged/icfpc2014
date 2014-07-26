@@ -71,16 +71,9 @@ Compiler.prototype.evalScopes = function evalScopes() {
     var item = queue.shift();
     var current = item.current;
 
+    // Declare functions at the top
     estraverse.traverse(item.ast, {
       enter: function(node) {
-        if (Array.isArray(node.body)) {
-          for (var i = 0; i < node.body.length; i++) {
-            var stmt = node.body[i];
-            if (stmt.type === 'FunctionDeclaration')
-              stmt.id._scope = current.set(stmt.id.name, node);
-          }
-        }
-
         // if (module) { ... node.js specific thing... }
         if (node.type === 'IfStatement' &&
             node.test.type === 'Identifier' &&
@@ -107,7 +100,24 @@ Compiler.prototype.evalScopes = function evalScopes() {
 
           // Visit function later
           return this.skip();
-        } else if (node.type === 'VariableDeclarator') {
+        }
+      }
+    });
+
+    estraverse.traverse(item.ast, {
+      enter: function(node) {
+        // Functions are already handled
+        if (/function/i.test(node.type))
+          return this.skip();
+
+        // if (module) { ... node.js specific thing... }
+        if (node.type === 'IfStatement' &&
+            node.test.type === 'Identifier' &&
+            node.test.name === 'module') {
+          return this.skip();
+        }
+
+        if (node.type === 'VariableDeclarator') {
           current.set(node.id.name, node.init);
         } else if (node.type === 'Identifier') {
           if (!node._scope)
