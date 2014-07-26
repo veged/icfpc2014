@@ -87,7 +87,7 @@ Compiler.prototype.evalScopes = function evalScopes() {
           node._scope = last.get(node.name);
       } else if (node.type === 'AssignmentExpression' &&
                  node.left.type === 'Identifier') {
-        last.set(node.left.name, node.right);
+        last.get(node.left.name).set(last, node.right);
       }
     },
     leave: function(node) {
@@ -176,7 +176,7 @@ Compiler.prototype.visitExpr = function visitExpr(expr, stmt) {
     return;
 
   // Auto-Consume returned value
-  this.add([ 'ATOM' ], 'cleanup');
+  this.add([ 'TSEL', this.out.length + 1, this.out.length + 1], 'cleanup');
 };
 
 Compiler.prototype.visitAsgn = function visitAsgn(expr, stmt) {
