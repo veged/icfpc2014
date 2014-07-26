@@ -81,6 +81,8 @@ Scope.prototype.set = function set(name, value, isArg) {
 
   var res = new ScopeEntry(this, 0, this.size++);
   this.map[name] = res;
+  if (value)
+    res.sets.push(value);
   return res;
 };
 
@@ -96,6 +98,7 @@ Scope.prototype.get = function get(name) {
       continue;
     }
 
+    entry.gets++;
     return new ScopeEntry(cur, depth, entry);
   }
 
@@ -107,12 +110,37 @@ function ScopeEntry(scope, depth, index) {
   this.depth = depth;
   if (index instanceof ScopeEntry) {
     this.parent = index;
+    this.parent.context = true;
     this.index = index.index;
   } else {
     this.parent = null;
     this.index = index;
   }
+  this.sets = [];
+  this.gets = 0;
+  this.context = false;
 }
+
+ScopeEntry.prototype.isConst = function isConst() {
+  if (this.parent)
+    return this.parent.isConst();
+
+  if (this.sets.length !== 1)
+    return false;
+
+  var a = this.sets[0];
+  return a.type === 'Literal' && typeof a.value === 'number';
+};
+
+ScopeEntry.prototype.constVal = function constVal() {
+  if (this.parent)
+    return this.parent.constVal();
+
+  if (!this.isConst())
+    throw new Error('ScopeEntry has no const value');
+
+  return this.sets[0].value;
+};
 
 Compiler.prototype.evalScopes = function evalScopes() {
   var scopes = [ new Scope(null, null) ];
@@ -135,6 +163,9 @@ Compiler.prototype.evalScopes = function evalScopes() {
       } else if (node.type === 'Identifier') {
         if (!node._scope)
           node._scope = last.get(node.name);
+      } else if (node.type === 'AssignmentExpression' &&
+                 node.left.type === 'Identifier') {
+        last.set(node.left.name, node.right);
       }
     },
     leave: function(node) {
@@ -226,6 +257,11 @@ Compiler.prototype.visitExpr = function visitExpr(expr, stmt) {
 Compiler.prototype.visitAsgn = function visitAsgn(expr, stmt) {
   var scope = expr.left._scope;
   assert(scope, 'lhs of assignment should have a scope');
+
+  // No point in assigning the const value
+  if (scope.isConst())
+    return;
+
   this.visitExpr(expr.right);
   this.add([ 'ST', scope.depth, scope.index ]);
 
@@ -280,9 +316,13 @@ Compiler.prototype.queueFn = function queueFn(fn, instr, index) {
 };
 
 Compiler.prototype.visitIdentifier = function visitIdentifier(id) {
-  assert(id._scope, 'unknown identifier');
-  assert(id._scope.depth !== -1, 'unknown global: ' + id._scope.name);
-  this.add([ 'LD', id._scope.depth, id._scope.index ]);
+  var scope = id._scope;
+  assert(scope, 'unknown identifier');
+  assert(scope.depth !== -1, 'unknown global: ' + scope.name);
+  if (scope.isConst())
+    this.add([ 'LDC', scope.constVal() ]);
+  else
+    this.add([ 'LD', scope.depth, scope.index ]);
 };
 
 Compiler.prototype.visitVar = function visitVar(stmt) {
@@ -293,6 +333,11 @@ Compiler.prototype.visitVar = function visitVar(stmt) {
 
     var val = decls[i].init;
     var slot = decls[i].id._scope;
+
+    // No point in assigning the const value
+    if (slot.isConst())
+      continue;
+
     this.visitExpr(val);
     this.add([ 'ST', slot.depth, slot.index ]);
   }
