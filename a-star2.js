@@ -20,8 +20,8 @@ function shiftDir(pos, d) {
 */
 
 function fixCell(cell) {
-    return ({ '#': 0, ' ': 1, '.': 2, 'o': 3, '%': 4, '\\': 5, '=': 6 }[cell]);
-//    return cell;
+//    return ({ '#': 0, ' ': 1, '.': 2, 'o': 3, '%': 4, '\\': 5, '=': 6 }[cell]);
+    return cell;
 }
 
 function canGo(cell) {
@@ -257,12 +257,12 @@ function flatAndSort(mx) {
         mx = mx[1];
     }
     return heapSort(res);
-};
-
+}
 
 function calcSmell(map, paths) {
     var Y = slowListLength(map);
     var X = slowListLength(map[0]);
+    var res;
     function genCell() {
         return 0;
     }
@@ -290,7 +290,6 @@ function calcSmell(map, paths) {
         }
         sortedPaths = sortedPaths[1];
     }
-
     return res;
 }
 
@@ -311,7 +310,7 @@ function run(map, myPos) {
     return bestD;
 }
 
-
+/*
 function toHtml(map, arr) {
     var res = '<table border="1" cellspacing="0" cellpadding="0">';
     for(var i = 0; i < map.length; i++) {
@@ -363,7 +362,8 @@ var cp = calcPaths(fixMap(map), [3, 2]);
 FS.writeFileSync('map.html', toHtml(map, unFixMap(cp)) + toHtml(map, unFixMap(calcSmell(fixMap(map), cp))) + "<br/>" + run(fixMap(map), [3, 2]));
 //*/
 function step(state, map) {
-    return [state, run(map)];
+    var myPos = [3, 2]; //FIXME:!!!
+    return [state, run(map, myPos)];
 }
 
 [0, step];
