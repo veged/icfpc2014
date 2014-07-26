@@ -3,8 +3,8 @@ function isArray(x) {
 }
 
 function div(n, m) {
-    //return (n - (n % m)) / m;
-    return n / m;
+    return (n - (n % m)) / m;
+    //return n / m;
 }
 
 function _listGet(size, list, n) {
@@ -67,12 +67,36 @@ function listFromSlowList(arr, f) {
     return [len, _listFromSlowList(arr, len)[0]];
 }
 
+function listIterate(list, f) {
+    var i = 0;
+    function _listIterate(list, length, i) {
+        if(length === 1) {
+            f(list, i);
+        } else {
+            var halfLength = div(length, 2);
+            _listIterate(list[0], halfLength, i);
+            _listIterate(list[1], length - halfLength, i + halfLength);
+        }
+    }
+    _listIterate(list[1], list[0], 0);
+}
+
 function matrixSet(mx, pos, x) {
     return listSet(mx, pos[1], listSet(listGet(mx, pos[1]), pos[0], x));
 }
 
 function matrixGet(mx, pos, x) {
     return listGet(listGet(mx, pos[1]), pos[0]);
+}
+
+function matrixIterate(mx, f) {
+    function rowIterate(row, i) {
+        function cellIterate(v, j) {
+            f(v, i, j);
+        }
+        listIterate(row, cellIterate);
+    }
+    listIterate(mx, rowIterate);
 }
 
 function genList(n, f) {
@@ -114,8 +138,8 @@ function shiftDir(pos, d) {
 */
 
 function fixCell(cell) {
-//    return ({ '#': 0, ' ': 1, '.': 2, 'o': 3, '%': 4, '\\': 5, '=': 6 }[cell]);
-    return cell;
+    return ({ '#': 0, ' ': 1, '.': 2, 'o': 3, '%': 4, '\\': 5, '=': 6 }[cell]);
+    //return cell;
 }
 
 function canGo(cell) {
@@ -333,7 +357,6 @@ function calcSmell(map, paths) {
 }
 
 function run(map, myPos) {
-
     var paths = calcPaths(map, myPos);
     var smell = calcSmell(map, paths);
     var d = 0;
@@ -358,13 +381,23 @@ function convertRow(x) {
     return val;
 }
 
-/*
+function toHtml(map, mx) {
+    var _map = [];
+    function mapIterate(cell, i, j) {
+        (_map[i] || (_map[i] = []))[j] = cell;
+    }
+    matrixIterate(map, mapIterate);
 
-function toHtml(map, arr) {
+    var _mx = [];
+    function mxIterate(v, i, j) {
+        (_mx[i] || (_mx[i] = []))[j] = v;
+    }
+    matrixIterate(mx, mxIterate);
+
     var res = '<table border="1" cellspacing="0" cellpadding="0">';
-    for(var i = 0; i < map.length; i++) {
-        var mapRow = map[i],
-            row = arr[i] || [];
+    for(var i = 0; i < _map.length; i++) {
+        var mapRow = _map[i] || [],
+            row = _mx[i] || [];
         res += '<tr>';
         for(var j = 0; j < mapRow.length; j++) {
             res += '<td>' +
@@ -384,6 +417,15 @@ function fixMap(map) {
         }, 0);
         return [x, a];
     }, 0);
+}
+
+function id(x) {
+    return x;
+}
+
+function convertRow(x) {
+    var val = listFromSlowList(x, id);
+    return val;
 }
 
 function unFixRow(row) {
@@ -407,13 +449,17 @@ function unFixMap(map) {
 var FS = require('fs'),
     map = FS.readFileSync('map.txt', 'utf8').split('\n');
 map.pop();
+map = listFromSlowList(fixMap(map), convertRow);
 
-var res = run(listFromSlowList(fixMap(map), convertRow), [3, 2]);
+var res = run(map, [3, 2]);
 
-console.log(JSON.stringify(res[1][0]));
-console.log(JSON.stringify(res[1][1]));
-console.log("res: ", res[0]);
-//FS.writeFileSync('map.html', toHtml(map, unFixMap(res[0][0])) + toHtml(map, unFixMap(res[0][1])) + "<br/>" + res[1]);
+console.log("res: ", JSON.stringify(res));
+FS.writeFileSync('map.html',
+    toHtml(map, res[1][0]) +
+    '<br/>' +
+    toHtml(map, res[1][1]) +
+    '<br/>' + res[0]);
+
 //*/
 function tplGet(tpl, length, i) {
     if(i === 0) {
@@ -424,7 +470,6 @@ function tplGet(tpl, length, i) {
         return tplGet(tpl[1], length - 1, i - 1);
     }
 }
-
 
 function tplGetter(tpl, length) {
     function getter(i) {
