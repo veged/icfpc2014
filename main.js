@@ -158,7 +158,7 @@ function heapPop(heap) {
         } else {
             var x0 = ptr[0][0][0];
             var x1 = ptr[1][0][0];
-            if (x0[1] < x1[1]) {
+            if (x0[0] < x1[0]) {
                 p = 0;
             } else {
                 p = 1;
@@ -190,7 +190,7 @@ function heapPush(heap, x) {
     var size = val[1];
     var ptr = heap[1];
 
-    if (x[1] < y[1]) {
+    if (x[0] < y[0]) {
         var z = x; x = y; y = z;
     }
     if (heapSize(ptr[0]) > heapSize(ptr[1])) {
@@ -237,7 +237,7 @@ function flatMatrix(mx) {
 
         function processCell(x, r, tail) {
             if (r >= 0) {
-                return [[[x, y], r], tail];
+                return [[r, [x, y]], tail];
             } else {
                 return tail;
             }
@@ -307,6 +307,12 @@ function rand() {
     return mod(((_next / 65536) | 0), 32768);
 }
 
+function slowListMap(list, f) {
+    if (typeof list === 'number')
+        return list;
+    return [f(list[0]), slowListMap(list[1], f)];
+}
+
 function step(aiState, worldState) {
     worldState = tplGetter(worldState, 4);
     var map = worldState(0),
@@ -354,12 +360,22 @@ function step(aiState, worldState) {
         res = matrixSet(res, myPos, 0);
 
         var toDo = 0;
-        toDo = heapPush(toDo, [myPos, 0]);
+        function addTicks(gh) {
+            return [1, gh]; // new ghost state - 4-tuple (time-to-move, standard state...)
+            //FIXME: track real time-to-move for each ghost!
+        }
+        var state = [myPos, listSlowMap(ghostsStatuses, addTicks)];
+        listSlowMap(ghostsStatuses, addTicks)
+        toDo = heapPush(toDo, [0, state]);
 
         while (heapSize(toDo) > 0) {
             var popRes = heapPop(toDo);
-            var t = popRes[0][1];
-            myPos = popRes[0][0];
+            var state = popRes[0];
+            var t = state[0];
+            state = state[1];
+            myPos = state[0];
+            var ghs = state[1]; // ghost statuses
+            // TODO: my status (vitality)
             toDo = popRes[1];
 
             if (t < 127 * 80) {
@@ -367,10 +383,70 @@ function step(aiState, worldState) {
                 var d = 0;
                 while (d < 4) {
                     var newPos = shiftDir(myPos, d);
+
+                    function updateGhostStatus(gh) {
+                        var gt = gh[0]; //ghost time-to-move
+                        //TODO: frightened?
+                        if (gt >= t) {
+                            return gh;
+                        }
+                        var vit = gh[1][0];
+                        var pos = gh[1][1][0];
+                        var d = gh[1][1][1];
+
+                        var dl = d + 1;
+                        if (dl === 4)
+                            dl = 0;
+                        var dr = d - 1;
+                        if (dl === -1)
+                            dl = 3;
+                        var db = d + 2;
+                        if (db >= 4)
+                            db = db - 4;
+
+                        if (matrixGet(map, shiftDir(pos, d)) === 0) { // wall
+                            if (matrixGet(map, shiftDir(pos, dl)) === 0) {
+                                if (matrixGet(map, shiftDir(pos, dr)) === 0) {
+                                    //  #
+                                    // #^#
+                                    d = db;
+                                } else {
+                                    //  #
+                                    // #^.
+                                    d = dr;
+                                }
+                            } else {
+                                if (matrixGet(map, shiftDir(pos, dr)) === 0) {
+                                    //  #
+                                    // .^#
+                                    d = dl;
+                                } else {
+                                    //  #
+                                    // .^.
+                                    d = -1; //futher action is unknown, let it stay here
+                                }
+                            }
+                        } else {
+                            if (matrixGet(map, shiftDir(pos, dl)) === 0 && matrixGet(map, shiftDir(pos, dr)) === 0) {
+                                //  .
+                                // #^#
+
+                                // d = d;
+                            } else {
+                                d = -1;
+                            }
+                        }
+
+                        if (d >= 0)
+                            pos = shiftDir(pos, d);
+                        return [t + 130, [vit, [pos, d]]]; //FIMXE: 130 depends on ghost id!
+                    }
+
                     if (canGo(matrixGet(map, newPos)) >= 0 && matrixGet(res, newPos) === -1) {
                         var dt = canGo(matrixGet(map, myPos)); //TODO: save in toDo!
                         res = matrixSet(res, newPos, t + dt);
-                        toDo = heapPush(toDo, [newPos, t + dt]);
+
+                        toDo = heapPush(toDo, [t + dt, [newPos, ghs]]);
                     }
                     d = d + 1;
                 }
@@ -392,7 +468,7 @@ function step(aiState, worldState) {
         var sortedPaths = flatAndSort(paths);
 
         while (typeof sortedPaths === 'object') {
-            var pos = sortedPaths[0][0];
+            var pos = sortedPaths[0][1];
             var myVal = matrixGet(res, pos) + bounty(matrixGet(map, pos));
             res = matrixSet(res, pos, myVal);
             var d = 0;
