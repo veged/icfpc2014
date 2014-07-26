@@ -77,6 +77,10 @@ function isArray(x) {
     return (typeof x === 'object');
 }
 
+function isObject(x) {
+    return typeof x === 'object';
+}
+
 function slowListRemove(list, n) {
     if (n === 0)
         return list[1];
@@ -361,9 +365,42 @@ var cp = calcPaths(fixMap(map), [3, 2]);
 
 FS.writeFileSync('map.html', toHtml(map, unFixMap(cp)) + toHtml(map, unFixMap(calcSmell(fixMap(map), cp))) + "<br/>" + run(fixMap(map), [3, 2]));
 //*/
-function step(state, map) {
-    var myPos = [3, 2]; //FIXME:!!!
-    return [state, run(map, myPos)];
+function tplGetter(tpl, length) {
+    function getter(i) {
+        return tplGet(tpl, length, i);
+    }
+    return getter;
+}
+
+function tplGet(tpl, length, i) {
+    if(i === 0) {
+        return tpl[0];
+    } else if(i === 1 && length === 2) {
+        return tpl[1];
+    } else {
+        return tplGet(tpl[1], length - 1, i - 1);
+    }
+}
+
+function applyStatusesToMap(map, ghostsStatuses, fruitStatus) {
+    var ghostStatus;
+    while(isObject(ghostsStatuses)) {
+        ghostStatus = ghostsStatuses[0];
+        ghostsStatuses = ghostsStatuses[1];
+        map = slowMatrixSet(map, tplGet(ghostStatus, 3, 1), 6);
+    }
+    return map;
+}
+
+function step(aiState, worldState) {
+    worldState = tplGetter(worldState, 4);
+    var map = worldState(0),
+        lmStatus = worldState(1),
+        ghostsStatuses = worldState(2),
+        fruitStatus = worldState(3);
+    map = applyStatusesToMap(map, ghostsStatuses, fruitStatus);
+    var myPos = tplGet(lmStatus, 5, 1);
+    return [aiState, run(map, myPos)];
 }
 
 [0, step];

@@ -1,0 +1,179 @@
+LDC 0 ; init_ctx=0
+LDC 0 ; init_ctx=1
+LDC 0 ; init_ctx=2
+LDC 0 ; init_ctx=3
+LDF 7
+AP 4
+RTN
+LDF 19 ; (js: `function array_ge...`)
+ST 0 0
+LDF 56
+ST 0 1
+LDF 88
+ST 0 2
+LDC 23 ; (js: `var seed = 23;`)
+ST 0 3
+LDC 0 ; (js: `[ 0, step ]`)
+LD 0 2
+CONS
+RTN
+LD 0 1 ; (js: `while (i > 0) {  ...`) (js: `{  while (i > 0) ...`)
+LDC 0
+CGT
+TSEL 23 42 ; while test
+LD 0 0 ; (js: `if (typeof a === ...`) (js: `{    if (typeof a...`)
+ATOM
+LDC 0
+CEQ
+TSEL 28 33 ; if test
+LD 0 0 ; (js: `a = a[1];`)
+CDR
+ST 0 0
+LDC 0
+TSEL 36 36
+LDC 0 ; (js: `a = 0;`)
+ST 0 0
+LDC 0
+LD 0 1 ; (js: `i = i - 1;`)
+LDC 1
+SUB
+ST 0 1
+LDC 0
+TSEL 19 19
+LD 0 0 ; (js: `if (typeof a === ...`)
+ATOM
+LDC 0
+CEQ
+TSEL 47 52 ; if test
+LD 0 0 ; (js: `return a[0];`)
+CAR
+RTN
+LDC 0
+TSEL 55 55
+LD 0 0 ; (js: `return a;`)
+RTN
+LDC 0
+RTN
+LDC 0 ; init_ctx=0
+LDF 60
+AP 1
+RTN
+LD 2 3 ; (js: `seed = seed * 257;`) (js: `{  seed = seed * ...`)
+LDC 257
+MUL
+ST 2 3
+LD 2 3 ; (js: `while (seed >= 13...`)
+LDC 13589
+CGTE
+TSEL 68 74 ; while test
+LD 2 3 ; (js: `seed = seed - 13589;`)
+LDC 13589
+SUB
+ST 2 3
+LDC 0
+TSEL 64 64
+LD 2 3 ; (js: `var r = seed;`)
+ST 0 0
+LD 0 0 ; (js: `while (r >= 4)   ...`)
+LDC 4
+CGTE
+TSEL 80 86 ; while test
+LD 0 0 ; (js: `r = r - 4;`)
+LDC 4
+SUB
+ST 0 0
+LDC 0
+TSEL 76 76
+LD 0 0 ; (js: `return r;`)
+RTN
+LDC 0 ; init_ctx=0
+LDC 0 ; init_ctx=1
+LDC 0 ; init_ctx=2
+LDC 0 ; init_ctx=3
+LDC 0 ; init_ctx=4
+LDF 96
+AP 5
+RTN
+LD 1 1 ; (js: `var player = arra...`) (js: `{  var player = a...`)
+LDC 1
+LD 2 0
+AP 2
+ST 0 0
+LD 0 0 ; (js: `var pos = array_g...`)
+LDC 1
+LD 2 0
+AP 2
+ST 0 1
+LD 1 0 ; (js: `if (typeof state ...`)
+ATOM
+LDC 1
+CEQ
+TSEL 111 119 ; if test
+LDC 0 ; (js: `return [ [ 0, [ p...`)
+LD 0 1
+LDC 0
+CONS
+CONS
+LDC 0
+CONS
+RTN
+LD 1 0 ; (js: `var rst = state[0];`)
+CAR
+ST 0 2
+LD 1 0 ; (js: `var opos = state[...`)
+CDR
+CAR
+ST 0 3
+LD 1 0 ; (js: `var odir = state[...`)
+CDR
+CDR
+ST 0 4
+LD 0 1 ; (js: `if (pos[0] === op...`)
+CAR
+LD 0 3
+CAR
+CEQ
+LD 0 1
+CDR
+LD 0 3
+CDR
+CEQ
+MUL
+LDC 1
+CEQ
+TSEL 144 168 ; if test
+LD 0 2 ; (js: `if (rst) {      o...`) (js: `{    if (rst) {  ...`)
+TSEL 146 153 ; if test
+LD 2 1 ; (js: `odir = rnd();`) (js: `{      odir = rnd...`)
+AP 0
+ST 0 4
+LDC 0 ; (js: `rst = 0;`)
+ST 0 2
+LDC 0
+TSEL 166 166
+LD 0 4 ; (js: `odir = odir + 1;`) (js: `{      odir = odi...`)
+LDC 1
+ADD
+ST 0 4
+LD 0 4 ; (js: `if (odir >= 4)   ...`)
+LDC 4
+CGTE
+TSEL 161 165 ; if test
+LD 0 4 ; (js: `odir = odir - 4;`)
+LDC 4
+SUB
+ST 0 4
+LDC 0
+LDC 0
+TSEL 171 171
+LDC 1 ; (js: `rst = 1;`) (js: `{    rst = 1;  }`)
+ST 0 2
+LDC 0
+LD 0 2 ; (js: `return [ [ rst, [...`)
+LD 0 1
+LD 0 4
+CONS
+CONS
+LD 0 4
+CONS
+RTN
