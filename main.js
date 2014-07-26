@@ -335,13 +335,14 @@ function step(aiState, worldState) {
         return -1;
     }
 
-    function bounty(cell) {
+    function bounty(pos) {
+        var cell = matrixGet(map, pos);
         if (cell === 2)
             return 10000;
         if (cell === 3)
             return 50000; // TODO: 0 if in power mode!
-    //    if (cell === 4)
-    //        return 1000000; //FIXME: only if fruit is present!
+        if (cell === 4 && fruitStatus > 0)
+            return 1000000; // TODO: use map size
         return 0;
     }
 
@@ -395,7 +396,7 @@ function step(aiState, worldState) {
 
         while (typeof sortedPaths === 'object') {
             var pos = sortedPaths[0][0];
-            var myVal = matrixGet(res, pos) + bounty(matrixGet(map, pos));
+            var myVal = matrixGet(res, pos) + bounty(pos);
             res = matrixSet(res, pos, myVal);
             var d = 0;
             while (d < 4) {
@@ -480,7 +481,7 @@ if (module) { // Node.js
                 ghostsContent = mapContent[1] ? contentToArray(mapContent[1]) : [],
                 ghostsCount = 0,
                 ghostsStatuses = 0,
-                fruitStatus = 0;
+                fruitStatus = mapContent[2] ? parseInt(mapContent[2], 10) : 0;
                 map = contentToArray(mapContent[0]).reduceRight(function(a, x, j) {
                     x = x.split("").reduceRight(function(b, y, i) {
                         if(y === '\\') {
