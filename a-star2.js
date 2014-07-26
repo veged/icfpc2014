@@ -12,17 +12,6 @@ function isArray(x) {
     return (typeof x === 'object');
 }
 
-//function _listGet(size, list, n) {
-//    if (size === 1) // n === 0
-//        return list;
-//    var m = div(size, 2);
-//    if (n < m) {
-//        return _listGet(m, list[0], n);
-//    } else {
-//        return _listGet(size - m, list[1], n - m);
-//    }
-//}
-
 function listGet(list2, n) {
     var size = list2[0];
     var list = list2[1];
@@ -39,14 +28,13 @@ function listGet(list2, n) {
         }
     }
     return list;
-    //return _listGet(list[0], list[1], n);
 }
 
 function _listSet(size, list, n, x) {
     if (size === 1) {
         return x;
     }
-    var m = div(size, 2);
+    var m = (size / 2) | 0;
     if (n < m) {
         return [ _listSet(m, list[0], n, x), list[1] ];
     } else {
@@ -77,7 +65,7 @@ function listFromSlowList(arr, f) {
         if (n === 1) {
             return [f(arr[0]), arr[1]];
         }
-        var m = div(n, 2);
+        var m = (n / 2) | 0;
         var left = _listFromSlowList(arr, m);
         var right = _listFromSlowList(left[1], n - m);
         return [[left[0], right[0]], right[1]];
@@ -85,6 +73,20 @@ function listFromSlowList(arr, f) {
 
     var len = slowListLength(arr);
     return [len, _listFromSlowList(arr, len)[0]];
+}
+
+function listIterate(list, f) {
+    var i = 0;
+    function _listIterate(list, length, i) {
+        if(length === 1) {
+            f(list, i);
+        } else {
+            var halfLength = (length / 2) | 0;
+            _listIterate(list[0], halfLength, i);
+            _listIterate(list[1], length - halfLength, i + halfLength);
+        }
+    }
+    _listIterate(list[1], list[0], 0);
 }
 
 function matrixSet(mx, pos, x) {
@@ -95,11 +97,21 @@ function matrixGet(mx, pos, x) {
     return listGet(listGet(mx, pos[1]), pos[0]);
 }
 
+function matrixIterate(mx, f) {
+    function rowIterate(row, i) {
+        function cellIterate(v, j) {
+            f(v, i, j);
+        }
+        listIterate(row, cellIterate);
+    }
+    listIterate(mx, rowIterate);
+}
+
 function genList(n, f) {
     function _genList(n) {
         if (n === 1)
             return f();
-        var m = div(n, 2);
+        var m = (n / 2) | 0;
         return [ _genList(m), _genList(n-m) ];
     }
     return [n, _genList(n)];
@@ -149,7 +161,7 @@ function bounty(cell) {
     if (cell === 2)
         return 10000;
     if (cell === 3)
-        return 100000; // TODO: 0 if in power mode!
+        return 50000; // TODO: 0 if in power mode!
 //    if (cell === 4)
 //        return 1000000; //FIXME: only if fruit is present!
     return 0;
@@ -282,7 +294,7 @@ function flatRow(row, f, b) {
         if (n === 1) {
             return f(x, row, a);
         }
-        var m = div(n, 2);
+        var m = (n / 2) | 0;
         a = _flatRow(row[1], x + m, n - m, a);
         return _flatRow(row[0], x, m, a);
     }
@@ -348,7 +360,6 @@ function calcSmell(map, paths) {
 }
 
 function run(map, myPos) {
-
     var paths = calcPaths(map, myPos);
     var smell = calcSmell(map, paths);
     var d = 0;
@@ -374,11 +385,23 @@ function convertRow(x) {
 }
 
 /*
-function toHtml(map, arr) {
+function toHtml(map, mx) {
+    var _map = [];
+    function mapIterate(cell, i, j) {
+        (_map[i] || (_map[i] = []))[j] = cell;
+    }
+    matrixIterate(map, mapIterate);
+
+    var _mx = [];
+    function mxIterate(v, i, j) {
+        (_mx[i] || (_mx[i] = []))[j] = v;
+    }
+    matrixIterate(mx, mxIterate);
+
     var res = '<table border="1" cellspacing="0" cellpadding="0">';
-    for(var i = 0; i < map.length; i++) {
-        var mapRow = map[i],
-            row = arr[i] || [];
+    for(var i = 0; i < _map.length; i++) {
+        var mapRow = _map[i] || [],
+            row = _mx[i] || [];
         res += '<tr>';
         for(var j = 0; j < mapRow.length; j++) {
             res += '<td>' +
@@ -398,6 +421,15 @@ function fixMap(map) {
         }, 0);
         return [x, a];
     }, 0);
+}
+
+function id(x) {
+    return x;
+}
+
+function convertRow(x) {
+    var val = listFromSlowList(x, id);
+    return val;
 }
 
 function unFixRow(row) {
@@ -421,13 +453,17 @@ function unFixMap(map) {
 var FS = require('fs'),
     map = FS.readFileSync('map.txt', 'utf8').split('\n');
 map.pop();
+map = listFromSlowList(fixMap(map), convertRow);
 
-var res = run(listFromSlowList(fixMap(map), convertRow), [3, 2]);
+var res = run(map, [3, 2]);
 
-console.log(JSON.stringify(res[1][0]));
-console.log(JSON.stringify(res[1][1]));
-console.log("res: ", res[0]);
-//FS.writeFileSync('map.html', toHtml(map, unFixMap(res[0][0])) + toHtml(map, unFixMap(res[0][1])) + "<br/>" + res[1]);
+console.log("res: ", JSON.stringify(res));
+FS.writeFileSync('map.html',
+    toHtml(map, res[1][0]) +
+    '<br/>' +
+    toHtml(map, res[1][1]) +
+    '<br/>' + res[0]);
+
 //*/
 function tplGet(tpl, length, i) {
     if(i === 0) {
@@ -438,7 +474,6 @@ function tplGet(tpl, length, i) {
         return tplGet(tpl[1], length - 1, i - 1);
     }
 }
-
 
 function tplGetter(tpl, length) {
     function getter(i) {

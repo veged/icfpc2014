@@ -129,7 +129,7 @@ Compiler.prototype.visitStmt = function visitStmt(stmt) {
     this.visitDebugger(stmt);
   } else if (stmt.type === 'JumpStatement') {
     // Artificial
-    this.add([ 'LDC', 0 ]);
+    this.add([ 'LDC', 0 ], 'jump-stmt');
     this.add([ 'TSEL', stmt.target, stmt.target ]);
   } else if (stmt.type === 'BlockStatement' || stmt.type === 'Program') {
     this.visitBlock(stmt);
@@ -137,9 +137,13 @@ Compiler.prototype.visitStmt = function visitStmt(stmt) {
     throw new Error('Unsupported statement type: ' + stmt.type);
   }
 
+  this.annotate(stmt, pos);
+};
+
+Compiler.prototype.annotate = function annotate(node, pos) {
   // Add comment
-  if (stmt.range && this.out.length > pos) {
-    var src = this.source.slice(stmt.range[0], stmt.range[1])
+  if (node.range && this.out.length > pos) {
+    var src = this.source.slice(node.range[0], node.range[1])
         .replace(/[\r\n]+/g, '');
     if (src.length > 20)
       src = src.slice(0, 17) + '...';
@@ -232,7 +236,7 @@ Compiler.prototype.visitCall = function visitCall(expr, stmt) {
 
 Compiler.prototype.visitLiteral = function visitLiteral(expr) {
   assert(typeof expr.value === 'number', 'only number literals are supported');
-  this.add([ 'LDC', expr.value ]);
+  this.add([ 'LDC', expr.value ], 'literal');
 };
 
 Compiler.prototype.visitFn = function visitFn(expr) {
@@ -254,7 +258,7 @@ Compiler.prototype.visitIdentifier = function visitIdentifier(id) {
   assert(slot, 'unknown identifier');
   assert(!slot.isGlobal(), 'unknown global: ' + slot.name);
   if (slot.isConst())
-    this.add([ 'LDC', slot.constVal() ]);
+    this.add([ 'LDC', slot.constVal() ], 'const-id');
   else
     this.add([ 'LD', slot.depth, slot.index ]);
 };
@@ -283,6 +287,13 @@ function isTypeof(expr) {
 
 Compiler.prototype.visitBinop = function visitBinop(expr) {
   var op = expr.operator;
+
+  // a | 0
+  if (op === '|') {
+    assert.equal(expr.right.type, 'Literal');
+    assert.equal(expr.right.value, 0);
+    return this.visitExpr(expr.left);
+  }
 
   // typeof a === '...'
   if (op === '===') {
@@ -342,9 +353,9 @@ Compiler.prototype.visitBinop = function visitBinop(expr) {
   else
     throw new Error('Unsupported operation: ' + op);
 
+  this.add([ op ]);
   if (neq)
     this.add([ 'SUB' ]);
-  this.add([ op ]);
 };
 
 Compiler.prototype.visitUnop = function visitUnop(expr) {
@@ -398,12 +409,11 @@ Compiler.prototype.visitIf = function visitIf(stmt) {
   if (stmt.alternate) {
     var jmp = [ 'TSEL', null, null ];
 
-    this.add([ 'LDC', 0 ]);
+    this.add([ 'LDC', 0 ], 'if-cons-jump');
     this.add(jmp);
     instr[2] = this.out.length;
 
     this.visitStmt(stmt.alternate);
-    this.add([ 'LDC', 0 ]);
 
     jmp[1] = this.out.length;
     jmp[2] = this.out.length;
@@ -432,7 +442,9 @@ Compiler.prototype.visitBlock = function visitBlock(stmt) {
     if (s.type !== 'FunctionDeclaration')
       continue;
 
+    var pos = this.out.length;
     this.visitFn(s);
+    this.annotate(s, pos);
     this.add([ 'ST', s.id._scope.depth, s.id._scope.index ]);
   }
 
