@@ -63,57 +63,67 @@ Compiler.prototype.pushContextAdaptor = function pushContextAdaptor(scope) {
 };
 
 Compiler.prototype.evalScopes = function evalScopes() {
-  var scopes = [ new Scope(null, null) ];
-  var last = scopes[0];
+  var root = new Scope(null, null);
+  var allScopes = [ root ];
 
-  estraverse.traverse(this.ast, {
-    enter: function(node) {
-      if (Array.isArray(node.body)) {
-        for (var i = 0; i < node.body.length; i++) {
-          var stmt = node.body[i];
-          if (stmt.type === 'FunctionDeclaration')
-            stmt.id._scope = last.set(stmt.id.name, node);
+  var queue = [ { ast: this.ast, current: root } ];
+  while (queue.length) {
+    var item = queue.shift();
+    var current = item.current;
+
+    estraverse.traverse(item.ast, {
+      enter: function(node) {
+        if (Array.isArray(node.body)) {
+          for (var i = 0; i < node.body.length; i++) {
+            var stmt = node.body[i];
+            if (stmt.type === 'FunctionDeclaration')
+              stmt.id._scope = current.set(stmt.id.name, node);
+          }
+        }
+
+        // if (module) { ... node.js specific thing... }
+        if (node.type === 'IfStatement' &&
+            node.test.type === 'Identifier' &&
+            node.test.name === 'module') {
+          return this.skip();
+        }
+
+        if (/function/i.test(node.type)) {
+          if (node.id && !node.id._scope)
+            node.id._scope = current.set(node.id.name, node);
+
+          var s = new Scope(node, current);
+          allScopes.push(s);
+          queue.push({
+            current: s,
+            ast: node.body
+          });
+
+          node.params.forEach(function(param) {
+            param._scope = s.set(param.name, null, true);
+          });
+
+          node._scope = s;
+
+          // Visit function later
+          return this.skip();
+        } else if (node.type === 'VariableDeclarator') {
+          current.set(node.id.name, node.init);
+        } else if (node.type === 'Identifier') {
+          if (!node._scope)
+            node._scope = current.get(node.name);
+        } else if (node.type === 'AssignmentExpression' &&
+                   node.left.type === 'Identifier') {
+          current.get(node.left.name).set(current, node.right);
         }
       }
+    });
+  }
 
-      // if (module) { ... node.js specific thing... }
-      if (node.type === 'IfStatement' &&
-          node.test.type === 'Identifier' &&
-          node.test.name === 'module') {
-        return this.skip();
-      }
+  for (var i = 0; i < allScopes.length; i++)
+    allScopes[i].buildContext();
 
-      if (/function/i.test(node.type)) {
-        if (node.id && !node.id._scope)
-          node.id._scope = last.set(node.id.name, node);
-
-        last = new Scope(node, last);
-        scopes.push(last);
-
-        node.params.forEach(function(param) {
-          param._scope = last.set(param.name, null, true);
-        });
-      } else if (node.type === 'VariableDeclarator') {
-        last.set(node.id.name, node.init);
-      } else if (node.type === 'Identifier') {
-        if (!node._scope)
-          node._scope = last.get(node.name);
-      } else if (node.type === 'AssignmentExpression' &&
-                 node.left.type === 'Identifier') {
-        last.get(node.left.name).set(last, node.right);
-      }
-    },
-    leave: function(node) {
-      if (node === scopes[scopes.length - 1].fn) {
-        node._scope = scopes.pop();
-        node._scope.buildContext();
-        last = scopes[scopes.length - 1];
-      }
-    }
-  });
-
-  this.ast._scope = scopes.pop();
-  this.ast._scope.buildContext();
+  this.ast._scope = root;
 };
 
 Compiler.prototype.visitStmt = function visitStmt(stmt) {
