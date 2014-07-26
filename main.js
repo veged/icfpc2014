@@ -433,78 +433,78 @@ function step(aiState, worldState) {
     return [[paths, smell], bestD];
 }
 
-///*
-function nodejsMain() {
-    function toHtml(map, mx) {
-        var _map = [];
-        function mapIterate(cell, i, j) {
-            (_map[i] || (_map[i] = []))[j] = cell;
-        }
-        matrixIterate(map, mapIterate);
-
-        var _mx = [];
-        function mxIterate(v, i, j) {
-            (_mx[i] || (_mx[i] = []))[j] = v;
-        }
-        matrixIterate(mx, mxIterate);
-
-        var res = '<table border="1" cellspacing="0" cellpadding="0">';
-        for(var i = 0; i < _map.length; i++) {
-            var mapRow = _map[i] || [],
-                row = _mx[i] || [];
-            res += '<tr>';
-            for(var j = 0; j < mapRow.length; j++) {
-                res += '<td>' +
-                    ({ '0': '#', '1': ' ', '2': '.', '3': 'o', '4': '%', '5': '\\', '6': '=' }[mapRow[j]]) +
-                    '<sup>' + (typeof row[j] === 'undefined' ? '' : row[j]) + '</sup>' +
-                    '</td>';
+if (module) { // Node.js
+    function nodejsMain() {
+        function toHtml(map, mx) {
+            var _map = [];
+            function mapIterate(cell, i, j) {
+                (_map[i] || (_map[i] = []))[j] = cell;
             }
-            res += '</tr>';
-        }
-        return res += '</table>'
-    }
+            matrixIterate(map, mapIterate);
 
-    function readMap(map) {
-        var lmVitality = 0,
-            lmPos,
-            lmDirection = 1,
-            lmLives = 3,
-            lmScore = 0
-            ghostsStatuses = 0,
-            fruitStatus = 0;
+            var _mx = [];
+            function mxIterate(v, i, j) {
+                (_mx[i] || (_mx[i] = []))[j] = v;
+            }
+            matrixIterate(mx, mxIterate);
 
-        map = map.reduceRight(function(a, x, j) {
-            x = x.split("").reduceRight(function(b, y, i) {
-                if(y === '\\') {
-                    lmPos = [i, j];
-                } else if(y === '=') {
-                    ghostsStatuses = [[0, [[i, j], 0]], ghostsStatuses];
+            var res = '<table border="1" cellspacing="0" cellpadding="0">';
+            for(var i = 0; i < _map.length; i++) {
+                var mapRow = _map[i] || [],
+                    row = _mx[i] || [];
+                res += '<tr>';
+                for(var j = 0; j < mapRow.length; j++) {
+                    res += '<td>' +
+                        ({ '0': '#', '1': ' ', '2': '.', '3': 'o', '4': '%', '5': '\\', '6': '=' }[mapRow[j]]) +
+                        '<sup>' + (typeof row[j] === 'undefined' ? '' : row[j]) + '</sup>' +
+                        '</td>';
                 }
-                return [{ '#': 0, ' ': 1, '.': 2, 'o': 3, '%': 4, '\\': 1, '=': 6 }[y], b];
+                res += '</tr>';
+            }
+            return res += '</table>'
+        }
+
+        function readMap(map) {
+            var lmVitality = 0,
+                lmPos,
+                lmDirection = 1,
+                lmLives = 3,
+                lmScore = 0
+                ghostsStatuses = 0,
+                fruitStatus = 0;
+
+            map = map.reduceRight(function(a, x, j) {
+                x = x.split("").reduceRight(function(b, y, i) {
+                    if(y === '\\') {
+                        lmPos = [i, j];
+                    } else if(y === '=') {
+                        ghostsStatuses = [[0, [[i, j], 0]], ghostsStatuses];
+                    }
+                    return [{ '#': 0, ' ': 1, '.': 2, 'o': 3, '%': 4, '\\': 1, '=': 6 }[y], b];
+                }, 0);
+                return [x, a];
             }, 0);
-            return [x, a];
-        }, 0);
 
-        var lmStatus = [lmVitality, [lmPos, [lmDirection, [lmLives, lmScore]]]];
+            var lmStatus = [lmVitality, [lmPos, [lmDirection, [lmLives, lmScore]]]];
 
-        return [map, [lmStatus, [ghostsStatuses, fruitStatus]]];
+            return [map, [lmStatus, [ghostsStatuses, fruitStatus]]];
+        }
+
+        var FS = require('fs'),
+            map = FS.readFileSync('map1.txt', 'utf8').replace(/\n$/, '').split('\n'),
+            worldState = readMap(map),
+            res = step(0, worldState);
+
+        console.log("res: ", JSON.stringify(res));
+        map = listFromSlowList(worldState[0], convertRow);
+        FS.writeFileSync('map.html',
+            toHtml(map, res[0][0]) +
+            '<br/>' +
+            toHtml(map, res[0][1]) +
+            '<br/>' + res[1]);
     }
 
-    var FS = require('fs'),
-        map = FS.readFileSync('map1.txt', 'utf8').replace(/\n$/, '').split('\n'),
-        worldState = readMap(map),
-        res = step(0, worldState);
-
-    console.log("res: ", JSON.stringify(res));
-    map = listFromSlowList(worldState[0], convertRow);
-    FS.writeFileSync('map.html',
-        toHtml(map, res[0][0]) +
-        '<br/>' +
-        toHtml(map, res[0][1]) +
-        '<br/>' + res[1]);
+    nodejsMain();
 }
-
-nodejsMain();
-//*/
 
 [0, step];
