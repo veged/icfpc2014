@@ -351,24 +351,24 @@ function step(aiState, worldState) {
             return -1;
         }
         var res = genMatrix(X, Y, genCell);
-        res = matrixSet(res, pos, 0);
+        res = matrixSet(res, myPos, 0);
 
         var toDo = 0;
-        toDo = heapPush(toDo, [pos, 0]);
+        toDo = heapPush(toDo, [myPos, 0]);
 
         while (heapSize(toDo) > 0) {
             var popRes = heapPop(toDo);
             var t = popRes[0][1];
-            pos = popRes[0][0];
+            myPos = popRes[0][0];
             toDo = popRes[1];
 
             if (t < 127 * 80) {
 
                 var d = 0;
                 while (d < 4) {
-                    var newPos = shiftDir(pos, d);
+                    var newPos = shiftDir(myPos, d);
                     if (canGo(matrixGet(map, newPos)) >= 0 && matrixGet(res, newPos) === -1) {
-                        var dt = canGo(matrixGet(map, pos)); //TODO: save in toDo!
+                        var dt = canGo(matrixGet(map, myPos)); //TODO: save in toDo!
                         res = matrixSet(res, newPos, t + dt);
                         toDo = heapPush(toDo, [newPos, t + dt]);
                     }
