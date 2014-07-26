@@ -147,7 +147,7 @@ ScopeEntry.prototype.constVal = function constVal() {
   if (!this.isConst())
     throw new Error('ScopeEntry has no const value');
 
-  return this.sets[0].value;
+  return this.sets[0].value.value;
 };
 
 ScopeEntry.prototype.parentScope = function parentScope() {
