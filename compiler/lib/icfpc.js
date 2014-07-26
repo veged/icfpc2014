@@ -2,13 +2,15 @@ var assert = require('assert');
 var esprima = require('esprima');
 var estraverse = require('estraverse');
 
+var Scope = require('./scope').Scope;
+
 function Compiler(source) {
   this.source = source;
   this.ast = esprima.parse(source, { range: true });
+  this.current = null;
   this.out = [];
 
   this.fns = [];
-  this.returns = [];
 }
 exports.Compiler = Compiler;
 
@@ -26,21 +28,12 @@ Compiler.prototype.compile = function compile() {
     var item = this.fns.shift();
     item.instr[item.index] = this.out.length;
 
+    this.current = item.fn;
+
     // Add adaptor frame
-    if (item.fn._scope.context != 0) {
-      // Push-out arguments
-      for (var i = 0; i < item.fn._scope.size - item.fn._scope.context; i++)
-        this.add([ 'LD' , 0, i ], 'adapt=' + i);
-
-      // Stub-out scope
-      for (; i < item.fn._scope.size; i++)
-        this.add([ 'LDC' , 0 ], 'init_ctx=' + i);
-
-      // Call adaptor function
-      this.add([ 'LDF', this.out.length + 3 ]);
-      this.add([ 'AP', item.fn._scope.size ]);
-      this.add([ 'RTN' ]);
-    }
+    var scope = item.fn._scope;
+    if (scope.contextSize() != 0)
+      this.pushContextAdaptor(scope);
 
     var body = item.fn.body;
     while (body.body)
@@ -49,97 +42,26 @@ Compiler.prototype.compile = function compile() {
       this.visitStmt(stmt);
     }, this);
 
-    var rtn = this.add([ 'RTN' ]);
+    this.add([ 'RTN' ]);
 
-    // Link-in all returns
-    for (var i = 0; i < this.returns.length; i++) {
-      var ret = this.returns[i];
-      ret.instr[ret.index ] = rtn;
-    }
+    this.current = null;
   }
 
   return this.out.map(function(instr) {
-    return instr.instr.join(' ') + (instr.comment ? '; ' + instr.comment : '');
+    return instr.instr.join(' ') + (instr.comment ? ' ; ' + instr.comment : '');
   }).join('\n');
 };
 
-function Scope(fn, parent) {
-  this.fn = fn;
-  this.parent = parent || null;
-  this.map = {};
-  this.size = 0;
-  this.context = 0;
-}
+Compiler.prototype.pushContextAdaptor = function pushContextAdaptor(scope) {
+  // Stub-out scope
+  var ctx = scope.contextSize();
+  for (var i = 0; i < ctx; i++)
+    this.add([ 'LDC' , 0 ], 'init_ctx=' + i);
 
-Scope.prototype.set = function set(name, value, isArg) {
-  // Already has an entry
-  if (this.map[name] !== undefined)
-    return this.map[name];
-
-  if (!isArg)
-    this.context++;
-
-  var res = new ScopeEntry(this, 0, this.size++);
-  this.map[name] = res;
-  if (value)
-    res.sets.push(value);
-  return res;
-};
-
-Scope.prototype.get = function get(name) {
-  var depth = 0;
-  var cur = this;
-  for (var cur = this; cur !== null; cur = cur.parent, depth++) {
-    var entry = cur.map[name];
-    if (entry === undefined) {
-      // Skip adaptor frame
-      if (cur.context !== 0)
-        depth++;
-      continue;
-    }
-
-    entry.gets++;
-    return new ScopeEntry(cur, depth, entry);
-  }
-
-  return new ScopeEntry(this, -1, name);
-};
-
-function ScopeEntry(scope, depth, index) {
-  this.scope = scope;
-  this.depth = depth;
-  if (index instanceof ScopeEntry) {
-    this.parent = index;
-    this.parent.context = true;
-    this.index = index.index;
-  } else {
-    this.parent = null;
-    this.index = index;
-  }
-  this.sets = [];
-  this.gets = 0;
-  this.context = false;
-}
-
-ScopeEntry.prototype.isConst = function isConst() {
-  if (this.parent)
-    return this.parent.isConst();
-
-  if (this.sets.length !== 1)
-    return false;
-
-  var a = this.sets[0];
-  return a.type === 'Literal' && typeof a.value === 'number';
-};
-
-ScopeEntry.prototype.constVal = function constVal() {
-  if (this.parent)
-    return this.parent.constVal();
-
-  if (!this.isConst())
-    throw new Error('ScopeEntry has no const value');
-
-  return this.sets[0].value;
+  // Call adaptor function
+  this.add([ 'LDF', this.out.length + 3 ]);
+  this.add([ 'AP', ctx ]);
+  this.add([ 'RTN' ]);
 };
 
 Compiler.prototype.evalScopes = function evalScopes() {
@@ -171,12 +93,14 @@ Compiler.prototype.evalScopes = function evalScopes() {
     leave: function(node) {
       if (node === scopes[scopes.length - 1].fn) {
         node._scope = scopes.pop();
+        node._scope.buildContext();
         last = scopes[scopes.length - 1];
       }
     }
   });
 
   this.ast._scope = scopes.pop();
+  this.ast._scope.buildContext();
 };
 
 Compiler.prototype.visitStmt = function visitStmt(stmt) {
@@ -216,8 +140,9 @@ Compiler.prototype.visitStmt = function visitStmt(stmt) {
       src = src.slice(0, 17) + '...';
 
     if (!this.out[pos].comment)
-      this.out[pos].comment = '';
-    this.out[pos].comment += ' (js: `' + src + '`)';
+      this.out[pos].comment = '(js: `' + src + '`)';
+    else
+      this.out[pos].comment += ' (js: `' + src + '`)';
   }
 };
 
@@ -316,13 +241,13 @@ Compiler.prototype.queueFn = function queueFn(fn, instr, index) {
 };
 
 Compiler.prototype.visitIdentifier = function visitIdentifier(id) {
-  var scope = id._scope;
-  assert(scope, 'unknown identifier');
-  assert(scope.depth !== -1, 'unknown global: ' + scope.name);
-  if (scope.isConst())
-    this.add([ 'LDC', scope.constVal() ]);
+  var slot = id._scope;
+  assert(slot, 'unknown identifier');
+  assert(!slot.isGlobal(), 'unknown global: ' + slot.name);
+  if (slot.isConst())
+    this.add([ 'LDC', slot.constVal() ]);
   else
-    this.add([ 'LD', scope.depth, scope.index ]);
+    this.add([ 'LD', slot.depth, slot.index ]);
 };
 
 Compiler.prototype.visitVar = function visitVar(stmt) {
@@ -433,11 +358,11 @@ Compiler.prototype.visitRet = function visitRet(stmt) {
   if (stmt.argument)
     this.visitExpr(stmt.argument);
 
-  var instr = [ 'TSEL', null, null ];
-  this.returns.push({ instr: instr, index: 1 });
-  this.returns.push({ instr: instr, index: 2 });
-  this.add([ 'LDC', 0 ]);
-  this.add(instr);
+  var body = this.current.body;
+  while (body.body)
+    body = body.body;
+  if (stmt !== body[body.length - 1])
+    this.add([ 'RTN' ]);
 };
 
 Compiler.prototype.visitIf = function visitIf(stmt) {
