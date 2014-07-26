@@ -288,6 +288,13 @@ function isTypeof(expr) {
 Compiler.prototype.visitBinop = function visitBinop(expr) {
   var op = expr.operator;
 
+  // a | 0
+  if (op === '|') {
+    assert.equal(expr.right.type, 'Literal');
+    assert.equal(expr.right.value, 0);
+    return this.visitExpr(expr.left);
+  }
+
   // typeof a === '...'
   if (op === '===') {
     if (isTypeof(expr.left) || isTypeof(expr.right)) {
