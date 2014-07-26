@@ -310,6 +310,10 @@ Compiler.prototype.visitBinop = function visitBinop(expr) {
     }
   }
 
+  var neq = op === '!=' || op === '==='
+  if (neq)
+    this.add([ 'LDC', 1 ]);
+
   if (op === '<' || op === '<=') {
     if (op === '<')
       op = '>';
@@ -330,7 +334,7 @@ Compiler.prototype.visitBinop = function visitBinop(expr) {
     op = 'MUL';
   else if (op === '/')
     op = 'DIV';
-  else if (op === '==' || op === '===')
+  else if (op === '==' || op === '===' || op === '!=' || op === '!==')
     op = 'CEQ';
   else if (op === '>')
     op = 'CGT';
@@ -338,6 +342,9 @@ Compiler.prototype.visitBinop = function visitBinop(expr) {
     op = 'CGTE';
   else
     throw new Error('Unsupported operation: ' + op);
+
+  if (neq)
+    this.add([ 'SUB' ]);
   this.add([ op ]);
 };
 
