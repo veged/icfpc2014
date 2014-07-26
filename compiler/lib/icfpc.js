@@ -35,12 +35,10 @@ Compiler.prototype.compile = function compile() {
     if (scope.contextSize() != 0)
       this.pushContextAdaptor(scope);
 
-    var body = item.fn.body;
-    while (body.body)
-      body = body.body;
-    body.forEach(function(stmt) {
-      this.visitStmt(stmt);
-    }, this);
+    if (item.fn.type !== 'Program')
+      this.visitStmt(item.fn.body);
+    else
+      this.visitStmt(item.fn);
 
     this.add([ 'RTN' ]);
 
@@ -116,8 +114,7 @@ Compiler.prototype.visitStmt = function visitStmt(stmt) {
   if (stmt.type === 'ExpressionStatement') {
     this.visitExpr(stmt.expression, stmt);
   } else if (stmt.type === 'FunctionDeclaration') {
-    this.visitFn(stmt);
-    this.add([ 'ST', stmt.id._scope.depth, stmt.id._scope.index ]);
+    // Already visited, ignore
   } else if (stmt.type === 'VariableDeclaration') {
     this.visitVar(stmt);
   } else if (stmt.type === 'ReturnStatement') {
@@ -134,7 +131,7 @@ Compiler.prototype.visitStmt = function visitStmt(stmt) {
     // Artificial
     this.add([ 'LDC', 0 ]);
     this.add([ 'TSEL', stmt.target, stmt.target ]);
-  } else if (stmt.type === 'BlockStatement') {
+  } else if (stmt.type === 'BlockStatement' || stmt.type === 'Program') {
     this.visitBlock(stmt);
   } else {
     throw new Error('Unsupported statement type: ' + stmt.type);
@@ -429,6 +426,17 @@ Compiler.prototype.visitWhile = function visitWhile(stmt) {
 };
 
 Compiler.prototype.visitBlock = function visitBlock(stmt) {
+  // Visit functions first
+  for (var i = 0; i < stmt.body.length; i++) {
+    var s = stmt.body[i];
+    if (s.type !== 'FunctionDeclaration')
+      continue;
+
+    this.visitFn(s);
+    this.add([ 'ST', s.id._scope.depth, s.id._scope.index ]);
+  }
+
+  // Visit rest later
   for (var i = 0; i < stmt.body.length; i++)
     this.visitStmt(stmt.body[i]);
 };
