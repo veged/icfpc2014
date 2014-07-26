@@ -2,15 +2,10 @@ function isArray(x) {
     return (typeof x === 'object');
 }
 
-function div(n, m) {
-    return (n - (n % m)) / m;
-    //return n / m;
-}
-
 function _listGet(size, list, n) {
     if (size === 1) // n === 0
         return list;
-    var m = div(size, 2);
+    var m = (size / 2) | 0;
     if (n < m) {
         return _listGet(m, list[0], n);
     } else {
@@ -26,7 +21,7 @@ function _listSet(size, list, n, x) {
     if (size === 1) {
         return x;
     }
-    var m = div(size, 2);
+    var m = (size / 2) | 0;
     if (n < m) {
         return [ _listSet(m, list[0], n, x), list[1] ];
     } else {
@@ -57,7 +52,7 @@ function listFromSlowList(arr, f) {
         if (n === 1) {
             return [f(arr[0]), arr[1]];
         }
-        var m = div(n, 2);
+        var m = (n / 2) | 0;
         var left = _listFromSlowList(arr, m);
         var right = _listFromSlowList(left[1], n - m);
         return [[left[0], right[0]], right[1]];
@@ -73,7 +68,7 @@ function listIterate(list, f) {
         if(length === 1) {
             f(list, i);
         } else {
-            var halfLength = div(length, 2);
+            var halfLength = (length / 2) | 0;
             _listIterate(list[0], halfLength, i);
             _listIterate(list[1], length - halfLength, i + halfLength);
         }
@@ -103,7 +98,7 @@ function genList(n, f) {
     function _genList(n) {
         if (n === 1)
             return f();
-        var m = div(n, 2);
+        var m = (n / 2) | 0;
         return [ _genList(m), _genList(n-m) ];
     }
     return [n, _genList(n)];
@@ -291,7 +286,7 @@ function flatRow(row, f, b) {
         if (n === 1) {
             return f(x, row, a);
         }
-        var m = div(n, 2);
+        var m = (n / 2) | 0;
         a = _flatRow(row[1], x + m, n - m, a);
         return _flatRow(row[0], x, m, a);
     }
