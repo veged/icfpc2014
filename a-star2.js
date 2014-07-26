@@ -375,13 +375,13 @@ function applyStatusesToMap(map, ghostsStatuses, fruitStatus) {
 }
 
 function mod(n, d) {
-    return n - ((n / d) | 0);
+    return n - ((n / d) | 0) * d;
 }
 
 var _next = 1;
 function rand() {
-    _next = _next * 1103515245 + 12345;
-    return mod((_next / 65536), 32768);
+    _next = mod(_next * 1103515245 + 12345, 4294967296);
+    return mod(((_next / 65536) | 0), 32768);
 }
 
 function step(aiState, worldState) {
