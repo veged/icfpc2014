@@ -344,12 +344,16 @@ Compiler.prototype.visitBinop = function visitBinop(expr) {
 
 Compiler.prototype.visitUnop = function visitUnop(expr) {
   var op = expr.operator;
-  if (op !== '-')
+  if (op === '-') {
+    this.add([ 'LDC', 0 ]);
+    this.visitExpr(expr.argument);
+    this.add([ 'SUB' ]);
+  } else if (op === '!') {
+    this.visitExpr(expr.argument);
+    this.add([ 'CEQ', 0 ]);
+  } else {
     throw new Error('Unsupported unary: ' + op);
-
-  this.add([ 'LDC', 0 ]);
-  this.visitExpr(expr.argument);
-  this.add([ 'SUB' ]);
+  }
 }
 
 Compiler.prototype.visitLogic = function visitLogic(expr) {
