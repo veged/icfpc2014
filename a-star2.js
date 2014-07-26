@@ -1,25 +1,45 @@
+function div(n, m) {
+//    return (n - (n % m)) / m;
+    return n / m;
+}
+
+function fixCell(cell) {
+//    return ({ '#': 0, ' ': 1, '.': 2, 'o': 3, '%': 4, '\\': 5, '=': 6 }[cell]);
+    return cell;
+}
+
 function isArray(x) {
     return (typeof x === 'object');
 }
 
-function div(n, m) {
-    //return (n - (n % m)) / m;
-    return n / m;
-}
+//function _listGet(size, list, n) {
+//    if (size === 1) // n === 0
+//        return list;
+//    var m = div(size, 2);
+//    if (n < m) {
+//        return _listGet(m, list[0], n);
+//    } else {
+//        return _listGet(size - m, list[1], n - m);
+//    }
+//}
 
-function _listGet(size, list, n) {
-    if (size === 1) // n === 0
-        return list;
-    var m = div(size, 2);
-    if (n < m) {
-        return _listGet(m, list[0], n);
-    } else {
-        return _listGet(size - m, list[1], n - m);
+function listGet(list2, n) {
+    var size = list2[0];
+    var list = list2[1];
+    var m;
+    while (size !== 1) {
+        m = div(size, 2);
+        if (n < m) {
+            list = list[0];
+            size = m;
+        } else {
+            list = list[1];
+            size = size - m;
+            n = n - m;
+        }
     }
-}
-
-function listGet(list, n) {
-    return _listGet(list[0], list[1], n);
+    return list;
+    //return _listGet(list[0], list[1], n);
 }
 
 function _listSet(size, list, n, x) {
@@ -113,11 +133,6 @@ function shiftDir(pos, d) {
   * 6: Ghost starting position
 */
 
-function fixCell(cell) {
-//    return ({ '#': 0, ' ': 1, '.': 2, 'o': 3, '%': 4, '\\': 5, '=': 6 }[cell]);
-    return cell;
-}
-
 function canGo(cell) {
     cell = fixCell(cell);
     if (cell === 5)
@@ -134,7 +149,7 @@ function bounty(cell) {
     if (cell === 2)
         return 10000;
     if (cell === 3)
-        return 50000; // TODO: 0 if in power mode!
+        return 100000; // TODO: 0 if in power mode!
 //    if (cell === 4)
 //        return 1000000; //FIXME: only if fruit is present!
     return 0;
@@ -319,7 +334,7 @@ function calcSmell(map, paths) {
                 var t0 = matrixGet(paths, pos);
                 var t = matrixGet(paths, newPos);
                 if (t === t0 - 127 || t === t0 - 137) {
-                    var newVal = myVal * 9 / 10; // ALPHA
+                    var newVal = myVal * 8 / 10; // ALPHA
                     if (matrixGet(res, newPos) < newVal) {
                         res = matrixSet(res, newPos, newVal);
                     }
@@ -359,7 +374,6 @@ function convertRow(x) {
 }
 
 /*
-
 function toHtml(map, arr) {
     var res = '<table border="1" cellspacing="0" cellpadding="0">';
     for(var i = 0; i < map.length; i++) {
@@ -439,6 +453,7 @@ function applyStatusesToMap(map, ghostsStatuses, fruitStatus) {
     while(isObject(ghostsStatuses)) {
         ghostStatus = ghostsStatuses[0];
         ghostsStatuses = ghostsStatuses[1];
+        console.log(tplGet(ghostStatus, 3, 1));
         map = matrixSet(map, tplGet(ghostStatus, 3, 1), 6);
     }
     return map;
