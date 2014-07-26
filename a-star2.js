@@ -72,11 +72,6 @@ function fastListSet(list, n, x) {
     return [size, res];
 }
 
-//var l = listFromSlowList([0,[1,[2,[3,[4,[5,[6,[7, [8, [9, 0]]]]]]]]]], id);
-//console.log(JSON.stringify(l));
-//console.log(JSON.stringify(fastListSet( l, 4, 40)));
-//return;
-
 function listLength(list) {
     return list[0];
 }
@@ -166,40 +161,7 @@ function shiftDir(pos, d) {
         return [pos[0] - 1, pos[1]];
 }
 
-/*
- * 0: Wall (`#`)
-  * 1: Empty (`<space>`)
-  * 2: Pill
-  * 3: Power pill
-  * 4: Fruit location
-  * 5: Lambda-Man starting position
-  * 6: Ghost starting position
-*/
-
-function canGo(cell) {
-//    cell = fixCell(cell);
-    if (cell === 5)
-        return 0;
-    if (cell === 1)
-        return 127;
-    if (cell === 2 || cell === 3 || cell === 4)
-        return 137;
-    return -1;
-}
-
-function bounty(cell) {
-//    cell = fixCell(cell);
-    if (cell === 2)
-        return 10000;
-    if (cell === 3)
-        return 50000; // TODO: 0 if in power mode!
-//    if (cell === 4)
-//        return 1000000; //FIXME: only if fruit is present!
-    return 0;
-}
-
 // heap struct: [[value, size], [ptr1, ptr2]]
-
 function heapPop(heap) {
     var val = heap[0];
     var x = val[0];
@@ -276,7 +238,7 @@ function heapSort(arr) {
     return res;
 }
 
-function calcPaths(map, pos) {
+function calcPaths(map, pos, canGo, bounty) {
 
     var Y = listLength(map);
     var X = listLength(listGet(map, 0));
@@ -352,7 +314,7 @@ function flatAndSort(mx) {
     return heapSort(val);
 }
 
-function calcSmell(map, paths) {
+function calcSmell(map, paths, canGo, bounty) {
     var Y = listLength(map);
     var X = listLength(listGet(map, 0));
     var res;
@@ -387,20 +349,6 @@ function calcSmell(map, paths) {
 }
 
 function run(map, myPos) {
-    var paths = calcPaths(map, myPos);
-    var smell = calcSmell(map, paths);
-    var d = 0;
-    var bestSmell = 0;
-    var bestD = 0;
-    while (d < 4) {
-        var val = matrixGet(smell, shiftDir(myPos, d));
-        if (val > bestSmell) {
-            bestSmell = val;
-            bestD = d;
-        }
-        d = d + 1;
-    }
-    return [bestD, [paths, smell]];
 }
 
 function id(x) {
@@ -410,87 +358,7 @@ function convertRow(x) {
     var val = listFromSlowList(x, id);
     return val;
 }
-/*
-function toHtml(map, mx) {
-    var _map = [];
-    function mapIterate(cell, i, j) {
-        (_map[i] || (_map[i] = []))[j] = cell;
-    }
-    matrixIterate(map, mapIterate);
 
-    var _mx = [];
-    function mxIterate(v, i, j) {
-        (_mx[i] || (_mx[i] = []))[j] = v;
-    }
-    matrixIterate(mx, mxIterate);
-
-    var res = '<table border="1" cellspacing="0" cellpadding="0">';
-    for(var i = 0; i < _map.length; i++) {
-        var mapRow = _map[i] || [],
-            row = _mx[i] || [];
-        res += '<tr>';
-        for(var j = 0; j < mapRow.length; j++) {
-            res += '<td>' +
-                mapRow[j] +
-                '<sup>' + (typeof row[j] === 'undefined' ? '' : row[j]) + '</sup>' +
-                '</td>';
-        }
-        res += '</tr>';
-    }
-    return res += '</table>'
-}
-
-function fixMap(map) {
-    return map.reduceRight(function(a, x) {
-        x = x.split("").reduceRight(function(b, y) {
-            return [y, b];
-        }, 0);
-        return [x, a];
-    }, 0);
-}
-
-function id(x) {
-    return x;
-}
-
-function convertRow(x) {
-    var val = listFromSlowList(x, id);
-    return val;
-}
-
-function unFixRow(row) {
-    var res = [];
-    while (typeof row === 'object') {
-        res.push(row[0]);
-        row = row[1];
-    }
-    return res;
-}
-
-function unFixMap(map) {
-    var res = [];
-    while (typeof map === 'object') {
-        res.push(unFixRow(map[0]));
-        map = map[1];
-    }
-    return res;
-}
-
-var FS = require('fs'),
-    map = FS.readFileSync('map1.txt', 'utf8').split('\n');
-map.pop();
-map = listFromSlowList(fixMap(map), convertRow);
-
-var res = run(map, [17, 14]);
-
-console.log("res: ", JSON.stringify(res));
-FS.writeFileSync('map.html',
-    toHtml(map, res[1][0]) +
-    '<br/>' +
-    toHtml(map, res[1][1]) +
-    '<br/>' + res[0]);
-
-//*/
 function tplGet(tpl, length, i) {
     if(i === 0) {
         return tpl[0];
@@ -526,9 +394,116 @@ function step(aiState, worldState) {
         ghostsStatuses = worldState(2),
         fruitStatus = worldState(3);
     map = listFromSlowList(map, convertRow);
-    map = applyStatusesToMap(map, ghostsStatuses, fruitStatus);
-    var myPos = tplGet(lmStatus, 5, 1);
-    return [aiState, run(map, myPos)[0]];
+    //map = applyStatusesToMap(map, ghostsStatuses, fruitStatus);
+
+    /*
+     * 0: Wall (`#`)
+     * 1: Empty (`<space>`)
+     * 2: Pill
+     * 3: Power pill
+     * 4: Fruit location
+     * 5: Lambda-Man starting position
+     * 6: Ghost starting position
+    */
+    function canGo(cell) {
+    //    cell = fixCell(cell);
+        if (cell === 5)
+            return 0;
+        if (cell === 1)
+            return 127;
+        if (cell === 2 || cell === 3 || cell === 4)
+            return 137;
+        return -1;
+    }
+
+    function bounty(cell) {
+    //    cell = fixCell(cell);
+        if (cell === 2)
+            return 10000;
+        if (cell === 3)
+            return 50000; // TODO: 0 if in power mode!
+    //    if (cell === 4)
+    //        return 1000000; //FIXME: only if fruit is present!
+        return 0;
+    }
+
+    var myPos = tplGet(lmStatus, 5, 1),
+        paths = calcPaths(map, myPos, canGo, bounty),
+        smell = calcSmell(map, paths, canGo, bounty),
+        d = 0,
+        bestSmell = 0,
+        bestD = 0;
+    while (d < 4) {
+        var val = matrixGet(smell, shiftDir(myPos, d));
+        if (val > bestSmell) {
+            bestSmell = val;
+            bestD = d;
+        }
+        d = d + 1;
+    }
+
+    return [aiState, bestD];
 }
+
+/*
+function nodejsMain() {
+    function toHtml(map, mx) {
+        var _map = [];
+        function mapIterate(cell, i, j) {
+            (_map[i] || (_map[i] = []))[j] = cell;
+        }
+        matrixIterate(map, mapIterate);
+
+        var _mx = [];
+        function mxIterate(v, i, j) {
+            (_mx[i] || (_mx[i] = []))[j] = v;
+        }
+        matrixIterate(mx, mxIterate);
+
+        var res = '<table border="1" cellspacing="0" cellpadding="0">';
+        for(var i = 0; i < _map.length; i++) {
+            var mapRow = _map[i] || [],
+                row = _mx[i] || [];
+            res += '<tr>';
+            for(var j = 0; j < mapRow.length; j++) {
+                res += '<td>' +
+                    mapRow[j] +
+                    '<sup>' + (typeof row[j] === 'undefined' ? '' : row[j]) + '</sup>' +
+                    '</td>';
+            }
+            res += '</tr>';
+        }
+        return res += '</table>'
+    }
+
+    function readMap(map) {
+        var map,
+            lmStatus,
+            ghostsStatuses,
+            fruitStatus,
+            worldState = [];
+        return map.reduceRight(function(a, x, i) {
+            x = x.split("").reduceRight(function(b, y, j) {
+                return [y, b];
+            }, 0);
+            return [x, a];
+        }, 0);
+    }
+
+    var FS = require('fs'),
+        map = FS.readFileSync('map1.txt', 'utf8').replace(/\n$/, '').split('\n');
+        worldState = readMap(map);
+        res = step(0, worldState);
+
+    console.log("res: ", JSON.stringify(res));
+    FS.writeFileSync('map.html',
+        toHtml(map, res[1][0]) +
+        '<br/>' +
+        toHtml(map, res[1][1]) +
+        '<br/>' + res[0]);
+}
+
+nodejsMain();
+//*/
 
 [0, step];
