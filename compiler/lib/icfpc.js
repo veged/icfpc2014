@@ -314,8 +314,10 @@ Compiler.prototype.visitBinop = function visitBinop(expr) {
 
       this.visitExpr(check);
       this.add([ 'ATOM' ]);
-      this.add([ 'LDC', value.value === 'number' ? 1 : 0 ]);
-      this.add([ 'CEQ' ]);
+      if (value.value === 'object') {
+        this.add([ 'LDC', 0 ]);
+        this.add([ 'CEQ' ]);
+      }
       return;
     }
   }
