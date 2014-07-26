@@ -3,8 +3,8 @@ function isArray(x) {
 }
 
 function div(n, m) {
-    return (n - (n % m)) / m;
-    //return n / m;
+    //return (n - (n % m)) / m;
+    return n / m;
 }
 
 function _listGet(size, list, n) {
@@ -24,8 +24,6 @@ function listGet(list, n) {
 
 function _listSet(size, list, n, x) {
     if (size === 1) {
-        if (n)
-            throw "aa";
         return x;
     }
     var m = div(size, 2);
@@ -116,8 +114,8 @@ function shiftDir(pos, d) {
 */
 
 function fixCell(cell) {
-    return ({ '#': 0, ' ': 1, '.': 2, 'o': 3, '%': 4, '\\': 5, '=': 6 }[cell]);
-//    return cell;
+//    return ({ '#': 0, ' ': 1, '.': 2, 'o': 3, '%': 4, '\\': 5, '=': 6 }[cell]);
+    return cell;
 }
 
 function canGo(cell) {
@@ -137,8 +135,8 @@ function bounty(cell) {
         return 10000;
     if (cell === 3)
         return 50000; // TODO: 0 if in power mode!
-    if (cell === 4)
-        return 1000000; //FIXME: only if fruit is present!
+//    if (cell === 4)
+//        return 1000000; //FIXME: only if fruit is present!
     return 0;
 }
 
@@ -336,16 +334,6 @@ function calcSmell(map, paths) {
 
 function run(map, myPos) {
 
-    function id(x) {
-        return x;
-    }
-    function convertRow(x) {
-        var val = listFromSlowList(x, id);
-        return val;
-    }
-
-    map = listFromSlowList(map, convertRow);
-
     var paths = calcPaths(map, myPos);
     var smell = calcSmell(map, paths);
     var d = 0;
@@ -361,6 +349,16 @@ function run(map, myPos) {
     }
     return [bestD, [paths, smell]];
 }
+
+function id(x) {
+    return x;
+}
+function convertRow(x) {
+    var val = listFromSlowList(x, id);
+    return val;
+}
+
+/*
 
 function toHtml(map, arr) {
     var res = '<table border="1" cellspacing="0" cellpadding="0">';
@@ -410,20 +408,13 @@ var FS = require('fs'),
     map = FS.readFileSync('map.txt', 'utf8').split('\n');
 map.pop();
 
-var res = run(fixMap(map), [3, 2]);
+var res = run(listFromSlowList(fixMap(map), convertRow), [3, 2]);
 
 console.log(JSON.stringify(res[1][0]));
 console.log(JSON.stringify(res[1][1]));
 console.log("res: ", res[0]);
 //FS.writeFileSync('map.html', toHtml(map, unFixMap(res[0][0])) + toHtml(map, unFixMap(res[0][1])) + "<br/>" + res[1]);
 //*/
-function tplGetter(tpl, length) {
-    function getter(i) {
-        return tplGet(tpl, length, i);
-    }
-    return getter;
-}
-
 function tplGet(tpl, length, i) {
     if(i === 0) {
         return tpl[0];
@@ -434,12 +425,21 @@ function tplGet(tpl, length, i) {
     }
 }
 
+
+function tplGetter(tpl, length) {
+    function getter(i) {
+        return tplGet(tpl, length, i);
+    }
+    return getter;
+}
+
+
 function applyStatusesToMap(map, ghostsStatuses, fruitStatus) {
     var ghostStatus;
     while(isObject(ghostsStatuses)) {
         ghostStatus = ghostsStatuses[0];
         ghostsStatuses = ghostsStatuses[1];
-        map = slowMatrixSet(map, tplGet(ghostStatus, 3, 1), 6);
+        map = matrixSet(map, tplGet(ghostStatus, 3, 1), 6);
     }
     return map;
 }
@@ -450,9 +450,10 @@ function step(aiState, worldState) {
         lmStatus = worldState(1),
         ghostsStatuses = worldState(2),
         fruitStatus = worldState(3);
+    map = listFromSlowList(map, convertRow);
     map = applyStatusesToMap(map, ghostsStatuses, fruitStatus);
     var myPos = tplGet(lmStatus, 5, 1);
-    return [aiState, run(map, myPos)];
+    return [aiState, run(map, myPos)[0]];
 }
 
 [0, step];
