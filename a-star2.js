@@ -338,7 +338,7 @@ function convertRow(x) {
 }
 
 function matrixFromSlowMatrix(mx) {
-    return listFromSlowList(map, convertRow);
+    return listFromSlowList(mx, convertRow);
 }
 
 function tplGet(tpl, length, i) {
@@ -475,8 +475,8 @@ function nodejsMain() {
             ghostsStatuses = 0,
             fruitStatus = 0;
 
-        map = map.reduceRight(function(a, x, i) {
-            x = x.split("").reduceRight(function(b, y, j) {
+        map = map.reduceRight(function(a, x, j) {
+            x = x.split("").reduceRight(function(b, y, i) {
                 if(y === '\\') {
                     lmPos = [i, j];
                 } else if(y === '=') {
