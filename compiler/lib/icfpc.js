@@ -184,6 +184,8 @@ Compiler.prototype.visitExpr = function visitExpr(expr, stmt) {
 Compiler.prototype.visitAsgn = function visitAsgn(expr, stmt) {
   var scope = expr.left._scope;
   assert(scope, 'lhs of assignment should have a scope');
+  assert.equal(expr.operator, '=',
+               'Unsupport assignment operator: ' + expr.operator);
 
   // No point in assigning the const value
   if (scope.isConst())
