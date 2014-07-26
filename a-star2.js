@@ -342,6 +342,10 @@ function convertRow(x) {
     return val;
 }
 
+function matrixFromSlowMatrix(mx) {
+    return listFromSlowList(map, convertRow);
+}
+
 function tplGet(tpl, length, i) {
     if(i === 0) {
         return tpl[0];
@@ -370,13 +374,23 @@ function applyStatusesToMap(map, ghostsStatuses, fruitStatus) {
     return map;
 }
 
+function mod(n, d) {
+    return n - ((n / d) | 0);
+}
+
+var _next = 1;
+function rand() {
+    _next = _next * 1103515245 + 12345;
+    return mod((_next / 65536), 32768);
+}
+
 function step(aiState, worldState) {
     worldState = tplGetter(worldState, 4);
     var map = worldState(0),
         lmStatus = worldState(1),
         ghostsStatuses = worldState(2),
         fruitStatus = worldState(3);
-    map = listFromSlowList(map, convertRow);
+    map = matrixFromSlowMatrix(map);
     //map = applyStatusesToMap(map, ghostsStatuses, fruitStatus);
 
     /*
@@ -414,11 +428,11 @@ function step(aiState, worldState) {
         paths = calcPaths(map, myPos, canGo, bounty),
         smell = calcSmell(map, paths, canGo, bounty),
         d = 0,
-        bestSmell = 0,
+        bestSmell = -1,
         bestD = 0;
     while (d < 4) {
         var val = matrixGet(smell, shiftDir(myPos, d));
-        if (val > bestSmell) {
+        if (val > bestSmell || val === bestSmell && mod(rand(), 2)) {
             bestSmell = val;
             bestD = d;
         }
