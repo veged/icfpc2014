@@ -129,7 +129,7 @@ Compiler.prototype.visitStmt = function visitStmt(stmt) {
     this.visitDebugger(stmt);
   } else if (stmt.type === 'JumpStatement') {
     // Artificial
-    this.add([ 'LDC', 0 ]);
+    this.add([ 'LDC', 0 ], 'jump-stmt');
     this.add([ 'TSEL', stmt.target, stmt.target ]);
   } else if (stmt.type === 'BlockStatement' || stmt.type === 'Program') {
     this.visitBlock(stmt);
@@ -236,7 +236,7 @@ Compiler.prototype.visitCall = function visitCall(expr, stmt) {
 
 Compiler.prototype.visitLiteral = function visitLiteral(expr) {
   assert(typeof expr.value === 'number', 'only number literals are supported');
-  this.add([ 'LDC', expr.value ]);
+  this.add([ 'LDC', expr.value ], 'literal');
 };
 
 Compiler.prototype.visitFn = function visitFn(expr) {
@@ -258,7 +258,7 @@ Compiler.prototype.visitIdentifier = function visitIdentifier(id) {
   assert(slot, 'unknown identifier');
   assert(!slot.isGlobal(), 'unknown global: ' + slot.name);
   if (slot.isConst())
-    this.add([ 'LDC', slot.constVal() ]);
+    this.add([ 'LDC', slot.constVal() ], 'const-id');
   else
     this.add([ 'LD', slot.depth, slot.index ]);
 };
@@ -402,12 +402,11 @@ Compiler.prototype.visitIf = function visitIf(stmt) {
   if (stmt.alternate) {
     var jmp = [ 'TSEL', null, null ];
 
-    this.add([ 'LDC', 0 ]);
+    this.add([ 'LDC', 0 ], 'if-cons-jump');
     this.add(jmp);
     instr[2] = this.out.length;
 
     this.visitStmt(stmt.alternate);
-    this.add([ 'LDC', 0 ]);
 
     jmp[1] = this.out.length;
     jmp[2] = this.out.length;
