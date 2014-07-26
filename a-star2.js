@@ -21,7 +21,7 @@ function shiftDir(pos, d) {
 
 function fixCell(cell) {
     return ({ '#': 0, ' ': 1, '.': 2, 'o': 3, '%': 4, '\\': 5, '=': 6 }[cell]);
-    //return cell;
+//    return cell;
 }
 
 function canGo(cell) {
@@ -62,11 +62,11 @@ function slowListGet(list, n) {
 }
 
 function slowMatrixSet(mx, pos, x) {
-    slowListSet(mx, pos[0], slowListSet(slowListGet(mx, pos[0]), pos[1], x));
+    return slowListSet(mx, pos[1], slowListSet(slowListGet(mx, pos[1]), pos[0], x));
 }
 
 function slowMatrixGet(mx, pos, x) {
-    slowListGet(slowListGet(mx, pos[0]), pos[1]);
+    return slowListGet(slowListGet(mx, pos[1]), pos[0]);
 }
 
 function isInt(x) {
@@ -121,21 +121,22 @@ function genList(n, f) {
 
 function genMatrix(X, Y, f) {
     function genListF() {
-        genList(Y, f);
+        return genList(X, f);
     }
-    return genList(X, genListF);
+    return genList(Y, genListF);
 }
 
 function calcPaths(map, pos) {
 
-    var X = slowListLength(map);
-    var Y = slowListLength(map[0]);
+    var Y = slowListLength(map);
+    var X = slowListLength(map[0]);
 
     var T = 0;
     function genCell() {
         return -1;
     }
     var res = genMatrix(X, Y, genCell);
+    res = slowMatrixSet(res, pos, 0);
     var toDo = elemToSlowList([pos, 0]);
 
     while (slowListLength(toDo) > 0) {
@@ -158,6 +159,158 @@ function calcPaths(map, pos) {
 
     return res;
 }
+
+// heap struct: [[value, size], [ptr1, ptr2]]
+
+function heapPop(heap) {
+    var val = heap[0];
+    var x = val[0];
+    var size = val[1];
+    var ptr = heap[1];
+    var p, res;
+    if (isInt(ptr[0])) {
+        if (isInt(ptr[1])) {
+            return [x, 0];
+        } else {
+            p = 1;
+        }
+    } else {
+        if (isInt(ptr[1])) {
+            p = 0;
+        } else {
+            var x0 = ptr[0][0][0];
+            var x1 = ptr[1][0][0];
+            if (x0[1] < x1[1]) {
+                p = 0;
+            } else {
+                p = 1;
+            }
+        }
+    }
+
+    if (p === 0) {
+        res = heapPop(ptr[0]);
+        return [x, [[res[0], size-1], [res[1], ptr[1]]]];
+    } else {
+        res = heapPop(ptr[1]);
+        return [x, [[res[0], size-1], [ptr[0], res[1]]]];
+    }
+}
+
+function heapSize(heap) {
+    if (isInt(heap))
+        return 0;
+    return heap[0][1];
+}
+
+function heapPush(heap, x) {
+    if (isInt(heap)) {
+        return [[x, 1], [0, 0]];
+    }
+    var val = heap[0];
+    var y = val[0];
+    var size = val[1];
+    var ptr = heap[1];
+
+    if (x[1] < y[1]) {
+        var z = x; x = y; y = z;
+    }
+    if (heapSize(ptr[0]) > heapSize(ptr[1])) {
+        return [[y, size + 1], [ptr[0], heapPush(ptr[1], x)]];
+    } else {
+        return [[y, size + 1], [heapPush(ptr[0], x), ptr[1]]];
+    }
+}
+
+function heapSort(arr) {
+    // descending
+    var heap = 0;
+    while (isArray(arr)) {
+        heap = heapPush(heap, arr[0]);
+        arr = arr[1];
+    }
+    var res = 0;
+    while (heapSize(heap) > 0) {
+        var pop = heapPop(heap);
+        res = [pop[0], res];
+        heap = pop[1];
+    }
+    return res;
+}
+
+//console.log(JSON.stringify(heapSort([[3, 3], [[4, 4], [[5, 5], [[6, 5], [[1, 1], [[2, 2], 0]]]]]])));
+
+function flatAndSort(mx) {
+    var res = 0;
+    var y = 0;
+    while (isArray(mx)) {
+        var row = mx[0];
+        var x = 0;
+        while (isArray(row)) {
+            if (row[0] >= 0) {
+               res = [[[x, y], row[0]], res];
+            }
+            x = x + 1;
+            row = row[1];
+        }
+        y = y + 1;
+        mx = mx[1];
+    }
+    return heapSort(res);
+};
+
+
+function calcSmell(map, paths) {
+    var Y = slowListLength(map);
+    var X = slowListLength(map[0]);
+    function genCell() {
+        return 0;
+    }
+    var res = genMatrix(X, Y, genCell);
+    var sortedPaths = flatAndSort(paths);
+
+    while (isArray(sortedPaths)) {
+        var pos = sortedPaths[0][0];
+        var myVal = slowMatrixGet(res, pos) + bounty(slowMatrixGet(map, pos));
+        res = slowMatrixSet(res, pos, myVal);
+        var d = 0;
+        while (d < 4) {
+            var newPos = shiftDir(pos, d);
+            if (canGo(slowMatrixGet(map, newPos)) > 0) {
+                var t0 = slowMatrixGet(paths, pos);
+                var t = slowMatrixGet(paths, newPos);
+                if (t === t0 - 127 || t === t0 - 137) {
+                    var newVal = myVal * 9 / 10; // ALPHA
+                    if (slowMatrixGet(res, newPos) < newVal) {
+                        res = slowMatrixSet(res, newPos, newVal);
+                    }
+                }
+            }
+            d = d + 1;
+        }
+        sortedPaths = sortedPaths[1];
+    }
+
+    return res;
+}
+
+function run(map, myPos) {
+    var paths = calcPaths(map, myPos);
+    var smell = calcSmell(map, paths);
+    var d = 0;
+    var bestSmell = 0;
+    var bestD = 0;
+    while (d < 4) {
+        var val = slowMatrixGet(smell, shiftDir(myPos, d));
+        if (val > bestSmell) {
+            bestSmell = val;
+            bestD = d;
+        }
+        d = d + 1;
+    }
+    return bestD;
+}
+
 
 function toHtml(map, arr) {
     var res = '<table border="1" cellspacing="0" cellpadding="0">';
@@ -191,7 +344,7 @@ function unFixRow(row) {
         res.push(row[0]);
         row = row[1];
     }
-    return row.join("");
+    return res;
 }
 
 function unFixMap(map) {
@@ -204,11 +357,13 @@ function unFixMap(map) {
 }
 
 var FS = require('fs'),
-    map = FS.readFileSync('map1.txt', 'utf8').split('\n');
-FS.writeFileSync('map1.html', toHtml(map, calcPaths(fixMap(map), [16, 11])));
+    map = FS.readFileSync('map.txt', 'utf8').split('\n');
+var cp = calcPaths(fixMap(map), [3, 2]);
 
+FS.writeFileSync('map.html', toHtml(map, unFixMap(cp)) + toHtml(map, unFixMap(calcSmell(fixMap(map), cp))) + "<br/>" + run(fixMap(map), [3, 2]));
+//*/
 function step(state, map) {
-    return [state, 0];
+    return [state, run(map)];
 }
 
 [0, step];
