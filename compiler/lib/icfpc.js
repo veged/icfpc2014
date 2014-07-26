@@ -402,6 +402,12 @@ Compiler.prototype.visitRet = function visitRet(stmt) {
 };
 
 Compiler.prototype.visitIf = function visitIf(stmt) {
+  // if (module) { ... node.js specific thing... }
+  if (stmt.test.type === 'Identifier' &&
+      stmt.test.name === 'module') {
+    return;
+  }
+
   this.visitExpr(stmt.test);
 
   var instr = [ 'TSEL', this.out.length + 1, null ];
