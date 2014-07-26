@@ -137,9 +137,13 @@ Compiler.prototype.visitStmt = function visitStmt(stmt) {
     throw new Error('Unsupported statement type: ' + stmt.type);
   }
 
+  this.annotate(stmt, pos);
+};
+
+Compiler.prototype.annotate = function annotate(node, pos) {
   // Add comment
-  if (stmt.range && this.out.length > pos) {
-    var src = this.source.slice(stmt.range[0], stmt.range[1])
+  if (node.range && this.out.length > pos) {
+    var src = this.source.slice(node.range[0], node.range[1])
         .replace(/[\r\n]+/g, '');
     if (src.length > 20)
       src = src.slice(0, 17) + '...';
@@ -342,9 +346,9 @@ Compiler.prototype.visitBinop = function visitBinop(expr) {
   else
     throw new Error('Unsupported operation: ' + op);
 
+  this.add([ op ]);
   if (neq)
     this.add([ 'SUB' ]);
-  this.add([ op ]);
 };
 
 Compiler.prototype.visitUnop = function visitUnop(expr) {
@@ -432,7 +436,9 @@ Compiler.prototype.visitBlock = function visitBlock(stmt) {
     if (s.type !== 'FunctionDeclaration')
       continue;
 
+    var pos = this.out.length;
     this.visitFn(s);
+    this.annotate(s, pos);
     this.add([ 'ST', s.id._scope.depth, s.id._scope.index ]);
   }
 
