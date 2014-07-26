@@ -1,8 +1,3 @@
-//function fixCell(cell) {
-//    return ({ '#': 0, ' ': 1, '.': 2, 'o': 3, '%': 4, '\\': 5, '=': 6 }[cell]);
-//    return cell;
-//}
-
 function listGet(list2, n) {
     var size = list2[0];
     var list = list2[1];
@@ -406,7 +401,6 @@ function step(aiState, worldState) {
      * 6: Ghost starting position
     */
     function canGo(cell) {
-    //    cell = fixCell(cell);
         if (cell === 5)
             return 0;
         if (cell === 1)
@@ -417,7 +411,6 @@ function step(aiState, worldState) {
     }
 
     function bounty(cell) {
-    //    cell = fixCell(cell);
         if (cell === 2)
             return 10000;
         if (cell === 3)
@@ -442,10 +435,10 @@ function step(aiState, worldState) {
         d = d + 1;
     }
 
-    return [aiState, bestD];
+    return [[paths, smell], bestD];
 }
 
-/*
+///*
 function nodejsMain() {
     function toHtml(map, mx) {
         var _map = [];
@@ -467,7 +460,7 @@ function nodejsMain() {
             res += '<tr>';
             for(var j = 0; j < mapRow.length; j++) {
                 res += '<td>' +
-                    mapRow[j] +
+                    ({ '0': '#', '1': ' ', '2': '.', '3': 'o', '4': '%', '5': '\\', '6': '=' }[mapRow[j]]) +
                     '<sup>' + (typeof row[j] === 'undefined' ? '' : row[j]) + '</sup>' +
                     '</td>';
             }
@@ -477,30 +470,43 @@ function nodejsMain() {
     }
 
     function readMap(map) {
-        var map,
-            lmStatus,
-            ghostsStatuses,
-            fruitStatus,
-            worldState = [];
-        return map.reduceRight(function(a, x, i) {
+        var lmVitality = 0,
+            lmPos,
+            lmDirection = 1,
+            lmLives = 3,
+            lmScore = 0
+            ghostsStatuses = 0,
+            fruitStatus = 0;
+
+        map = map.reduceRight(function(a, x, i) {
             x = x.split("").reduceRight(function(b, y, j) {
-                return [y, b];
+                if(y === '\\') {
+                    lmPos = [i, j];
+                } else if(y === '=') {
+                    ghostsStatuses = [[0, [[i, j], 0]], ghostsStatuses];
+                }
+                return [{ '#': 0, ' ': 1, '.': 2, 'o': 3, '%': 4, '\\': 5, '=': 6 }[y], b];
             }, 0);
             return [x, a];
         }, 0);
+
+        var lmStatus = [lmVitality, [lmPos, [lmDirection, [lmLives, lmScore]]]];
+
+        return [map, [lmStatus, [ghostsStatuses, fruitStatus]]];
     }
 
     var FS = require('fs'),
-        map = FS.readFileSync('map1.txt', 'utf8').replace(/\n$/, '').split('\n');
-        worldState = readMap(map);
+        map = FS.readFileSync('map1.txt', 'utf8').replace(/\n$/, '').split('\n'),
+        worldState = readMap(map),
         res = step(0, worldState);
 
     console.log("res: ", JSON.stringify(res));
+    map = listFromSlowList(worldState[0], convertRow);
     FS.writeFileSync('map.html',
-        toHtml(map, res[1][0]) +
+        toHtml(map, res[0][0]) +
         '<br/>' +
-        toHtml(map, res[1][1]) +
-        '<br/>' + res[0]);
+        toHtml(map, res[0][1]) +
+        '<br/>' + res[1]);
 }
 
 nodejsMain();
