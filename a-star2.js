@@ -1,15 +1,6 @@
-function div(n, m) {
-//    return (n - (n % m)) / m;
-    return n / m;
-}
-
 function fixCell(cell) {
-//    return ({ '#': 0, ' ': 1, '.': 2, 'o': 3, '%': 4, '\\': 5, '=': 6 }[cell]);
-    return cell;
-}
-
-function isArray(x) {
-    return (typeof x === 'object');
+    return ({ '#': 0, ' ': 1, '.': 2, 'o': 3, '%': 4, '\\': 5, '=': 6 }[cell]);
+//    return cell;
 }
 
 function listGet(list2, n) {
@@ -17,7 +8,7 @@ function listGet(list2, n) {
     var list = list2[1];
     var m;
     while (size !== 1) {
-        m = div(size, 2);
+        m = (size / 2) | 0;
         if (n < m) {
             list = list[0];
             size = m;
@@ -52,7 +43,7 @@ function listLength(list) {
 
 function slowListLength(list) {
     var n = 0;
-    while (isArray(list)) {
+    while (typeof list === 'object') {
         list = list[1];
         n = n + 1;
     }
@@ -167,14 +158,6 @@ function bounty(cell) {
     return 0;
 }
 
-function isInt(x) {
-    return (typeof x === 'number');
-}
-
-function isObject(x) {
-    return typeof x === 'object';
-}
-
 // heap struct: [[value, size], [ptr1, ptr2]]
 
 function heapPop(heap) {
@@ -183,14 +166,14 @@ function heapPop(heap) {
     var size = val[1];
     var ptr = heap[1];
     var p, res;
-    if (isInt(ptr[0])) {
-        if (isInt(ptr[1])) {
+    if (typeof ptr[0] === 'number') {
+        if (typeof ptr[1] === 'number') {
             return [x, 0];
         } else {
             p = 1;
         }
     } else {
-        if (isInt(ptr[1])) {
+        if (typeof ptr[1] === 'number') {
             p = 0;
         } else {
             var x0 = ptr[0][0][0];
@@ -213,13 +196,13 @@ function heapPop(heap) {
 }
 
 function heapSize(heap) {
-    if (isInt(heap))
+    if (typeof heap === 'number')
         return 0;
     return heap[0][1];
 }
 
 function heapPush(heap, x) {
-    if (isInt(heap)) {
+    if (typeof heap === 'number') {
         return [[x, 1], [0, 0]];
     }
     var val = heap[0];
@@ -240,7 +223,7 @@ function heapPush(heap, x) {
 function heapSort(arr) {
     // descending
     var heap = 0;
-    while (isArray(arr)) {
+    while (typeof arr === 'object') {
         heap = heapPush(heap, arr[0]);
         arr = arr[1];
     }
@@ -273,15 +256,19 @@ function calcPaths(map, pos) {
         pos = popRes[0][0];
         toDo = popRes[1];
 
-        var d = 0;
-        while (d < 4) {
-            var newPos = shiftDir(pos, d);
-            if (canGo(matrixGet(map, newPos)) >= 0 && matrixGet(res, newPos) === -1) {
-                var dt = canGo(matrixGet(map, pos)); //TODO: save in toDo!
-                res = matrixSet(res, newPos, t + dt);
-                toDo = heapPush(toDo, [newPos, t + dt]);
+        if (t < 127 * 10) {
+
+            var d = 0;
+            while (d < 4) {
+                var newPos = shiftDir(pos, d);
+                if (canGo(matrixGet(map, newPos)) >= 0 && matrixGet(res, newPos) === -1) {
+                    var dt = canGo(matrixGet(map, pos)); //TODO: save in toDo!
+                    res = matrixSet(res, newPos, t + dt);
+                    toDo = heapPush(toDo, [newPos, t + dt]);
+                }
+                d = d + 1;
             }
-            d = d + 1;
+
         }
     }
 
@@ -335,7 +322,7 @@ function calcSmell(map, paths) {
     var res = genMatrix(X, Y, genCell);
     var sortedPaths = flatAndSort(paths);
 
-    while (isArray(sortedPaths)) {
+    while (typeof sortedPaths === 'object') {
         var pos = sortedPaths[0][0];
         var myVal = matrixGet(res, pos) + bounty(matrixGet(map, pos));
         res = matrixSet(res, pos, myVal);
@@ -346,7 +333,7 @@ function calcSmell(map, paths) {
                 var t0 = matrixGet(paths, pos);
                 var t = matrixGet(paths, newPos);
                 if (t === t0 - 127 || t === t0 - 137) {
-                    var newVal = myVal * 8 / 10; // ALPHA
+                    var newVal = (myVal * 8 / 10) | 0; // ALPHA
                     if (matrixGet(res, newPos) < newVal) {
                         res = matrixSet(res, newPos, newVal);
                     }
@@ -384,7 +371,6 @@ function convertRow(x) {
     return val;
 }
 
-/*
 function toHtml(map, mx) {
     var _map = [];
     function mapIterate(cell, i, j) {
@@ -451,11 +437,11 @@ function unFixMap(map) {
 }
 
 var FS = require('fs'),
-    map = FS.readFileSync('map.txt', 'utf8').split('\n');
+    map = FS.readFileSync('map1.txt', 'utf8').split('\n');
 map.pop();
 map = listFromSlowList(fixMap(map), convertRow);
 
-var res = run(map, [3, 2]);
+var res = run(map, [17, 14]);
 
 console.log("res: ", JSON.stringify(res));
 FS.writeFileSync('map.html',
@@ -485,7 +471,7 @@ function tplGetter(tpl, length) {
 
 function applyStatusesToMap(map, ghostsStatuses, fruitStatus) {
     var ghostStatus;
-    while(isObject(ghostsStatuses)) {
+    while(typeof ghostsStatuses === 'object') {
         ghostStatus = ghostsStatuses[0];
         ghostsStatuses = ghostsStatuses[1];
         console.log(tplGet(ghostStatus, 3, 1));
