@@ -16,24 +16,7 @@ function listGet(list2, n) {
     return list;
 }
 
-function _listSet(size, list, n, x) {
-    if (size === 1) {
-        return x;
-    }
-    var m = (size / 2) | 0;
-    if (n < m) {
-        return [ _listSet(m, list[0], n, x), list[1] ];
-    } else {
-        return [ list[0], _listSet(size - m, list[1], n - m, x) ];
-    }
-}
-
 function listSet(list, n, x) {
-    //return [list[0], _listSet(list[0], list[1], n, x)];
-    return fastListSet(list, n, x);
-}
-
-function fastListSet(list, n, x) {
     var size = list[0];
     var s = size;
     list = list[1];
@@ -354,6 +337,10 @@ function convertRow(x) {
     return val;
 }
 
+function matrixFromSlowMatrix(mx) {
+    return listFromSlowList(map, convertRow);
+}
+
 function tplGet(tpl, length, i) {
     if(i === 0) {
         return tpl[0];
@@ -382,13 +369,23 @@ function applyStatusesToMap(map, ghostsStatuses, fruitStatus) {
     return map;
 }
 
+function mod(n, d) {
+    return n - ((n / d) | 0) * d;
+}
+
+var _next = 1;
+function rand() {
+    _next = mod(_next * 1103515245 + 12345, 4294967296);
+    return mod(((_next / 65536) | 0), 32768);
+}
+
 function step(aiState, worldState) {
     worldState = tplGetter(worldState, 4);
     var map = worldState(0),
         lmStatus = worldState(1),
         ghostsStatuses = worldState(2),
         fruitStatus = worldState(3);
-    map = listFromSlowList(map, convertRow);
+    map = matrixFromSlowMatrix(map);
     //map = applyStatusesToMap(map, ghostsStatuses, fruitStatus);
 
     /*
@@ -424,11 +421,11 @@ function step(aiState, worldState) {
         paths = calcPaths(map, myPos, canGo, bounty),
         smell = calcSmell(map, paths, canGo, bounty),
         d = 0,
-        bestSmell = 0,
+        bestSmell = -1,
         bestD = 0;
     while (d < 4) {
         var val = matrixGet(smell, shiftDir(myPos, d));
-        if (val > bestSmell) {
+        if (val > bestSmell || val === bestSmell && mod(rand(), 2)) {
             bestSmell = val;
             bestD = d;
         }
