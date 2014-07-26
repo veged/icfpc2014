@@ -63,66 +63,85 @@ Compiler.prototype.compile = function compile() {
   }).join('\n');
 };
 
-Compiler.prototype.evalScopes = function evalScopes() {
-  var scopes = [
-    { fn: null, map: {}, size: 0, context: 0 }
-  ];
+function Scope(fn, parent) {
+  this.fn = fn;
+  this.parent = parent || null;
+  this.map = {};
+  this.size = 0;
+  this.context = 0;
+}
 
-  function add(name, arg) {
-    var scope = scopes[scopes.length - 1];
-    if (scope.map[name] !== undefined)
-      return { depth: 0, index: scope.map[name] };
+Scope.prototype.set = function set(name, value, isArg) {
+  // Already has an entry
+  if (this.map[name] !== undefined)
+    return this.map[name];
 
-    if (!arg)
-      scope.context++;
+  if (!isArg)
+    this.context++;
 
-    return {
-      depth: 0,
-      index: scope.map[name] = scope.size++
-    };
-  }
+  var res = new ScopeEntry(this, 0, this.size++);
+  this.map[name] = res;
+  return res;
+};
 
-  function get(name) {
-    var depth = 0;
-    for (var i = scopes.length - 1; i >= 0; i--, depth++) {
-      if (scopes[i].map[name] === undefined) {
-        // Skip adaptor frame
-        if (scopes[i].context != 0)
-          depth++;
-        continue;
-      }
-
-      return { depth: depth, index: scopes[i].map[name] };
+Scope.prototype.get = function get(name) {
+  var depth = 0;
+  var cur = this;
+  for (var cur = this; cur !== null; cur = cur.parent, depth++) {
+    var entry = cur.map[name];
+    if (entry === undefined) {
+      // Skip adaptor frame
+      if (cur.context !== 0)
+        depth++;
+      continue;
     }
-    return { depth: -1, index: name };
+
+    return new ScopeEntry(cur, depth, entry);
   }
+
+  return new ScopeEntry(this, -1, name);
+};
+
+function ScopeEntry(scope, depth, index) {
+  this.scope = scope;
+  this.depth = depth;
+  if (index instanceof ScopeEntry) {
+    this.parent = index;
+    this.index = index.index;
+  } else {
+    this.parent = null;
+    this.index = index;
+  }
+}
+
+Compiler.prototype.evalScopes = function evalScopes() {
+  var scopes = [ new Scope(null, null) ];
+  var last = scopes[0];
 
   estraverse.traverse(this.ast, {
     enter: function(node) {
       if (/function/i.test(node.type)) {
         if (node.id)
-          node.id._scope = add(node.id.name);
+          node.id._scope = last.set(node.id.name, node);
 
-        scopes.push({
-          fn: node,
-          map: {},
-          size: 0,
-          context: 0
-        });
+        last = new Scope(node, last);
+        scopes.push(last);
 
         node.params.forEach(function(param) {
-          param._scope = add(param.name, true);
+          param._scope = last.set(param.name, null, true);
         });
       } else if (node.type === 'VariableDeclarator') {
-        add(node.id.name);
+        last.set(node.id.name, node.init);
       } else if (node.type === 'Identifier') {
         if (!node._scope)
-          node._scope = get(node.name);
+          node._scope = last.get(node.name);
       }
     },
     leave: function(node) {
-      if (node === scopes[scopes.length - 1].fn)
+      if (node === scopes[scopes.length - 1].fn) {
         node._scope = scopes.pop();
+        last = scopes[scopes.length - 1];
+      }
     }
   });
 
@@ -206,7 +225,7 @@ Compiler.prototype.visitExpr = function visitExpr(expr, stmt) {
 
 Compiler.prototype.visitAsgn = function visitAsgn(expr, stmt) {
   var scope = expr.left._scope;
-  assert(scope);
+  assert(scope, 'lhs of assignment should have a scope');
   this.visitExpr(expr.right);
   this.add([ 'ST', scope.depth, scope.index ]);
 
@@ -242,7 +261,7 @@ Compiler.prototype.visitCall = function visitCall(expr, stmt) {
 };
 
 Compiler.prototype.visitLiteral = function visitLiteral(expr) {
-  assert(typeof expr.value === 'number');
+  assert(typeof expr.value === 'number', 'only number literals are supported');
   this.add([ 'LDC', expr.value ]);
 };
 
@@ -261,8 +280,8 @@ Compiler.prototype.queueFn = function queueFn(fn, instr, index) {
 };
 
 Compiler.prototype.visitIdentifier = function visitIdentifier(id) {
-  assert(id._scope);
-  assert(id._scope.depth !== -1);
+  assert(id._scope, 'unknown identifier');
+  assert(id._scope.depth !== -1, 'unknown global: ' + id._scope.name);
   this.add([ 'LD', id._scope.depth, id._scope.index ]);
 };
 
@@ -300,7 +319,8 @@ Compiler.prototype.visitBinop = function visitBinop(expr) {
       }
 
       assert.equal(value.type, 'Literal');
-      assert(value.value === 'number' || value.value === 'object');
+      assert(value.value === 'number' || value.value === 'object',
+             'typeof, but the rhs is not `number` and nor `object`');
 
       this.visitExpr(check);
       this.add([ 'ATOM' ]);
@@ -310,7 +330,7 @@ Compiler.prototype.visitBinop = function visitBinop(expr) {
     }
   }
 
-  var neq = op === '!=' || op === '==='
+  var neq = op === '!=' || op === '!==';
   if (neq)
     this.add([ 'LDC', 1 ]);
 
@@ -418,12 +438,12 @@ Compiler.prototype.visitBlock = function visitBlock(stmt) {
 };
 
 Compiler.prototype.visitMember = function visitMember(stmt) {
-  assert(stmt.computed);
-  assert.equal(stmt.property.type, 'Literal');
-  assert.equal(typeof stmt.property.value, 'number');
+  assert(stmt.computed, '`obj.prop` not supported');
+  assert.equal(stmt.property.type, 'Literal', 'property not literal');
+  assert.equal(typeof stmt.property.value, 'number', 'property not number');
 
   var idx = stmt.property.value;
-  assert(0 <= idx && idx < 2);
+  assert(0 <= idx && idx < 2, 'property index OOB');
   this.visitExpr(stmt.object);
   if (idx === 0)
     this.add([ 'CAR' ]);
