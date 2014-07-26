@@ -76,6 +76,13 @@ Compiler.prototype.evalScopes = function evalScopes() {
         }
       }
 
+      // if (module) { ... node.js specific thing... }
+      if (node.type === 'IfStatement' &&
+          node.test.type === 'Identifier' &&
+          node.test.name === 'module') {
+        return this.skip();
+      }
+
       if (/function/i.test(node.type)) {
         if (node.id && !node.id._scope)
           node.id._scope = last.set(node.id.name, node);
