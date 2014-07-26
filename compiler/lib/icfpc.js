@@ -70,8 +70,16 @@ Compiler.prototype.evalScopes = function evalScopes() {
 
   estraverse.traverse(this.ast, {
     enter: function(node) {
+      if (Array.isArray(node.body)) {
+        for (var i = 0; i < node.body.length; i++) {
+          var stmt = node.body[i];
+          if (stmt.type === 'FunctionDeclaration')
+            stmt.id._scope = last.set(stmt.id.name, node);
+        }
+      }
+
       if (/function/i.test(node.type)) {
-        if (node.id)
+        if (node.id && !node.id._scope)
           node.id._scope = last.set(node.id.name, node);
 
         last = new Scope(node, last);
