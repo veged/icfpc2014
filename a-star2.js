@@ -1,7 +1,7 @@
-function fixCell(cell) {
-    return ({ '#': 0, ' ': 1, '.': 2, 'o': 3, '%': 4, '\\': 5, '=': 6 }[cell]);
+//function fixCell(cell) {
+//    return ({ '#': 0, ' ': 1, '.': 2, 'o': 3, '%': 4, '\\': 5, '=': 6 }[cell]);
 //    return cell;
-}
+//}
 
 function listGet(list2, n) {
     var size = list2[0];
@@ -34,8 +34,48 @@ function _listSet(size, list, n, x) {
 }
 
 function listSet(list, n, x) {
-    return [list[0], _listSet(list[0], list[1], n, x)];
+    //return [list[0], _listSet(list[0], list[1], n, x)];
+    return fastListSet(list, n, x);
 }
+
+function fastListSet(list, n, x) {
+    var size = list[0];
+    var s = size;
+    list = list[1];
+    var stack = 0;
+
+    while (s > 1) {
+        var m = (s / 2) | 0;
+        if (n < m) {
+            s = m;
+            stack = [[1, list[1]], stack];
+            list = list[0];
+        } else {
+            s = s - m;
+            n = n - m;
+            stack = [[0, list[0]], stack];
+            list = list[1];
+        }
+    }
+
+    var res = x;
+
+    while (typeof stack === 'object') {
+        var head = stack[0];
+        if (head[0]) {
+            res = [res, head[1]];
+        } else {
+            res = [head[1], res];
+        }
+        stack = stack[1];
+    }
+    return [size, res];
+}
+
+//var l = listFromSlowList([0,[1,[2,[3,[4,[5,[6,[7, [8, [9, 0]]]]]]]]]], id);
+//console.log(JSON.stringify(l));
+//console.log(JSON.stringify(fastListSet( l, 4, 40)));
+//return;
 
 function listLength(list) {
     return list[0];
@@ -137,7 +177,7 @@ function shiftDir(pos, d) {
 */
 
 function canGo(cell) {
-    cell = fixCell(cell);
+//    cell = fixCell(cell);
     if (cell === 5)
         return 0;
     if (cell === 1)
@@ -148,7 +188,7 @@ function canGo(cell) {
 }
 
 function bounty(cell) {
-    cell = fixCell(cell);
+//    cell = fixCell(cell);
     if (cell === 2)
         return 10000;
     if (cell === 3)
@@ -186,12 +226,12 @@ function heapPop(heap) {
         }
     }
 
-    if (p === 0) {
-        res = heapPop(ptr[0]);
-        return [x, [[res[0], size-1], [res[1], ptr[1]]]];
-    } else {
+    if (p) {
         res = heapPop(ptr[1]);
         return [x, [[res[0], size-1], [ptr[0], res[1]]]];
+    } else {
+        res = heapPop(ptr[0]);
+        return [x, [[res[0], size-1], [res[1], ptr[1]]]];
     }
 }
 
@@ -256,7 +296,7 @@ function calcPaths(map, pos) {
         pos = popRes[0][0];
         toDo = popRes[1];
 
-        if (t < 127 * 10) {
+        if (t < 127 * 80) {
 
             var d = 0;
             while (d < 4) {
@@ -370,7 +410,7 @@ function convertRow(x) {
     var val = listFromSlowList(x, id);
     return val;
 }
-
+/*
 function toHtml(map, mx) {
     var _map = [];
     function mapIterate(cell, i, j) {
@@ -474,7 +514,6 @@ function applyStatusesToMap(map, ghostsStatuses, fruitStatus) {
     while(typeof ghostsStatuses === 'object') {
         ghostStatus = ghostsStatuses[0];
         ghostsStatuses = ghostsStatuses[1];
-        console.log(tplGet(ghostStatus, 3, 1));
         map = matrixSet(map, tplGet(ghostStatus, 3, 1), 6);
     }
     return map;
