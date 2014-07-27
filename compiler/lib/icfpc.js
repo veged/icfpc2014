@@ -36,6 +36,13 @@ Compiler.prototype.compile = function compile() {
     if (scope.contextSize() != 0)
       this.pushContextAdaptor(scope);
 
+    if (this.options.lines && item.fn.loc) {
+      this.add([ 'LDC', item.fn.loc.start.line ]);
+      this.add([ 'LDC', item.fn.loc.end.line ]);
+      this.add([ 'CONS' ]);
+      this.add([ 'DBUG' ]);
+    }
+
     if (item.fn.type !== 'Program')
       this.visitStmt(item.fn.body);
     else
@@ -139,11 +146,6 @@ Compiler.prototype.evalScopes = function evalScopes() {
 
 Compiler.prototype.visitStmt = function visitStmt(stmt) {
   var pos = this.out.length;
-  if (this.options.lines && stmt.loc) {
-    this.add([ 'LDC', stmt.loc.start.line ]);
-    this.add([ 'DBUG' ]);
-  }
-
   if (stmt.type === 'ExpressionStatement') {
     this.visitExpr(stmt.expression, stmt);
   } else if (stmt.type === 'FunctionDeclaration') {

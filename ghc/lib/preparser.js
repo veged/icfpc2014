@@ -1,4 +1,5 @@
 var assert = require('assert');
+var ssa = require('ssa-ir');
 
 function Preparser(source) {
   this.source = source;
@@ -6,6 +7,7 @@ function Preparser(source) {
   this.blocks = [];
   this.current = null;
   this.labels = {};
+  this.missingLabels = {};
 
   var root = new Block(this, '$root');
   this.current = root;
@@ -54,6 +56,12 @@ Preparser.prototype.visitLabel = function visitLabel(name) {
 
   this.blocks.push(b);
   this.labels[name] = b;
+  if (this.missingLabels[name]) {
+    var q = this.missingLabels[name];
+    delete this.missingLabels[name];
+    for (var i = 0; i < q.length; i++)
+      q[i].from.go(b);
+  }
 };
 
 Preparser.prototype.visitInstr = function visitInstr(instr) {
@@ -98,32 +106,58 @@ Preparser.prototype.visitInstr = function visitInstr(instr) {
   if (!label)
     return;
 
-  var subid = this.current.subid;
-
-  console.log(label);
   // Add jump
-  this.current.go(this.labels[label]);
+  if (this.labels[label]) {
+    this.current.go(this.labels[label]);
+  } else {
+    if (!this.missingLabels[label])
+      this.missingLabels[label] = [];
+    this.missingLabels[label].push({
+      from: this.current
+    });
+  }
 
   // Split the block
-  this.visitLabel(this.current.id);
-  this.current.subid = subid + 1;
+  if (!this.current.ended)
+    this.current = this.current.sub();
 };
 
 function Block(preparser, id) {
   this.preparser = preparser;
 
   this.id = id;
-  this.subid = 0;
   this.successors = [];
   this.instructions = [];
+  this.ended = false;
+
+  this.parent = null;
+  this.subs = [];
 }
 
 Block.prototype.go = function go(block) {
-  this.successors.push(block);
+  assert(block);
+  if (!this.ended)
+    this.successors.push(block);
+};
+
+Block.prototype.sub = function sub() {
+  if (this.parent)
+    return this.parent.sub();
+
+  var b = new Block(this.preparser, this.id);
+  b.parent = this;
+  b.id += '$' + this.subs.push(b);
+
+  return b;
 };
 
 Block.prototype.add = function add(type, out, inputs, label) {
+  if (this.ended)
+    return;
+
   this.instructions.push(new Instruction(this, type, out, inputs, label));
+  if (type === 'hlt')
+    this.ended = true;
 };
 
 function Instruction(block, type, output, inputs, label) {
