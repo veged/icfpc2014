@@ -1,102 +1,205 @@
 ; Just move to the player in a closest direction
+$seed = 0
+$px = 1
+$py = 2
+$gx = 3
+$gy = 4
+$dx = 5
+$dy = 6
+$up_cell = 7
+$down_cell = 8
+$left_cell = 9
+$right_cell = 10
+$vit = 11
+$dir = 12
+$once = 13
+$counter = 14
 
 start:
+    jeq .not_once, [$once], 1
+
+once:
+    mov [$seed], 23
+    int 3
+    mul a, 11
+    add [$seed], a
+    mov [$once], 1
+
+not_once:
 
     ; get player's coordinates
     int 1
-    mov c, a
-    mov d, b
+    mov [$px], a
+    mov [$py], b
 
     ; get ghost's coordinates
     int 3
     int 5
-    mov e, a
-    mov f, b
+    mov [$gx], a
+    mov [$gy], b
+
+    int 3
+    int 6
+    mov [$vit], a
+    mov [$dir], b
+
+    ; get up cells
+    mov a, [$gx]
+    mov b, [$gy]
+    dec b
+    int 7
+    mov [$up_cell], a
+
+    ; down
+    mov a, [$gx]
+    mov b, [$gy]
+    inc b
+    int 7
+    mov [$down_cell], a
+
+    ; left
+    mov a, [$gx]
+    mov b, [$gy]
+    dec a
+    int 7
+    mov [$left_cell], a
+
+    ; right
+    mov a, [$gx]
+    mov b, [$gy]
+    inc a
+    int 7
+    mov [$right_cell], a
+
+    ; count ways to go
+    xor a, a
+    jeq .free_up, [$up_cell], 0
+    inc a
+free_up:
+    jeq .free_down, [$down_cell], 0
+    inc a
+free_down:
+    jeq .free_left, [$left_cell], 0
+    inc a
+free_left:
+    jeq .free_right, [$right_cell], 0
+    inc a
+free_right:
+    jlt .no_way, a, 3
 
     ; check if left the home
+    mov a, [$gx]
+    mov b, [$gy]
     int 7
-    mov g, a
-    mov a, e
-    mov b, f
+    jeq .home, a, 6
 
-    jeq .home, g, 6
-    xor h, h
+    ; check fright mode
+    jeq .not_fright, [$vit], 0
 
-    ; get dx=e, dy=f
-    jgt .dx_gt_x, a, c
+fright:
+    ; swap coordinates to run from the player
+    mov a, [$gx]
+    mov b, [$gy]
+    mov [$gx], [$px]
+    mov [$gx], [$py]
+    mov [$px], a
+    mov [$py], b
+
+not_fright:
+    ; compute dx
+    jgt .dx_gt_x, [$gx], [$px]
 
 dx_lte_x:
-    mov e, c
-    sub e, a
-    jeq .dx_join, h, h
+    mov [$dx], [$px]
+    sub [$dx], [$gx]
+    jeq .dx_join, 0, 0
 
 dx_gt_x:
-    mov e, a
-    sub e, c
+    mov [$dx], [$gx]
+    sub [$dx], [$px]
 
 dx_join:
-    jgt .dy_gt_y, b, d
+    jgt .dy_gt_y, [$gy], [$py]
 
 dy_lte_y:
-    mov f, d
-    sub f, b
-    jeq .dy_join, h, h
+    mov [$dy], [$py]
+    sub [$dy], [$gy]
+    jeq .dy_join, 0, 0
 
 dy_gt_y:
-    mov f, b
-    sub f, b
+    mov [$dy], [$gy]
+    sub [$dy], [$px]
 
 dy_join:
     ; Find biggest difference and try to compensate it
-    jgt .dx_gt_dy, e, f
+    jgt .move_x, [$dx], [$dy]
 
-dx_lte_dy:
+move_y:
     ; move in y
-    jgt .move_y_gt_p, b, d
+    jgt .move_y_gt_p, [$gy], [$py]
 
 move_y_lte_p:
+    ; move in x, if blocked
+    jeq .move_x, [$down_cell], 0
+
     ; down
     mov a, 2
-    int 0
-    hlt
+    jeq .dir, 0, 0
 
 move_y_gt_p:
+    ; move in x, if blocked
+    jeq .move_x, [$up_cell], 0
+
     ; up
     mov a, 0
-    int 0
-    hlt
+    jeq .dir, 0, 0
 
-dx_gt_dy:
+move_x:
     ; move in x
-    jgt .move_x_gt_p, a, c
+    jgt .move_x_gt_p, [$gx], [$px]
 
 move_x_lte_p:
+    ; move in y, if blocked
+    jeq .move_y, [$right_cell], 0
+
     ; right
     mov a, 1
-    int 0
-    hlt
+    jeq .dir, 0, 0
 
 move_x_gt_p:
+    ; move in y, if blocked
+    jeq .move_y, [$left_cell], 0
+
     ; left
     mov a, 3
-    int 0
-    hlt
+    jeq .dir, 0, 0
 
 home:
-    ; We are still home - move randomly
+    inc [$seed]
+    mov a, [$seed]
+    and a, 3
 
-    ; increment ticker
-    inc [0]
-    and [0], 3
-    mov a, [0]
-    jeq .home_run, a, 0
+    int 0
     hlt
 
-home_run:
-    mov b, [0]
-    add b, a
-    mul b, 13
-    mov [0], b
+dir:
+    ; Continue movement
+    jeq .no_way, [$dir], a
+
+    ; Can't swap direction
+    mov b, a
+    add b, 2
     and b, 3
+    jeq .swap_dir, [$dir], b
+
+    ; Ok now, just move
     int 0
+no_way:
+    hlt
+
+swap_dir:
+    jeq .move_y, [$dir], 1
+    jeq .move_y, [$dir], 3
+    jeq .move_x, [$dir], 0
+    jeq .move_x, [$dir], 2
     hlt
