@@ -404,7 +404,8 @@ Compiler.prototype.visitUnop = function visitUnop(expr) {
     this.add([ 'SUB' ]);
   } else if (op === '!') {
     this.visitExpr(expr.argument);
-    this.add([ 'CEQ', 0 ]);
+    this.add([ 'LDC', 0 ]);
+    this.add([ 'CEQ' ]);
   } else {
     throw new Error('Unsupported unary: ' + op);
   }

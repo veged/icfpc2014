@@ -1,9 +1,6 @@
-; Move randomly
-a = mov b, c
-jgt .gt, a, b
-
-lte:
-  hlt
-
-gt:
-  hlt
+dir = 1
+setDirection dir
+t1 = getLambda1_x
+t2 = getLambda1_y
+tmp = add dir, t2
+tmp = add tmp, t1
