@@ -1,0 +1,102 @@
+; Just move to the player in a closest direction
+
+start:
+
+    ; get player's coordinates
+    int 1
+    mov c, a
+    mov d, b
+
+    ; get ghost's coordinates
+    int 3
+    int 5
+    mov e, a
+    mov f, b
+
+    ; check if left the home
+    int 7
+    mov g, a
+    mov a, e
+    mov b, f
+
+    jeq .home, g, 6
+    xor h, h
+
+    ; get dx=e, dy=f
+    jgt .dx_gt_x, a, c
+
+dx_lte_x:
+    mov e, c
+    sub e, a
+    jeq .dx_join, h, h
+
+dx_gt_x:
+    mov e, a
+    sub e, c
+
+dx_join:
+    jgt .dy_gt_y, b, d
+
+dy_lte_y:
+    mov f, d
+    sub f, b
+    jeq .dy_join, h, h
+
+dy_gt_y:
+    mov f, b
+    sub f, b
+
+dy_join:
+    ; Find biggest difference and try to compensate it
+    jgt .dx_gt_dy, e, f
+
+dx_lte_dy:
+    ; move in y
+    jgt .move_y_gt_p, b, d
+
+move_y_lte_p:
+    ; down
+    mov a, 2
+    int 0
+    hlt
+
+move_y_gt_p:
+    ; up
+    mov a, 0
+    int 0
+    hlt
+
+dx_gt_dy:
+    ; move in x
+    jgt .move_x_gt_p, a, c
+
+move_x_lte_p:
+    ; right
+    mov a, 1
+    int 0
+    hlt
+
+move_x_gt_p:
+    ; left
+    mov a, 3
+    int 0
+    hlt
+
+home:
+    ; We are still home - move randomly
+
+    ; increment ticker
+    inc [0]
+    and [0], 3
+    mov a, [0]
+    jeq .home_run, a, 0
+    hlt
+
+home_run:
+    mov b, [0]
+    add b, a
+    mul b, 13
+    mov [0], b
+    and b, 3
+    int 0
+    hlt

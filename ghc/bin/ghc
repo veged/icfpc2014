@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-var icfpc = require('../');
+var ghc = require('../');
 
 function read(cb) {
   var data = '';
@@ -16,11 +16,6 @@ function read(cb) {
 }
 
 read(function(src) {
-  var c = new icfpc.Compiler(src, {
-    lines: process.argv.some(function(arg) {
-      return arg === '--lines';
-    })
-  });
-
-  console.log(c.compile());
+  var compiler = new ghc.Compiler(src);
+  console.log(compiler.compile());
 });
