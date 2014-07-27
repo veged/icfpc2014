@@ -503,9 +503,17 @@ Compiler.prototype.visitMember = function visitMember(stmt) {
   assert.equal(stmt.property.type, 'Literal', 'property not literal');
   assert.equal(typeof stmt.property.value, 'number', 'property not number');
 
+  var obj = stmt.object;
+  if (obj.type === 'Identifier' && obj.name === 'global') {
+    var slot = obj._scope;
+    assert(slot);
+    this.add([ 'LD', slot.depth, stmt.property.value ]);
+    return;
+  }
+
   var idx = stmt.property.value;
   assert(0 <= idx && idx < 2, 'property index OOB');
-  this.visitExpr(stmt.object);
+  this.visitExpr(obj);
   if (idx === 0)
     this.add([ 'CAR' ]);
   else

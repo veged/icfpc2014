@@ -72,12 +72,17 @@ Scope.prototype.get = function get(name) {
 
   var r = new ScopeEntry(this, 0, name);
   r.markGlobal();
+  var start = this;
+  for (; start !== null; start = start.parent)
+    start.uses.push(r);
+  r.calculateDepth();
   return r;
 };
 
 function ScopeEntry(scope, index, name) {
   this.scope = scope;
   this.depth = 0;
+  this.global = false;
   this.context = false;
   if (index instanceof ScopeEntry) {
     this.parent = index;
@@ -161,11 +166,11 @@ ScopeEntry.prototype.parentScope = function parentScope() {
 };
 
 ScopeEntry.prototype.markGlobal = function markGlobal() {
-  this.depth = -1;
+  this.global = true;
 };
 
 ScopeEntry.prototype.isGlobal = function isGlobal() {
-  return this.depth === -1;
+  return this.global;
 };
 
 ScopeEntry.prototype.calculateDepth = function calculateDepth() {
