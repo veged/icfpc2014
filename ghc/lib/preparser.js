@@ -64,7 +64,7 @@ Preparser.prototype.visitLabel = function visitLabel(name) {
     delete this.missingLabels[name];
 
     for (var i = 0; i < q.length; i++)
-      q[i].from.go(b);
+      q[i].from.go(b, q[i].force);
   }
 };
 
@@ -114,14 +114,10 @@ Preparser.prototype.visitInstr = function visitInstr(instr) {
     }, this);
 
     for (var i = 0; i < memsets.length; i++) {
-      this.current.add(
-        'memset',
-        null,
-        [
-          { type: 'js', value: memsets[i].to },
-          { type: 'instruction', id: memsets[i].from }
-        ]
-      );
+      this.current.add('memset', null, [
+        { type: 'js', value: memsets[i].to },
+        { type: 'instruction', id: memsets[i].from }
+      ]);
     }
 
     return;
@@ -131,14 +127,10 @@ Preparser.prototype.visitInstr = function visitInstr(instr) {
   // Memory set
   if (/^\[\d+\]$/.test(out)) {
     var instr = this.visitInstr(type + ' ' + args.join(', '));
-    return this.current.add(
-      'memset',
-      null,
-      [
-        { type: 'js', value: out.slice(1, -1) | 0 },
-        { type: 'instruction', id: instr.id }
-      ]
-    );
+    return this.current.add('memset', null, [
+      { type: 'js', value: out.slice(1, -1) | 0 },
+      { type: 'instruction', id: instr.id }
+    ]);
   }
   assert(!/[\[\]]/.test(out));
 
@@ -168,12 +160,25 @@ Preparser.prototype.visitInstr = function visitInstr(instr) {
     if (/^\d+$/.test(arg))
       return { type: 'js', value: arg | 0 };
 
+    if (/^\[\d+\]$/.test(arg)) {
+      var m = this.current.add('memget', null, [
+        { type: 'js', value: arg.slice(1, -1) | 0 }
+      ]);
+      return { type: 'instruction', id: m.id };
+    }
     return { type: 'variable', id: arg };
-  });
+  }, this);
 
-  var res = this.current.add(type, out, args, label);
-  if (!label)
-    return res;
+  if (type === 'goto') {
+    assert(label, 'goto without label');
+    assert(!out, 'goto does not have output');
+
+    this.current.add('goto', null, [], null);
+  } else {
+    var res = this.current.add(type, out, args, label);
+    if (!label)
+      return res;
+  }
 
   // Add jump
   if (this.labels[label]) {
@@ -182,8 +187,14 @@ Preparser.prototype.visitInstr = function visitInstr(instr) {
     if (!this.missingLabels[label])
       this.missingLabels[label] = [];
     this.missingLabels[label].push({
+      force: type === 'goto',
       from: this.current
     });
+  }
+
+  if (type === 'goto') {
+    this.current.ended = true;
+    return null;
   }
 
   if (!this.current.ended)
@@ -219,9 +230,9 @@ Block.prototype.toJSON = function toJSON() {
   };
 };
 
-Block.prototype.go = function go(block) {
+Block.prototype.go = function go(block, force) {
   assert(block);
-  if (this.ended)
+  if (this.ended && !force)
     return this;
 
   var from = block;
@@ -232,7 +243,7 @@ Block.prototype.go = function go(block) {
     from = from.before();
 
   from.predecessors.push(to);
-  to.successors.push(from);
+  to.successors.unshift(from);
   assert(from.predecessors.length <= 2);
   assert(to.successors.length <= 2);
 
