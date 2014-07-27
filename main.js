@@ -335,14 +335,20 @@ function step(aiState, worldState) {
         return -1;
     }
 
-    function bounty(pos) {
+    function bounty(pos, t) {
         var cell = matrixGet(map, pos);
         if (cell === 2)
-            return 10000;
-        if (cell === 3)
-            return 50000; // TODO: 0 if in power mode!
+            return 1e4;
+        if (cell === 3) {
+            if (lmVitality > 0 && lmVitality > t) {
+                return 0;
+            } else {
+                if (fruitStatus > 0) return 5e5;
+                return 5e4;
+            }
+        }
         if (cell === 4 && fruitStatus > 0)
-            return 1000000; // TODO: use map size
+            return 1e6; // TODO: use map size
         return 0;
     }
 
@@ -396,13 +402,13 @@ function step(aiState, worldState) {
 
         while (typeof sortedPaths === 'object') {
             var pos = sortedPaths[0][0];
-            var myVal = matrixGet(res, pos) + bounty(pos);
+            var t0 = matrixGet(paths, pos);
+            var myVal = matrixGet(res, pos) + bounty(pos, t0);
             res = matrixSet(res, pos, myVal);
             var d = 0;
             while (d < 4) {
                 var newPos = shiftDir(pos, d);
                 if (canGo(newPos) > 0) {
-                    var t0 = matrixGet(paths, pos);
                     var t = matrixGet(paths, newPos);
                     if (t === t0 - 127 || t === t0 - 137) {
                         var newVal = (myVal * 8 / 10) | 0; // ALPHA
