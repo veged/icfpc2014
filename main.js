@@ -302,11 +302,10 @@ function mod(n, d) {
     return n - ((n / d) | 0) * d;
 }
 
-//var _next = 42;
+var _next = 42;
 function rand() {
-//    _next = (_next * 1103515245 + 12345) | 0;
-//    return mod(((_next / 65536) | 0), 32768);
-    return 42;
+    _next = (_next * 1103515245 + 12345) | 0;
+    return mod(((_next / 65536) | 0), 32768);
 }
 
 function slowListMap(list, f) {
@@ -376,7 +375,6 @@ function step(aiState, worldState) {
             //FIXME: track real time-to-move for each ghost!
         }
         var state = [myPos, slowListMap(ghostsStatuses, addTicks)];
-        slowListMap(ghostsStatuses, addTicks);
         toDo = heapPush(toDo, [0, state]);
 
         while (heapSize(toDo) > 0) {
@@ -537,19 +535,20 @@ function step(aiState, worldState) {
         return res;
     }
 
-    var myPos = lmStatus(1),
-        paths = calcPaths(),
+    var myPos = lmStatus(1);
+    var myOrigPos = myPos;
+    var paths = calcPaths(),
         smell = calcSmell(paths),
         d = 0,
         bestSmell = -1,
         bestD = 0;
     while (d < 4) {
-        var val = matrixGet(smell, shiftDir(myPos, d));
+        var val = matrixGet(smell, shiftDir(myOrigPos, d));
         if (val > bestSmell || val === bestSmell && mod(rand(), 2)) {
-            console.log(bestD);
-            console.log(bestSmell);
             bestSmell = val;
             bestD = d;
+            console.log(bestD);
+            console.log(bestSmell);
         }
         d = d + 1;
     }
@@ -557,7 +556,6 @@ function step(aiState, worldState) {
     return [[paths, smell], bestD];
 }
 
-/*
 if (module) { // Node.js
     function nodejsMain() {
         function toHtml(map, mx) {
@@ -640,6 +638,5 @@ if (module) { // Node.js
 
     nodejsMain();
 }
-*/
 
 [0, step];
