@@ -1,0 +1,15 @@
+{
+  "name": "ghc",
+  "version": "0.0.0",
+  "description": "",
+  "main": "lib/ghc.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "linearscan": "^0.3.5",
+    "phi.js": "^0.1.4"
+  }
+}

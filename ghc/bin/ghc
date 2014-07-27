@@ -1,0 +1,21 @@
+#!/usr/bin/env node
+var ghc = require('../');
+
+function read(cb) {
+  var data = '';
+
+  process.stdin.resume();
+
+  process.stdin.on('data', function(chunk) {
+    data += chunk;
+  });
+
+  process.stdin.on('end', function() {
+    cb(data);
+  });
+}
+
+read(function(src) {
+  var compiler = new ghc.Compiler(src);
+  console.log(compiler.compile());
+});
