@@ -1,0 +1,52 @@
+int 1
+mov c, a
+mov d, b
+int 3
+int 5
+mov e, a
+mov f, b
+int 7
+mov g, a
+mov a, e
+mov b, f
+jeq 40, g, 6
+xor h, h
+jgt 17, a, c
+mov e, c
+sub e, a
+jeq 19, h, h
+mov e, a
+sub e, c
+jgt 23, b, d
+mov f, d
+sub f, b
+jeq 25, h, h
+mov f, b
+sub f, b
+jgt 33, e, f
+jgt 30, b, d
+mov a, 2
+int 0
+hlt
+mov a, 0
+int 0
+hlt
+jgt 37, a, c
+mov a, 1
+int 0
+hlt
+mov a, 3
+int 0
+hlt
+inc [0]
+and [0], 7
+mov a, [0]
+jeq 45, a, 0
+hlt
+mov b, [0]
+add b, a
+mul b, 13
+mov [0], b
+and b, 3
+int 0
+hlt
