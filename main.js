@@ -388,6 +388,7 @@ function step(aiState, worldState) {
         return -1;
     }
     var paths = genMatrix(X, Y, genPath);
+    var flatPaths = 0;
 
     function genSmell() {
         return 0;
@@ -402,6 +403,7 @@ function step(aiState, worldState) {
     function calcPaths() {
 
         paths = matrixSet(paths, myPos, 0);
+        flatPaths = [[0, myPos], flatPaths];
 
         var toDo = 0;
         function prepareGhostsStatuses(ghs) {
@@ -419,8 +421,10 @@ function step(aiState, worldState) {
         // TODO: track ghost eating multiplier!
         var state = [myPos, [ghs, myStatus]];
         toDo = heapPush(toDo, [0, state]);
+        var heapOps = 0;
 
-        while (heapSize(toDo) > 0) {
+        while (heapSize(toDo) > 0 || heapOps < 200) {
+            heapOps = heapOps + 1;
             var popRes = heapPop(toDo);
             var state = popRes[0];
             var t = state[0];
@@ -432,7 +436,7 @@ function step(aiState, worldState) {
             var myVitality = myStatus[0];
             toDo = popRes[1];
 
-            if (t < 127 * 20) {
+            if (t < 127 * 30) {
 
                 var d = 0;
                 while (d < 4) {
@@ -670,6 +674,7 @@ function step(aiState, worldState) {
                         }
 
                         paths = matrixSet(paths, newPos, t + dt);
+                        flatPaths = [[t + dt, newPos], flatPaths];
 
                         if (alive) {
                             myNewVitality = myNewVitality - dt;
@@ -689,11 +694,12 @@ function step(aiState, worldState) {
                 } // while d
             }
         }
+        console.log(heapOps);
         return 0;
     }
 
     function calcSmell() {
-        var sortedPaths = flatAndSort(paths);
+        var sortedPaths = heapSort(flatPaths);
 
         while (typeof sortedPaths === 'object') {
             var pos = sortedPaths[0][1];
