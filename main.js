@@ -357,8 +357,8 @@ function step(aiState, worldState) {
         return val;
     }
 
-    //map = listFromSlowList(map, convertRow);
-    map = matrixFromSlowMatrix(map);
+    map = listFromSlowList(map, convertRow);
+    //map = matrixFromSlowMatrix(map);
     //map = applyStatusesToMap(map, ghostsStatuses, fruitStatus);
 
     /*
@@ -579,9 +579,9 @@ function step(aiState, worldState) {
                         var newGhs = slowListMap(ghs, checkGhost);
 
                         if (alive) {
-                            var dt = canGo(newPos, t);
-                            var newT = t + dt;
-                            if (canGo(newPos, newT) >= 0 && matrixGet(res, newPos) === -1) {
+                            if (canGo(newPos, 0) >= 0 && matrixGet(res, newPos) === -1) {
+                                var dt = canGo(newPos, t);
+                                var newT = t + dt;
 
                                 myNewVitality = myNewVitality - dt;
                                 if (myNewVitality < 0)
@@ -622,8 +622,8 @@ function step(aiState, worldState) {
             var d = 0;
             while (d < 4) {
                 var newPos = shiftDir(pos, d);
-                var t = matrixGet(paths, newPos);
-                if (canGo(newPos, t) > 0) {
+                if (canGo(newPos, 0) > 0) {
+                    var t = matrixGet(paths, newPos);
                     if (t === t0 - 127 || t === t0 - 137) {
                         var newVal = (myVal * 8 / 10) | 0; // ALPHA
                         if (matrixGet(res, newPos) < newVal) {
@@ -727,7 +727,7 @@ if (module) { // Node.js
         }
 
         var FS = require('fs'),
-            worldState = readMap('map3.txt'),
+            worldState = readMap('map2.txt'),
             res = step(0, worldState);
 
         console.log("res: ", JSON.stringify(res));
