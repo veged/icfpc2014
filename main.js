@@ -65,18 +65,18 @@ function slowListLength(list) {
 
 function listFromSlowList(arr, f) {
 
-    function _listFromSlowList(arr, n) {
+    function _listFromSlowList(arr, n, i) {
         if (n === 1) {
-            return [f(arr[0]), arr[1]];
+            return [f(arr[0], i), arr[1]];
         }
         var m = (n / 2) | 0;
-        var left = _listFromSlowList(arr, m);
-        var right = _listFromSlowList(left[1], n - m);
+        var left = _listFromSlowList(arr, m, i);
+        var right = _listFromSlowList(left[1], n - m, i + m);
         return [[left[0], right[0]], right[1]];
     }
 
     var len = slowListLength(arr);
-    return [len, _listFromSlowList(arr, len)[0]];
+    return [len, _listFromSlowList(arr, len, 0)[0]];
 }
 
 function listIterate(list, f) {
@@ -258,10 +258,10 @@ function flatAndSort(mx) {
 function run(map, myPos) {
 }
 
-function id(x) {
+function id(x, i) {
     return x;
 }
-function convertRow(x) {
+function convertRow(x, i) {
     var val = listFromSlowList(x, id);
     return val;
 }
@@ -288,16 +288,6 @@ function tplGetter(tpl, length) {
 }
 
 
-function applyStatusesToMap(map, ghostsStatuses, fruitStatus) {
-    var ghostStatus;
-    while(typeof ghostsStatuses === 'object') {
-        ghostStatus = ghostsStatuses[0];
-        ghostsStatuses = ghostsStatuses[1];
-        map = matrixSet(map, tplGet(ghostStatus, 3, 1), 6);
-    }
-    return map;
-}
-
 function mod(n, d) {
     return n - ((n / d) | 0) * d;
 }
@@ -315,15 +305,60 @@ function slowListMap(list, f) {
     return [f(list[0]), slowListMap(list[1], f)];
 }
 
+function applyStatusesToMap(map, ghostsStatuses, fruitStatus) {
+    while(typeof ghostsStatuses === 'object') {
+        var ghostStatus = ghostsStatuses[0];
+        ghostsStatuses = ghostsStatuses[1];
+        map = matrixSet(map, tplGet(ghostStatus, 3, 1), 6);
+    }
+    return map;
+}
+
 function step(aiState, worldState) {
     worldState = tplGetter(worldState, 4);
     var map = worldState(0),
         lmStatus = tplGetter(worldState(1), 5),
         lmVitality = lmStatus(0),
         ghostsStatuses = worldState(2),
-        fruitStatus = worldState(3);
+        fruitStatus = worldState(3),
+        unplacedGhosts = ghostsStatuses;
 
-    map = matrixFromSlowMatrix(map);
+    function convertMapRow(x, j) {
+        var allGhosts = unplacedGhosts, ghostsInRow = 0;
+        unplacedGhosts = 0;
+        while(typeof allGhosts === 'object') {
+            var ghost = allGhosts[0],
+                ghostPos = tplGet(ghost, 3, 1);
+            allGhosts = allGhosts[1];
+            if (ghostPos[1] === j) {
+                ghostsInRow = [ghost, ghostsInRow];
+            } else {
+                unplacedGhosts = [ghost, unplacedGhosts];
+            }
+        }
+
+        function convertMapCell(x, i) {
+            var allGhosts = ghostsInRow, ghostInCell = 0;
+            ghostsInRow = 0;
+            while(typeof allGhosts === 'object') {
+                var ghost = allGhosts[0],
+                    ghostPos = tplGet(ghost, 3, 1);
+                allGhosts = allGhosts[1];
+                if (ghostPos[0] === i && tplGet(ghost, 3, 0) !== 2) {
+                    ghostInCell = 6
+                } else {
+                    ghostsInRow = [ghost, ghostsInRow];
+                }
+            }
+            if (ghostInCell === 6) return 6;
+            if (x === 6) return 1;
+            return x;
+        }
+        var val = listFromSlowList(x, convertMapCell);
+        return val;
+    }
+
+    map = listFromSlowList(map, convertMapRow);
     //map = applyStatusesToMap(map, ghostsStatuses, fruitStatus);
 
     /*
@@ -335,11 +370,12 @@ function step(aiState, worldState) {
      * 5: Lambda-Man starting position
      * 6: Ghost starting position
     */
-    function canGo(pos) {
+    function canGo(pos, t) {
         var cell = matrixGet(map, pos);
         if (cell === 5) return 0;
         if (cell === 1) return 127;
         if (cell === 2 || cell === 3 || cell === 4) return 137;
+        if (cell === 6 && lmVitality > t) return 137;
         return -1;
     }
 
@@ -484,11 +520,10 @@ function step(aiState, worldState) {
                         slowListMap(ghs, checkGhost);
 
                         if (alive) {
-
-                            if (canGo(newPos) >= 0 && matrixGet(res, newPos) === -1) {
-                                var dt = canGo(newPos);
-                                res = matrixSet(res, newPos, t + dt);
-                                toDo = heapPush(toDo, [t + dt, [newPos, ghs]]);
+                            var newT = t + canGo(myPos, t);
+                            if (canGo(newPos, newT) >= 0 && matrixGet(res, newPos) === -1) {
+                                res = matrixSet(res, newPos, newT);
+                                toDo = heapPush(toDo, [newT, [newPos, ghs]]);
                             }
                         } else {
                             alive = 1;
@@ -521,8 +556,8 @@ function step(aiState, worldState) {
             var d = 0;
             while (d < 4) {
                 var newPos = shiftDir(pos, d);
-                if (canGo(newPos) > 0) {
-                    var t = matrixGet(paths, newPos);
+                var t = matrixGet(paths, newPos);
+                if (canGo(newPos, t) > 0) {
                     if (t === t0 - 127 || t === t0 - 137) {
                         var newVal = (myVal * 8 / 10) | 0; // ALPHA
                         if (matrixGet(res, newPos) < newVal) {
@@ -554,10 +589,9 @@ function step(aiState, worldState) {
         d = d + 1;
     }
 
-    return [[paths, smell], bestD];
+    return [[paths, [smell, map]], bestD];
 }
 
-/*
 if (module) { // Node.js
     function nodejsMain() {
         function toHtml(map, mx) {
@@ -626,20 +660,19 @@ if (module) { // Node.js
         }
 
         var FS = require('fs'),
-            worldState = readMap('map2.txt'),
+            worldState = readMap('map1.txt'),
             res = step(0, worldState);
 
         console.log("res: ", JSON.stringify(res));
-        var map = listFromSlowList(worldState[0], convertRow);
+        res = tplGetter(res[0], 3);
         FS.writeFileSync('map.html',
-            toHtml(map, res[0][0]) +
+            toHtml(res(2), res(0)) +
             '<br/>' +
-            toHtml(map, res[0][1]) +
+            toHtml(res(2), res(1)) +
             '<br/>' + res[1]);
     }
 
     nodejsMain();
 }
-*/
 
 [0, step];
