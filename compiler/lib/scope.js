@@ -122,7 +122,10 @@ ScopeEntry.prototype.use = function use(scope) {
 
 ScopeEntry.prototype.set = function set(scope, value) {
   var use = this.use(scope);
-  this.sets.push({ use: use, value: value });
+  var p = this;
+  while (p.parent)
+    p = p.parent;
+  p.sets.push({ use: use, value: value });
   return use;
 };
 
