@@ -1,6 +1,83 @@
-dir = 1
-setDirection dir
-x = 0
-y = 1
-a = probeMap 0, 1
-([1], b) = getGhostState x
+; Just move to the player in a closest direction
+
+start:
+    (px, py) = lambda1Pos
+    ghostId = ghostIndex
+    (gx, gy) = ghostPos ghostId
+
+    ; check if left the home
+    cell = probeMap gx, gy
+    jeq .home, cell, 6
+
+    ; get dx=e, dy=f
+    jgt .dx_gt_x, gx, px
+
+dx_lte_x:
+    dx = sub px, gx
+    goto .dx_join
+
+dx_gt_x:
+    dx = sub gx, px
+    goto .dx_join
+
+dx_join:
+    jgt .dy_gt_y, gx, px
+
+dy_lte_y:
+    dy = sub py, gy
+    goto .dy_join
+
+dy_gt_y:
+    dy = sub gy, py
+    goto .dy_join
+
+dy_join:
+    ; Find biggest difference and try to compensate it
+    jgt .dx_gt_dy, dx, dy
+
+dx_lte_dy:
+    ; move in y
+    jgt .move_y_gt_p, gy, py
+
+move_y_lte_p:
+    ; down
+    dir 2
+    hlt
+
+move_y_gt_p:
+    ; up
+    dir 0
+    hlt
+
+dx_gt_dy:
+    ; move in x
+    jgt .move_x_gt_p, gx, px
+
+move_x_lte_p:
+    ; right
+    dir 1
+    hlt
+
+move_x_gt_p:
+    ; left
+    dir 3
+    hlt
+
+home:
+    ; We are still home - move randomly
+
+    ; increment ticker
+    inc [0]
+    [0] = and [0], 3
+    jeq .home_run, [0], 0
+    hlt
+
+home_run:
+    ; Pseudo-random move
+    seed = mov [1]
+    seed = add seed, ghostId
+    seed = mul seed, 13
+    [1] = mov seed
+    d = and seed, 3
+    dir d
+    hlt
