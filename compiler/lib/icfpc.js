@@ -222,6 +222,7 @@ Compiler.prototype.visitExpr = function visitExpr(expr, stmt) {
     return;
 
   // Auto-Consume returned value
+  this.add([ 'ATOM' ]);
   this.add([ 'TSEL', this.out.length + 1, this.out.length + 1], 'cleanup');
 };
 
