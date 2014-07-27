@@ -1,52 +1,102 @@
+jeq 6, [13], 1
+mov [0], 23
+int 3
+mul a, 11
+add [0], a
+mov [13], 1
 int 1
-mov c, a
-mov d, b
+mov [1], a
+mov [2], b
 int 3
 int 5
-mov e, a
-mov f, b
+mov [3], a
+mov [4], b
+int 3
+int 6
+mov [11], a
+mov [12], b
+mov a, [3]
+mov b, [4]
+dec b
 int 7
-mov g, a
-mov a, e
-mov b, f
-jeq 40, g, 6
-xor h, h
-jgt 17, a, c
-mov e, c
-sub e, a
-jeq 19, h, h
-mov e, a
-sub e, c
-jgt 23, b, d
-mov f, d
-sub f, b
-jeq 25, h, h
-mov f, b
-sub f, b
-jgt 33, e, f
-jgt 30, b, d
+mov [7], a
+mov a, [3]
+mov b, [4]
+inc b
+int 7
+mov [8], a
+mov a, [3]
+mov b, [4]
+dec a
+int 7
+mov [9], a
+mov a, [3]
+mov b, [4]
+inc a
+int 7
+mov [10], a
+xor a, a
+jeq 40, [7], 0
+inc a
+jeq 42, [8], 0
+inc a
+jeq 44, [9], 0
+inc a
+jeq 46, [10], 0
+inc a
+jlt 96, a, 3
+mov a, [3]
+mov b, [4]
+int 7
+jeq 85, a, 6
+jeq 58, [11], 0
+mov a, [3]
+mov b, [4]
+mov [3], [1]
+mov [3], [2]
+mov [1], a
+mov [2], b
+jgt 62, [3], [1]
+mov [5], [1]
+sub [5], [3]
+jeq 64, 0, 0
+mov [5], [3]
+sub [5], [1]
+jgt 68, [4], [2]
+mov [6], [2]
+sub [6], [4]
+jeq 70, 0, 0
+mov [6], [4]
+sub [6], [1]
+jgt 78, [5], [6]
+jgt 75, [4], [2]
+jeq 78, [8], 0
 mov a, 2
-int 0
-hlt
+jeq 90, 0, 0
+jeq 78, [7], 0
 mov a, 0
-int 0
-hlt
-jgt 37, a, c
+jeq 90, 0, 0
+jgt 82, [3], [1]
+jeq 71, [10], 0
 mov a, 1
-int 0
-hlt
+jeq 90, 0, 0
+jeq 71, [9], 0
 mov a, 3
-int 0
-hlt
+jeq 90, 0, 0
 inc [0]
-and [0], 7
 mov a, [0]
-jeq 45, a, 0
-hlt
-mov b, [0]
-add b, a
-mul b, 13
-mov [0], b
-and b, 3
+and a, 3
 int 0
+hlt
+jeq 96, [12], a
+mov b, a
+add b, 2
+and b, 3
+jeq 97, [12], b
+int 0
+hlt
+jeq 71, [12], 1
+jeq 71, [12], 3
+jeq 78, [12], 0
+jeq 78, [12], 2
 hlt
