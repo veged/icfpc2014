@@ -41,9 +41,6 @@ not_once:
     mov [$gx], a
     mov [$gy], b
 
-    ; skip the pill search, if it is already known
-    jgt .search_join, [$px], 0
-
     ; search in cells
     mov [$search_x], a
     mov [$search_y], b
