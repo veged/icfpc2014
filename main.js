@@ -292,11 +292,10 @@ function mod(n, d) {
     return n - ((n / d) | 0) * d;
 }
 
-//var _next = 42;
+var _next = 42;
 function rand() {
-//    _next = (_next * 1103515245 + 12345) | 0;
-//    return mod(((_next / 65536) | 0), 32768);
-    return 42;
+    _next = (_next * 1103515245 + 12345) | 0;
+    return mod(((_next / 65536) | 0), 32768);
 }
 
 function slowListMap(list, f) {
@@ -372,8 +371,7 @@ function step(aiState, worldState) {
     */
     function canGo(pos, t) {
         var cell = matrixGet(map, pos);
-        if (cell === 5) return 0;
-        if (cell === 1) return 127;
+        if (cell === 1 || cell === 5 || cell === 6) return 127;
         if (cell === 2 || cell === 3 || cell === 4) return 137;
         if (cell === 6 && lmVitality > t) return 137;
         return -1;
@@ -407,12 +405,16 @@ function step(aiState, worldState) {
         res = matrixSet(res, myPos, 0);
 
         var toDo = 0;
-        function addTicks(gh) {
+        function prepareGhostStatus(gh) {
             return [1, gh]; // new ghost state - 4-tuple (time-to-move, standard state...)
-            //FIXME: track real time-to-move for each ghost!
+            //TODO: track ghost id
+            //TODO: track real time-to-move for each ghost!
         }
-        var state = [myPos, slowListMap(ghostsStatuses, addTicks)];
-        slowListMap(ghostsStatuses, addTicks);
+        var ghs = slowListMap(ghostsStatuses, prepareGhostStatus);
+        var myStatus = [lmVitality, 0];
+        // (vitality, score)
+        // TODO: track ghost eating multiplier!
+        var state = [myPos, [ghs, myStatus]];
         toDo = heapPush(toDo, [0, state]);
 
         while (heapSize(toDo) > 0) {
@@ -421,8 +423,10 @@ function step(aiState, worldState) {
             var t = state[0];
             state = state[1];
             myPos = state[0];
-            var ghs = state[1]; // ghost statuses
-            // TODO: my status (vitality)
+            state = state[1];
+            ghs = state[0]; // ghost statuses
+            myStatus = state[1];
+            var myVitality = myStatus[0];
             toDo = popRes[1];
 
             if (t < 127 * 80) {
@@ -430,100 +434,161 @@ function step(aiState, worldState) {
                 var alive = 1;
 
                 function updateGhostStatus(gh) {
-                    var gt = gh[0]; //ghost time-to-move
-                    //TODO: frightened?
-                    //console.log("gh: ", JSON.stringify(gh));
+                    if (module) console.log("gh: ", myPos, myVitality, JSON.stringify(gh));
+
+                    var state = gh;
+                    var gt = state[0];
                     if (gt >= t) {
                         return gh;
                     }
-                    var vit = gh[1][0];
-                    var pos = gh[1][1][0];
-                    var d = gh[1][1][1];
+                    state = state[1];
+                    var vit = state[0];
+                    state = state[1];
+                    var pos = state[0];
+                    var d = state[1];
 
-                    if (d === -1) {
-                        return gh;
+                    if (vit && myVitality === 0) {
+                        vit = 0;
                     }
 
-                    var dl = d + 1;
-                    if (dl === 4)
-                        dl = 0;
-                    var dr = d - 1;
-                    if (dl === -1)
-                        dl = 3;
-                    var db = d + 2;
-                    if (db >= 4)
-                        db = db - 4;
+                    if (d >= 0) {
 
-                    if (matrixGet(map, shiftDir(pos, d)) === 0) { // wall
-                        if (matrixGet(map, shiftDir(pos, dl)) === 0) {
-                            if (matrixGet(map, shiftDir(pos, dr)) === 0) {
-                                //  #
+                        var dl = d + 1;
+                        if (dl === 4)
+                            dl = 0;
+                        var dr = d - 1;
+                        if (dl === -1)
+                            dl = 3;
+                        var db = d + 2;
+                        if (db >= 4)
+                            db = db - 4;
+
+                        if (matrixGet(map, shiftDir(pos, d)) === 0) { // wall
+                            if (matrixGet(map, shiftDir(pos, dl)) === 0) {
+                                if (matrixGet(map, shiftDir(pos, dr)) === 0) {
+                                    //  #
+                                    // #^#
+                                    d = db;
+                                } else {
+                                    //  #
+                                    // #^.
+                                    d = dr;
+                                }
+                            } else {
+                                if (matrixGet(map, shiftDir(pos, dr)) === 0) {
+                                    //  #
+                                    // .^#
+                                    d = dl;
+                                } else {
+                                    //  #
+                                    // .^.
+                                    d = -1; //futher action is unknown, let it stay here
+                                }
+                            }
+                        } else {
+                            if (matrixGet(map, shiftDir(pos, dl)) === 0 && matrixGet(map, shiftDir(pos, dr)) === 0) {
+                                //  .
                                 // #^#
-                                d = db;
-                            } else {
-                                //  #
-                                // #^.
-                                d = dr;
-                            }
-                        } else {
-                            if (matrixGet(map, shiftDir(pos, dr)) === 0) {
-                                //  #
-                                // .^#
-                                d = dl;
-                            } else {
-                                //  #
-                                // .^.
-                                d = -1; //futher action is unknown, let it stay here
-                            }
-                        }
-                    } else {
-                        if (matrixGet(map, shiftDir(pos, dl)) === 0 && matrixGet(map, shiftDir(pos, dr)) === 0) {
-                            //  .
-                            // #^#
 
-                            // d = d;
-                        } else {
-                            d = -1;
+                                // d = d;
+                            } else {
+                                d = -1;
+                            }
                         }
+
                     }
 
-                    //console.log("ghost move: ", myPos, pos, d);
+                    if (module) console.log("ghost move: ", myPos, pos, d);
 
                     if (d >= 0) {
                         pos = shiftDir(pos, d);
                         if (pos[0] === myPos[0] && pos[1] === myPos[1]) {
-                            //console.log("eaten by ghost!!", myPos);
-                            alive = 0; //TODO: frightened!!
+                            if (vit === 0) {
+                                //console.log("eaten by ghost: ", myPos);
+                                alive = 0;
+                            } else if (vit === 1) {
+                                //console.log("ghost suiside:", myPos);
+                                pos = [7,2]; //FIXME!!!
+                                vit = 2; // invisible
+                                d = 2; // down
+                                //TODO: add smell to the point?!
+                            }
                         }
                     }
 
-                    return [gt + 130, [vit, [pos, d]]]; //FIMXE: 130 depends on ghost id and vitality!
+                    var gdt = 130;
+                    if (vit) { // frightened or invisible
+                        gdt = 195;
+                    }
+                    //FIMXE:depends on ghost id
+                    return [gt + gdt, [vit, [pos, d]]];
                 }
 
                 ghs = slowListMap(ghs, updateGhostStatus);
+
                 if (alive) {
 
                     var d = 0;
                     while (d < 4) {
+                        var frighten = 0;
                         var newPos = shiftDir(myPos, d);
-
-                        function checkGhost(gh) {
-                            var pos = gh[1][1][0];
-
-                            if (pos[0] === newPos[0] && pos[1] === newPos[1]) {
-                                //console.log("moved on ghost!!", newPos);
-                                alive = 0;//TODO: frightened!!
+                        var myNewVitality = myVitality;
+                        //actually need to save modified map into the state!!
+                        if (matrixGet(map, newPos) === 3) {
+                            if (!myVitality) {
+                                frighten = 1;
                             }
-                            return 0;
+                            myNewVitality = 127 * 20;
                         }
 
-                        slowListMap(ghs, checkGhost);
+                        function checkGhost(gh) {
+                            var state = gh;
+                            var gt = state[0];
+                            state = state[1];
+                            var vit = state[0];
+                            state = state[1];
+                            var pos = state[0];
+                            var d = state[1];
+
+                            if (frighten) {
+                                if (module) console.log("frighten!", myPos, newPos);
+                                vit = 1;
+                                d = d + 2;
+                                if (d >= 4)
+                                    d = d - 4;
+                                gh = [gt, [vit, [pos, d]]];
+                            }
+
+                            if (pos[0] === newPos[0] && pos[1] === newPos[1]) {
+                                if (vit === 0) {
+                                    alive = 0;
+                                    if (module) console.log("moved on ghost!!", newPos);
+                                } else if (vit === 1) {
+                                    pos = [7,2]; //FIXME!!!
+                                    vit = 2;
+                                    d = 2;
+                                    gh = [gt, [vit, [pos, d]]];
+                                    if (module) console.log("eated ghost!!", newPos);
+                                }
+                            }
+
+                            return gh;
+                        }
+
+                        var newGhs = slowListMap(ghs, checkGhost);
 
                         if (alive) {
-                            var newT = t + canGo(myPos, t);
+                            var dt = canGo(newPos, t);
+                            var newT = t + dt;
                             if (canGo(newPos, newT) >= 0 && matrixGet(res, newPos) === -1) {
+
+                                myNewVitality = myNewVitality - dt;
+                                if (myNewVitality < 0)
+                                    myNewVitality = 0;
+
+                                var myNewStatus = [myNewVitality, 0]; //TODO: score!
                                 res = matrixSet(res, newPos, newT);
-                                toDo = heapPush(toDo, [newT, [newPos, ghs]]);
+                                toDo = heapPush(toDo, [newT, [newPos, [newGhs, myNewStatus]]]);
                             }
                         } else {
                             alive = 1;
@@ -572,19 +637,20 @@ function step(aiState, worldState) {
         return res;
     }
 
-    var myPos = lmStatus(1),
-        paths = calcPaths(),
+    var myPos = lmStatus(1);
+    var myOrigPos = myPos;
+    var paths = calcPaths(),
         smell = calcSmell(paths),
         d = 0,
         bestSmell = -1,
         bestD = 0;
     while (d < 4) {
-        var val = matrixGet(smell, shiftDir(myPos, d));
+        var val = matrixGet(smell, shiftDir(myOrigPos, d));
         if (val > bestSmell || val === bestSmell && mod(rand(), 2)) {
-            console.log(bestD);
-            console.log(bestSmell);
             bestSmell = val;
             bestD = d;
+            console.log(bestD);
+            console.log(bestSmell);
         }
         d = d + 1;
     }
@@ -660,7 +726,7 @@ if (module) { // Node.js
         }
 
         var FS = require('fs'),
-            worldState = readMap('map1.txt'),
+            worldState = readMap('map3.txt'),
             res = step(0, worldState);
 
         console.log("res: ", JSON.stringify(res));
