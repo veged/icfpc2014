@@ -9,8 +9,13 @@ var config = {
   registers: [ 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h' ],
 
   instructions: {
+    // Internals
     nop: { output: null },
     literal: { output: { type: 'any' }, inputs: [ { type: 'js' } ] },
+    memset: { inputs: [ { type: 'js' }, { type: 'any' } ], output: null },
+    memget: { inputs: [ { type: 'js' } ], output: { type: 'any' } },
+
+    // ASM
     hlt: { output: null },
     jgt: { inputs: [ { type: 'any' }, { type: 'any' } ] },
     jlt: { inputs: [ { type: 'any' }, { type: 'any' } ] },
@@ -62,11 +67,55 @@ var config = {
       output: null
     },
 
-    getLambda1_x: {
+    getLambda1Pos_0: {
       output: { type: 'register', id: 'a' }
     },
-    getLambda1_y: {
+    getLambda1Pos_1: {
       output: { type: 'register', id: 'b' }
+    },
+
+    getLambda2Pos_0: {
+      output: { type: 'register', id: 'a' }
+    },
+    getLambda2Pos_1: {
+      output: { type: 'register', id: 'b' }
+    },
+
+    ghostIndex: {
+      output: { type: 'register', id: 'a' }
+    },
+
+    getGhostStartPos_0: {
+      inputs: [ { type: 'register', id: 'a' } ],
+      output: { type: 'register', id: 'a' }
+    },
+    getGhostStartPos_1: {
+      output: { type: 'register', id: 'b' }
+    },
+
+    getGhostPos_0: {
+      inputs: [ { type: 'register', id: 'a' } ],
+      output: { type: 'register', id: 'a' }
+    },
+    getGhostPos_1: {
+      output: { type: 'register', id: 'b' }
+    },
+
+    getGhostState_0: {
+      inputs: [ { type: 'register', id: 'a' } ],
+      output: { type: 'register', id: 'a' }
+    },
+    getGhostState_1: {
+      output: { type: 'register', id: 'b' }
+    },
+
+    probeMap: {
+      inputs: [ { type: 'register', id: 'a' }, { type: 'register', id: 'b' } ],
+      output: { type: 'register', id: 'a' }
+    },
+
+    debug: {
+      output: null
     }
   }
 };

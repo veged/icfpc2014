@@ -1,6 +1,6 @@
 dir = 1
 setDirection dir
-t1 = getLambda1_x
-t2 = getLambda1_y
-tmp = add dir, t2
-tmp = add tmp, t1
+x = 0
+y = 1
+a = probeMap 0, 1
+([1], b) = getGhostState x
