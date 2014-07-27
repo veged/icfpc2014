@@ -359,22 +359,26 @@ function step(aiState, worldState) {
         return -1;
     }
 
-    function bounty(pos, t) {
-        var cell = matrixGet(map, pos);
-        if (cell === 2)
-            return 1e4;
-        if (cell === 3) {
-            return 1e3;
-            /*if (lmVitality > t) {
-                return 0;
+    function bounty(cell, t) {
+        var b;
+        if (cell === 2) {
+            b = 100;
+        } else if (cell === 3) {
+            if (fruitStatus > 0 && lmVitality < t) {
+                b = 10000;
             } else {
-                if (fruitStatus > 0) return 5e5;
-                return 5e4;
-            }*/
+                b = 10; // dislike wasting power pills, only when proved to catch a ghost or hunting a fruit
+            }
+        } else if (cell === 4 && fruitStatus > 0) {
+            b = 10000; // TODO: use map size
+        } else if (cell === 7) {
+            b = 10000; // frightened ghost
+        } else if (cell === 8) {
+            b = -10;
+        } else {
+            b = 1;
         }
-        if (cell === 4 && fruitStatus > 0)
-            return 1e6; // TODO: use map size
-        return 1e2;
+        return ((b * 100000 / (t + 1)) | 0);
     }
 
     var Y = listLength(map);
@@ -476,13 +480,13 @@ function step(aiState, worldState) {
                                 if (pos[0] === newPos[0] && pos[1] === newPos[1]) {
                                     if (vit === 0) {
                                         alive = 0;
-                                        scoreBonus = -1e4; // slight dead body smell
+                                        scoreBonus = bounty(8, t); // slight dead body smell
                                         if (module) console.log("moved on ghost!!", newPos);
                                     } else if (vit === 1) {
                                         pos = listGet(ghostsStartingPositions, gi);
                                         vit = 2;
                                         d = 2;
-                                        scoreBonus = scoreBonus + 200000;
+                                        scoreBonus = scoreBonus + bounty(7, t);
                                         if (module) console.log("eated ghost!!", newPos);
                                     }
                                 }
@@ -694,7 +698,8 @@ function step(aiState, worldState) {
         while (typeof sortedPaths === 'object') {
             var pos = sortedPaths[0][1];
             var t0 = matrixGet(paths, pos);
-            var myVal = matrixGet(smell, pos) + bounty(pos, t0);
+            var cell = matrixGet(map, pos);
+            var myVal = matrixGet(smell, pos) + bounty(cell, t0);
             smell = matrixSet(smell, pos, myVal);
             var d = 0;
             while (d < 4) {
@@ -702,7 +707,7 @@ function step(aiState, worldState) {
                 if (canGo(newPos) > 0) {
                     var t = matrixGet(paths, newPos);
                     if (t === t0 - 127 || t === t0 - 137) {
-                        var newVal = (myVal * 7 / 10) | 0; // ALPHA
+                        var newVal = myVal; //(myVal * 7 / 10) | 0; // ALPHA
                         var oldVal = matrixGet(smell, newPos);
                         if (oldVal === 0 || oldVal < newVal) {
                             smell = matrixSet(smell, newPos, newVal);
@@ -807,7 +812,7 @@ if (module) { // Node.js
         }
 
         var FS = require('fs'),
-            worldState = readMap('map-classic.txt'),
+            worldState = readMap(process.argv[2]),
             res = step(0, worldState);
 
         console.log("res: ", JSON.stringify(res));
