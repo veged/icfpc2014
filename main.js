@@ -318,41 +318,14 @@ function step(aiState, worldState) {
         lmVitality = lmStatus(0),
         ghostsStatuses = worldState(2),
         fruitStatus = worldState(3),
-        ghostsStartingPositions = 0,
-        unplacedGhosts = ghostsStatuses;
+        ghostsStartingPositions = 0;
 
     function convertMapRow(x, j) {
-        var allGhosts = unplacedGhosts, ghostsInRow = 0;
-        unplacedGhosts = 0;
-        while(typeof allGhosts === 'object') {
-            var ghost = allGhosts[0],
-                ghostPos = tplGet(ghost, 3, 1);
-            allGhosts = allGhosts[1];
-            if (ghostPos[1] === j) {
-                ghostsInRow = [ghost, ghostsInRow];
-            } else {
-                unplacedGhosts = [ghost, unplacedGhosts];
-            }
-        }
 
         function convertMapCell(x, i) {
-            var allGhosts = ghostsInRow, ghostInCell = 0;
-            ghostsInRow = 0;
-            while(typeof allGhosts === 'object') {
-                var ghost = allGhosts[0],
-                    ghostPos = tplGet(ghost, 3, 1);
-                allGhosts = allGhosts[1];
-                if (ghostPos[0] === i && tplGet(ghost, 3, 0) !== 2) {
-                    ghostInCell = 6
-                } else {
-                    ghostsInRow = [ghost, ghostsInRow];
-                }
-            }
             if (x === 6) {
                 ghostsStartingPositions = [[i, j], ghostsStartingPositions];
             }
-            if (ghostInCell === 6) return 6;
-            if (x === 6) return 1;
             return x;
         }
         var val = listFromSlowList(x, convertMapCell);
@@ -360,7 +333,6 @@ function step(aiState, worldState) {
     }
 
     map = listFromSlowList(map, convertMapRow);
-    //map = matrixFromSlowMatrix(map);
 
     ghostsStartingPositions = listFromSlowList(ghostsStartingPositions, id);
 
