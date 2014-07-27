@@ -129,14 +129,15 @@ function genMatrix(X, Y, f) {
 }
 
 function shiftDir(pos, d) {
-    if (d === 0)
+    if (d === 0) {
         return [pos[0], pos[1] - 1];
-    else if (d === 1)
+    } else if (d === 1) {
         return [pos[0] + 1, pos[1]];
-    else if (d === 2)
+    } else if (d === 2) {
         return [pos[0], pos[1] + 1];
-    else
+    } else {
         return [pos[0] - 1, pos[1]];
+    }
 }
 
 // heap struct: [[value, size], [ptr1, ptr2]]
@@ -301,10 +302,11 @@ function mod(n, d) {
     return n - ((n / d) | 0) * d;
 }
 
-var _next = 42;
+//var _next = 42;
 function rand() {
-    _next = (_next * 1103515245 + 12345) | 0;
-    return mod(((_next / 65536) | 0), 32768);
+//    _next = (_next * 1103515245 + 12345) | 0;
+//    return mod(((_next / 65536) | 0), 32768);
+    return 42;
 }
 
 function slowListMap(list, f) {
@@ -373,8 +375,8 @@ function step(aiState, worldState) {
             return [1, gh]; // new ghost state - 4-tuple (time-to-move, standard state...)
             //FIXME: track real time-to-move for each ghost!
         }
-        var state = [myPos, listSlowMap(ghostsStatuses, addTicks)];
-        listSlowMap(ghostsStatuses, addTicks)
+        var state = [myPos, slowListMap(ghostsStatuses, addTicks)];
+        slowListMap(ghostsStatuses, addTicks);
         toDo = heapPush(toDo, [0, state]);
 
         while (heapSize(toDo) > 0) {
@@ -389,76 +391,112 @@ function step(aiState, worldState) {
 
             if (t < 127 * 80) {
 
-                var d = 0;
-                while (d < 4) {
-                    var newPos = shiftDir(myPos, d);
+                var alive = 1;
 
-                    function updateGhostStatus(gh) {
-                        var gt = gh[0]; //ghost time-to-move
-                        //TODO: frightened?
-                        if (gt >= t) {
-                            return gh;
-                        }
-                        var vit = gh[1][0];
-                        var pos = gh[1][1][0];
-                        var d = gh[1][1][1];
+                function updateGhostStatus(gh) {
+                    var gt = gh[0]; //ghost time-to-move
+                    //TODO: frightened?
+                    //console.log("gh: ", JSON.stringify(gh));
+                    if (gt >= t) {
+                        return gh;
+                    }
+                    var vit = gh[1][0];
+                    var pos = gh[1][1][0];
+                    var d = gh[1][1][1];
 
-                        var dl = d + 1;
-                        if (dl === 4)
-                            dl = 0;
-                        var dr = d - 1;
-                        if (dl === -1)
-                            dl = 3;
-                        var db = d + 2;
-                        if (db >= 4)
-                            db = db - 4;
+                    if (d === -1) {
+                        return gh;
+                    }
 
-                        if (matrixGet(map, shiftDir(pos, d)) === 0) { // wall
-                            if (matrixGet(map, shiftDir(pos, dl)) === 0) {
-                                if (matrixGet(map, shiftDir(pos, dr)) === 0) {
-                                    //  #
-                                    // #^#
-                                    d = db;
-                                } else {
-                                    //  #
-                                    // #^.
-                                    d = dr;
-                                }
+                    var dl = d + 1;
+                    if (dl === 4)
+                        dl = 0;
+                    var dr = d - 1;
+                    if (dl === -1)
+                        dl = 3;
+                    var db = d + 2;
+                    if (db >= 4)
+                        db = db - 4;
+
+                    if (matrixGet(map, shiftDir(pos, d)) === 0) { // wall
+                        if (matrixGet(map, shiftDir(pos, dl)) === 0) {
+                            if (matrixGet(map, shiftDir(pos, dr)) === 0) {
+                                //  #
+                                // #^#
+                                d = db;
                             } else {
-                                if (matrixGet(map, shiftDir(pos, dr)) === 0) {
-                                    //  #
-                                    // .^#
-                                    d = dl;
-                                } else {
-                                    //  #
-                                    // .^.
-                                    d = -1; //futher action is unknown, let it stay here
-                                }
+                                //  #
+                                // #^.
+                                d = dr;
                             }
                         } else {
-                            if (matrixGet(map, shiftDir(pos, dl)) === 0 && matrixGet(map, shiftDir(pos, dr)) === 0) {
-                                //  .
-                                // #^#
-
-                                // d = d;
+                            if (matrixGet(map, shiftDir(pos, dr)) === 0) {
+                                //  #
+                                // .^#
+                                d = dl;
                             } else {
-                                d = -1;
+                                //  #
+                                // .^.
+                                d = -1; //futher action is unknown, let it stay here
                             }
                         }
+                    } else {
+                        if (matrixGet(map, shiftDir(pos, dl)) === 0 && matrixGet(map, shiftDir(pos, dr)) === 0) {
+                            //  .
+                            // #^#
 
-                        if (d >= 0)
-                            pos = shiftDir(pos, d);
-                        return [t + 130, [vit, [pos, d]]]; //FIMXE: 130 depends on ghost id!
+                            // d = d;
+                        } else {
+                            d = -1;
+                        }
                     }
 
-                    if (canGo(newPos) >= 0 && matrixGet(res, newPos) === -1) {
-                        var dt = canGo(myPos); //TODO: save in toDo!
-                        res = matrixSet(res, newPos, t + dt);
-                        toDo = heapPush(toDo, [t + dt, [newPos, ghs]]);
+                    //console.log("ghost move: ", myPos, pos, d);
+
+                    if (d >= 0) {
+                        pos = shiftDir(pos, d);
+                        if (pos[0] === myPos[0] && pos[1] === myPos[1]) {
+                            //console.log("eaten by ghost!!", myPos);
+                            alive = 0; //TODO: frightened!!
+                        }
                     }
-                    d = d + 1;
+
+                    return [gt + 130, [vit, [pos, d]]]; //FIMXE: 130 depends on ghost id and vitality!
                 }
 
+                ghs = slowListMap(ghs, updateGhostStatus);
+                if (alive) {
+
+                    var d = 0;
+                    while (d < 4) {
+                        var newPos = shiftDir(myPos, d);
+
+                        function checkGhost(gh) {
+                            var pos = gh[1][1][0];
+
+                            if (pos[0] === newPos[0] && pos[1] === newPos[1]) {
+                                //console.log("moved on ghost!!", newPos);
+                                alive = 0;//TODO: frightened!!
+                            }
+                            return 0;
+                        }
+
+                        slowListMap(ghs, checkGhost);
+
+                        if (alive) {
+
+                            if (canGo(newPos) >= 0 && matrixGet(res, newPos) === -1) {
+                                var dt = canGo(newPos);
+                                res = matrixSet(res, newPos, t + dt);
+                                toDo = heapPush(toDo, [t + dt, [newPos, ghs]]);
+                            }
+                        } else {
+                            alive = 1;
+                        }
+
+                        d = d + 1;
+                    }
+                }
             }
         }
 
@@ -508,6 +546,8 @@ function step(aiState, worldState) {
     while (d < 4) {
         var val = matrixGet(smell, shiftDir(myPos, d));
         if (val > bestSmell || val === bestSmell && mod(rand(), 2)) {
+            console.log(bestD);
+            console.log(bestSmell);
             bestSmell = val;
             bestD = d;
         }
@@ -517,6 +557,7 @@ function step(aiState, worldState) {
     return [[paths, smell], bestD];
 }
 
+/*
 if (module) { // Node.js
     function nodejsMain() {
         function toHtml(map, mx) {
@@ -569,8 +610,8 @@ if (module) { // Node.js
                             lmPos = [i, j];
                         } else if(y === '=') {
                             var ghostContent = ghostsContent[ghostsCount] || '0 2',
-                                ghostVitality = ghostContent[0],
-                                ghostDirection = ghostContent[2];
+                                ghostVitality = parseInt(ghostContent[0], 10),
+                                ghostDirection = parseInt(ghostContent[2], 10);
                             ghostsStatuses = [[ghostVitality, [[i, j], ghostDirection]], ghostsStatuses];
                             ghostsCount = ghostsCount + 1;
                         }
@@ -585,7 +626,7 @@ if (module) { // Node.js
         }
 
         var FS = require('fs'),
-            worldState = readMap('map1.txt'),
+            worldState = readMap('map2.txt'),
             res = step(0, worldState);
 
         console.log("res: ", JSON.stringify(res));
@@ -599,5 +640,6 @@ if (module) { // Node.js
 
     nodejsMain();
 }
+*/
 
 [0, step];
