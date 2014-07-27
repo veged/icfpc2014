@@ -380,7 +380,7 @@ function step(aiState, worldState) {
         if (cell === 2)
             return 1e4;
         if (cell === 3) {
-            if (lmVitality > 0 && lmVitality > t) {
+            if (lmVitality > t) {
                 return 0;
             } else {
                 if (fruitStatus > 0) return 5e5;
@@ -434,7 +434,7 @@ function step(aiState, worldState) {
             var myVitality = myStatus[0];
             toDo = popRes[1];
 
-            if (t < 127 * 80) {
+            if (t < 127 * 40) {
 
                 var d = 0;
                 while (d < 4) {
@@ -460,10 +460,8 @@ function step(aiState, worldState) {
                         function updateGhostStatus(state) {
                             if (module) console.log("gh: ", myPos, myVitality, JSON.stringify(state));
 
+                            //FIXME: we actually need a while loop here, ghost can make 2 moves: 130 < 137
                             var gt = state[0];
-                            //if (gt >= t + dt) { //FIXME: actually need a while loop here, ghost can make 2 moves: 130 < 137
-                            //    return gh;
-                            //}
                             state = state[1];
                             var vit = state[0];
                             state = state[1];
@@ -496,59 +494,120 @@ function step(aiState, worldState) {
 
                             handleCollision();
 
+                            function ghostStrat(d) {
+                                d = shiftDir([0,0], d);
+                                var dx = d[0];
+                                var dy = d[1];
+                                var dX = newPos[0] - pos[0];
+                                var dY = newPos[1] - pos[1];
+                                var tmp;
+                                if (dX < 0) {
+                                    dX = 0 - dX;
+                                    dx = 0 - dx;
+                                }
+                                if (dY < 0) {
+                                    dY = 0 - dY;
+                                    dy = 0 - dy;
+                                }
+                                var s;
+                                if (dX < dY) {
+                                    if (dy > 0) {
+                                        s = 2;
+                                    } else if (dx > 0) {
+                                        s = 1;
+                                    } else if (dx < 0) {
+                                        s = -1;
+                                    } else {
+                                        s = -2;
+                                    }
+                                }
+
+                                if (vit === 1) {
+                                    return 0 - s;
+                                } else {
+                                    return s;
+                                }
+                            }
+
+                            function findGhostStrat(ds) {
+                                var bestD = 0;
+                                var bestScore = -3;
+                                while (typeof ds === 'object') {
+                                    var d = ds[0];
+                                    var val = ghostStrat(d);
+                                    if (module) console.log("findGhostStrat:", d, val);
+                                    if (val > bestScore || val === bestScore && rand() > 16384) {
+                                        bestD = d;
+                                        bestScore = val;
+                                    }
+                                    ds = ds[1];
+                                }
+                                return bestD;
+                            }
+
                             function handleMove() {
-                                if (d >= 0) { //FIXME: never stop!
 
-                                    var dl = d + 1;
-                                    if (dl === 4)
-                                        dl = 0;
-                                    var dr = d - 1;
-                                    if (dl === -1)
-                                        dl = 3;
-                                    var db = d + 2;
-                                    if (db >= 4)
-                                        db = db - 4;
+                                var dl = d + 1;
+                                if (dl === 4)
+                                    dl = 0;
+                                var dr = d - 1;
+                                if (dl === -1)
+                                    dl = 3;
+                                var db = oppositeDir(d);
 
-                                    if (matrixGet(map, shiftDir(pos, d)) === 0) { // wall
-                                        if (matrixGet(map, shiftDir(pos, dl)) === 0) {
-                                            if (matrixGet(map, shiftDir(pos, dr)) === 0) {
-                                                //  #
-                                                // #^#
-                                                d = db;
-                                            } else {
-                                                //  #
-                                                // #^.
-                                                d = dr;
-                                            }
+                                if (matrixGet(map, shiftDir(pos, d)) === 0) { // wall
+                                    if (matrixGet(map, shiftDir(pos, dl)) === 0) {
+                                        if (matrixGet(map, shiftDir(pos, dr)) === 0) {
+                                            //  #
+                                            // #^#
+                                            d = db;
                                         } else {
-                                            if (matrixGet(map, shiftDir(pos, dr)) === 0) {
-                                                //  #
-                                                // .^#
-                                                d = dl;
-                                            } else {
-                                                //  #
-                                                // .^.
-                                                d = -1; //futher action is unknown, let it stay here
-                                            }
+                                            //  #
+                                            // #^.
+                                            d = dr;
                                         }
                                     } else {
-                                        if (matrixGet(map, shiftDir(pos, dl)) === 0 && matrixGet(map, shiftDir(pos, dr)) === 0) {
+                                        if (matrixGet(map, shiftDir(pos, dr)) === 0) {
+                                            //  #
+                                            // .^#
+                                            d = dl;
+                                        } else {
+                                            //  #
+                                            // .^.
+                                            d = findGhostStrat([dr, [dl, 0]]);
+                                        }
+                                    }
+                                } else {
+                                    if (matrixGet(map, shiftDir(pos, dl)) === 0) {
+                                        if (matrixGet(map, shiftDir(pos, dr)) === 0) {
                                             //  .
                                             // #^#
 
                                             // d = d;
                                         } else {
-                                            d = -1;
+                                            //  .
+                                            // #^.
+                                            d = findGhostStrat([d, [dr, 0]]);
+                                        }
+                                    } else {
+
+                                        if (matrixGet(map, shiftDir(pos, dr)) === 0) {
+                                            //  .
+                                            // .^#
+                                            d = findGhostStrat([d, [dl, 0]]);
+                                        } else {
+                                            //  .
+                                            // .^.
+                                            d = findGhostStrat([d, [dl, [dr, 0]]]);
                                         }
                                     }
                                 }
 
                                 if (module) console.log("ghost move: ", myPos, pos, d);
 
-                                if (d >= 0) {
-                                    pos = shiftDir(pos, d);
-                                    handleCollision(); //myVitality - (gt-t) !
-                                }
+                                pos = shiftDir(pos, d);
+                                handleCollision(); //myVitality - (gt-t) !
+
                                 return 0;
                             }
 
@@ -711,7 +770,7 @@ if (module) { // Node.js
         }
 
         var FS = require('fs'),
-            worldState = readMap('map2.txt'),
+            worldState = readMap('map3.txt'),
             res = step(0, worldState);
 
         console.log("res: ", JSON.stringify(res));
