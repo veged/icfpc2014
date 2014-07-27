@@ -357,7 +357,8 @@ function step(aiState, worldState) {
         return val;
     }
 
-    map = listFromSlowList(map, convertMapRow);
+    //map = listFromSlowList(map, convertRow);
+    map = matrixFromSlowMatrix(map);
     //map = applyStatusesToMap(map, ghostsStatuses, fruitStatus);
 
     /*
@@ -373,7 +374,7 @@ function step(aiState, worldState) {
         var cell = matrixGet(map, pos);
         if (cell === 1 || cell === 5 || cell === 6) return 127;
         if (cell === 2 || cell === 3 || cell === 4) return 137;
-        if (cell === 6 && lmVitality > t) return 137;
+        //if (cell === 6 && lmVitality > t) return 137;
         return -1;
     }
 
