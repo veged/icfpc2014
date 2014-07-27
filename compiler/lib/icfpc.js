@@ -4,9 +4,10 @@ var estraverse = require('estraverse');
 
 var Scope = require('./scope').Scope;
 
-function Compiler(source) {
+function Compiler(source, options) {
   this.source = source;
-  this.ast = esprima.parse(source, { range: true });
+  this.options = options || {};
+  this.ast = esprima.parse(source, { range: true, loc: options.lines });
   this.current = null;
   this.out = [];
 
@@ -138,6 +139,11 @@ Compiler.prototype.evalScopes = function evalScopes() {
 
 Compiler.prototype.visitStmt = function visitStmt(stmt) {
   var pos = this.out.length;
+  if (this.options.lines && stmt.loc) {
+    this.add([ 'LDC', stmt.loc.start.line ]);
+    this.add([ 'DBUG' ]);
+  }
+
   if (stmt.type === 'ExpressionStatement') {
     this.visitExpr(stmt.expression, stmt);
   } else if (stmt.type === 'FunctionDeclaration') {

@@ -16,7 +16,11 @@ function read(cb) {
 }
 
 read(function(src) {
-  var c = new icfpc.Compiler(src);
+  var c = new icfpc.Compiler(src, {
+    lines: process.argv.some(function(arg) {
+      return arg === '--lines';
+    })
+  });
 
   console.log(c.compile());
 });
