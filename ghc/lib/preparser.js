@@ -69,11 +69,13 @@ Preparser.prototype.visitLabel = function visitLabel(name) {
 };
 
 Preparser.prototype.visitInstr = function visitInstr(instr) {
-  var p = instr.match(/^(?:([\w\d_]+)\s*=\s*)?([\w\d]+)\s*([\.\w\d_,\s]*)/i);
+  var p = instr.match(
+    /^(?:([\[\]\(\),\s\w\d_]+)\s*=\s*)?([\w\d]+)\s*([\.\[\]\w\d_,\s]*)/i
+  );
   if (!p)
-    return;
+    throw new Error('Mistake in instruction: ' + instr);
 
-  var out = p[1];
+  var out = p[1] && p[1].trim();
   var type = p[2];
   var args = p[3].split(/\s*,\s*/g);
 
@@ -82,6 +84,63 @@ Preparser.prototype.visitInstr = function visitInstr(instr) {
   } else {
     assert(args.every(function(arg) { return arg.length !== 0 }), 'empty arg');
   }
+
+  // Skip output
+  if (out === '_')
+    out = null;
+
+  // Multi-var
+  if (/^\(.*\)$/.test(out)) {
+    var memsets = [];
+
+    out = out.slice(1, -1).split(/\s*,\s*/);
+    out.forEach(function(out, i) {
+      var str;
+
+      if (i === 0)
+        str = type + '_' + i + ' ' + args.join(', ');
+      else
+        str = type + '_' + i;
+
+      // Memory set
+      if (/^\[\d+\]$/.test(out)) {
+        var instr = this.visitInstr(str);
+
+        memsets.push({ to: out.slice(1, -1) | 0, from: instr.id });
+      // Normal output
+      } else {
+        this.visitInstr(out + ' = ' + str);
+      }
+    }, this);
+
+    for (var i = 0; i < memsets.length; i++) {
+      this.current.add(
+        'memset',
+        null,
+        [
+          { type: 'js', value: memsets[i].to },
+          { type: 'instruction', id: memsets[i].from }
+        ]
+      );
+    }
+
+    return;
+  }
+  assert(!/[\(\)]/.test(out));
+
+  // Memory set
+  if (/^\[\d+\]$/.test(out)) {
+    var instr = this.visitInstr(type + ' ' + args.join(', '));
+    return this.current.add(
+      'memset',
+      null,
+      [
+        { type: 'js', value: out.slice(1, -1) | 0 },
+        { type: 'instruction', id: instr.id }
+      ]
+    );
+  }
+  assert(!/[\[\]]/.test(out));
 
   // Just a literal
   if (type == (type | 0)) {
@@ -112,9 +171,9 @@ Preparser.prototype.visitInstr = function visitInstr(instr) {
     return { type: 'variable', id: arg };
   });
 
-  this.current.add(type, out, args, label);
+  var res = this.current.add(type, out, args, label);
   if (!label)
-    return;
+    return res;
 
   // Add jump
   if (this.labels[label]) {
@@ -129,6 +188,8 @@ Preparser.prototype.visitInstr = function visitInstr(instr) {
 
   if (!this.current.ended)
     this.current = this.current.after();
+
+  return res;
 };
 
 function Block(preparser, id) {
@@ -271,12 +332,16 @@ Block.prototype.split = function split() {
 };
 
 Block.prototype.add = function add(type, out, inputs, label) {
-  if (this.ended)
-    return;
+  var res = new Instruction(this, type, out, inputs, label);
 
-  this.instructions.push(new Instruction(this, type, out, inputs, label));
+  if (this.ended)
+    return res;
+
+  this.instructions.push(res);
   if (type === 'hlt')
     this.ended = true;
+
+  return res;
 };
 
 function Instruction(block, type, output, inputs, label) {
