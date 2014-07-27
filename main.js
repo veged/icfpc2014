@@ -301,9 +301,9 @@ function mod(n, d) {
     return n - ((n / d) | 0) * d;
 }
 
-var _next = 1;
+var _next = 42;
 function rand() {
-    _next = mod(_next * 1103515245 + 12345, 4294967296);
+    _next = (_next * 1103515245 + 12345) | 0;
     return mod(((_next / 65536) | 0), 32768);
 }
 
