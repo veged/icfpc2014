@@ -129,14 +129,18 @@ function genMatrix(X, Y, f) {
 }
 
 function shiftDir(pos, d) {
-    if (d === 0) {
-        return [pos[0], pos[1] - 1];
-    } else if (d === 1) {
-        return [pos[0] + 1, pos[1]];
-    } else if (d === 2) {
-        return [pos[0], pos[1] + 1];
+    if ((d / 2) | 0) {
+        if (d === 2) { //down
+            return [pos[0], pos[1] + 1];
+        } else { //left
+            return [pos[0] - 1, pos[1]];
+        }
     } else {
-        return [pos[0] - 1, pos[1]];
+        if (d) { //right
+            return [pos[0] + 1, pos[1]];
+        } else { //up
+            return [pos[0], pos[1] - 1];
+        }
     }
 }
 
@@ -312,6 +316,9 @@ function oppositeDir(d) {
 }
 
 function step(aiState, worldState) {
+
+    var _4FastList = [4, [[0, 0], [0, 0]] ];
+
     worldState = tplGetter(worldState, 4);
     var map = worldState(0),
         lmStatus = tplGetter(worldState(1), 5),
@@ -357,12 +364,13 @@ function step(aiState, worldState) {
         if (cell === 2)
             return 1e4;
         if (cell === 3) {
-            if (lmVitality > t) {
+            return 1e3;
+            /*if (lmVitality > t) {
                 return 0;
             } else {
                 if (fruitStatus > 0) return 5e5;
                 return 5e4;
-            }
+            }*/
         }
         if (cell === 4 && fruitStatus > 0)
             return 1e6; // TODO: use map size
@@ -381,6 +389,11 @@ function step(aiState, worldState) {
         return 0;
     }
     var smell = genMatrix(X, Y, genSmell);
+
+    function genMaze() {
+        return 0;
+    }
+    var maze = genMatrix(X, Y, genMaze);
 
     function calcPaths() {
 
@@ -524,6 +537,9 @@ function step(aiState, worldState) {
                             }
 
                             function findGhostStrat(ds) {
+                                if (typeof ds[1] === 'number') {
+                                    return ds[0];
+                                }
                                 var bestD = 0;
                                 var bestScore = -3;
                                 while (typeof ds === 'object') {
@@ -541,61 +557,82 @@ function step(aiState, worldState) {
 
                             function handleMove() {
 
-                                var dl = d + 1;
-                                if (dl === 4)
-                                    dl = 0;
-                                var dr = d - 1;
-                                if (dl === -1)
-                                    dl = 3;
-                                var db = oppositeDir(d);
+                                var mz = matrixGet(maze, pos);
+                                var ds = 0;
 
-                                if (matrixGet(map, shiftDir(pos, d)) === 0) { // wall
-                                    if (matrixGet(map, shiftDir(pos, dl)) === 0) {
-                                        if (matrixGet(map, shiftDir(pos, dr)) === 0) {
-                                            //  #
-                                            // #^#
-                                            d = db;
-                                        } else {
-                                            //  #
-                                            // #^.
-                                            d = dr;
-                                        }
-                                    } else {
-                                        if (matrixGet(map, shiftDir(pos, dr)) === 0) {
-                                            //  #
-                                            // .^#
-                                            d = dl;
-                                        } else {
-                                            //  #
-                                            // .^.
-                                            d = findGhostStrat([dr, [dl, 0]]);
-                                        }
-                                    }
-                                } else {
-                                    if (matrixGet(map, shiftDir(pos, dl)) === 0) {
-                                        if (matrixGet(map, shiftDir(pos, dr)) === 0) {
-                                            //  .
-                                            // #^#
-
-                                            // d = d;
-                                        } else {
-                                            //  .
-                                            // #^.
-                                            d = findGhostStrat([d, [dr, 0]]);
-                                        }
-                                    } else {
-
-                                        if (matrixGet(map, shiftDir(pos, dr)) === 0) {
-                                            //  .
-                                            // .^#
-                                            d = findGhostStrat([d, [dl, 0]]);
-                                        } else {
-                                            //  .
-                                            // .^.
-                                            d = findGhostStrat([d, [dl, [dr, 0]]]);
-                                        }
-                                    }
+                                if (typeof mz === 'object') {
+                                    ds = listGet(mz, d);
                                 }
+
+                                if (typeof ds === 'number') {
+
+                                    // no cache found :(
+
+                                    var dl = d + 1;
+                                    if (dl === 4)
+                                        dl = 0;
+                                    var dr = d - 1;
+                                    if (dr === -1)
+                                        dr = 3;
+                                    var db = oppositeDir(d);
+
+                                    if (matrixGet(map, shiftDir(pos, d)) === 0) { // wall
+                                        if (matrixGet(map, shiftDir(pos, dl)) === 0) {
+                                            if (matrixGet(map, shiftDir(pos, dr)) === 0) {
+                                                //  #
+                                                // #^#
+                                                ds = [db, 0];
+                                            } else {
+                                                //  #
+                                                // #^.
+                                                ds = [dr, 0];
+                                            }
+                                        } else {
+                                            if (matrixGet(map, shiftDir(pos, dr)) === 0) {
+                                                //  #
+                                                // .^#
+                                                ds = [dl, 0];
+                                            } else {
+                                                //  #
+                                                // .^.
+                                                ds = [dr, [dl, 0]];
+                                            }
+                                        }
+                                    } else {
+                                        if (matrixGet(map, shiftDir(pos, dl)) === 0) {
+                                            if (matrixGet(map, shiftDir(pos, dr)) === 0) {
+                                                //  .
+                                                // #^#
+                                                ds = [d, 0];
+                                            } else {
+                                                //  .
+                                                // #^.
+                                                ds = [d, [dr, 0]];
+                                            }
+                                        } else {
+
+                                            if (matrixGet(map, shiftDir(pos, dr)) === 0) {
+                                                //  .
+                                                // .^#
+                                                ds = [d, [dl, 0]];
+                                            } else {
+                                                //  .
+                                                // .^.
+                                                ds = [d, [dl, [dr, 0]]];
+                                            }
+                                        }
+                                    }
+                                    // save cache
+
+                                    if (typeof mz === 'number') {
+                                        mz = _4FastList;
+                                    }
+                                    mz = listSet(mz, d, ds);
+                                    maze = matrixSet(maze, pos, mz);
+                                }
+                                //else { console.log("ds from cache: ", pos, d, JSON.stringify(ds)); }
+
+                                d = findGhostStrat(ds);
 
                                 if (module) console.log("ghost move: ", myPos, pos, d);
 
@@ -665,7 +702,7 @@ function step(aiState, worldState) {
                 if (canGo(newPos) > 0) {
                     var t = matrixGet(paths, newPos);
                     if (t === t0 - 127 || t === t0 - 137) {
-                        var newVal = (myVal * 8 / 10) | 0; // ALPHA
+                        var newVal = (myVal * 7 / 10) | 0; // ALPHA
                         var oldVal = matrixGet(smell, newPos);
                         if (oldVal === 0 || oldVal < newVal) {
                             smell = matrixSet(smell, newPos, newVal);
@@ -770,7 +807,7 @@ if (module) { // Node.js
         }
 
         var FS = require('fs'),
-            worldState = readMap('map2.txt'),
+            worldState = readMap('map-classic.txt'),
             res = step(0, worldState);
 
         console.log("res: ", JSON.stringify(res));
