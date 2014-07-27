@@ -389,7 +389,7 @@ function step(aiState, worldState) {
         }
         if (cell === 4 && fruitStatus > 0)
             return 1e6; // TODO: use map size
-        return 0;
+        return 1e2;
     }
 
     var Y = listLength(map);
@@ -434,7 +434,7 @@ function step(aiState, worldState) {
             var myVitality = myStatus[0];
             toDo = popRes[1];
 
-            if (t < 127 * 40) {
+            if (t < 127 * 20) {
 
                 var d = 0;
                 while (d < 4) {
@@ -480,6 +480,7 @@ function step(aiState, worldState) {
                                 if (pos[0] === newPos[0] && pos[1] === newPos[1]) {
                                     if (vit === 0) {
                                         alive = 0;
+                                        scoreBonus = -1e4; // slight dead body smell
                                         if (module) console.log("moved on ghost!!", newPos);
                                     } else if (vit === 1) {
                                         pos = [7,2]; //FIXME!!!
@@ -516,6 +517,16 @@ function step(aiState, worldState) {
                                     } else if (dx > 0) {
                                         s = 1;
                                     } else if (dx < 0) {
+                                        s = -1;
+                                    } else {
+                                        s = -2;
+                                    }
+                                } else {
+                                    if (dx > 0) {
+                                        s = 2;
+                                    } else if (dy > 0) {
+                                        s = 1;
+                                    } else if (dy < 0) {
                                         s = -1;
                                     } else {
                                         s = -2;
@@ -626,18 +637,19 @@ function step(aiState, worldState) {
 
                         var newGhs = slowListMap(ghs, updateGhostStatus);
 
+                        if (scoreBonus) {
+                            smell = matrixSet(smell, newPos, scoreBonus);
+                            if (module) console.log("scoreBonus: ", scoreBonus, newPos);
+                        }
+
+                        paths = matrixSet(paths, newPos, t + dt);
+
                         if (alive) {
                             myNewVitality = myNewVitality - dt;
                             if (myNewVitality < 0)
                                 myNewVitality = 0;
 
                             var myNewStatus = [myNewVitality, 0]; //TODO: score?
-                            paths = matrixSet(paths, newPos, t + dt);
-
-                            if (scoreBonus) {
-                                smell = matrixSet(smell, newPos, scoreBonus);
-                                if (module) console.log("scoreBonus: ", scoreBonus, newPos);
-                            }
 
                             toDo = heapPush(toDo, [t + dt, [newPos, [newGhs, myNewStatus]]]);
                         } else {
@@ -668,7 +680,8 @@ function step(aiState, worldState) {
                     var t = matrixGet(paths, newPos);
                     if (t === t0 - 127 || t === t0 - 137) {
                         var newVal = (myVal * 8 / 10) | 0; // ALPHA
-                        if (matrixGet(smell, newPos) < newVal) {
+                        var oldVal = matrixGet(smell, newPos);
+                        if (oldVal === 0 || oldVal < newVal) {
                             smell = matrixSet(smell, newPos, newVal);
                         }
                     }
@@ -685,12 +698,13 @@ function step(aiState, worldState) {
     calcPaths();
     calcSmell();
 
-    var d = 0,
-        bestSmell = -1,
-        bestD = 0;
+    var d = 0;
+    var bestSmell = -1;
+    var bestD = 0;
     while (d < 4) {
-        var val = matrixGet(smell, shiftDir(myOrigPos, d));
-        if (val > bestSmell || val === bestSmell && mod(rand(), 2)) {
+        var xxx = shiftDir(myOrigPos, d);
+        var val = matrixGet(smell, xxx);
+        if (canGo(xxx) > 0 && (val > bestSmell || val === bestSmell && rand() > 16384)) {
             bestSmell = val;
             bestD = d;
             console.log(bestD);
@@ -770,7 +784,7 @@ if (module) { // Node.js
         }
 
         var FS = require('fs'),
-            worldState = readMap('map3.txt'),
+            worldState = readMap('map2.txt'),
             res = step(0, worldState);
 
         console.log("res: ", JSON.stringify(res));
