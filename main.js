@@ -318,6 +318,7 @@ function step(aiState, worldState) {
         lmVitality = lmStatus(0),
         ghostsStatuses = worldState(2),
         fruitStatus = worldState(3),
+        ghostsStartingPositions = 0,
         unplacedGhosts = ghostsStatuses;
 
     function convertMapRow(x, j) {
@@ -347,6 +348,9 @@ function step(aiState, worldState) {
                     ghostsInRow = [ghost, ghostsInRow];
                 }
             }
+            if (x === 6) {
+                ghostsStartingPositions = [[i, j], ghostsStartingPositions];
+            }
             if (ghostInCell === 6) return 6;
             if (x === 6) return 1;
             return x;
@@ -355,9 +359,10 @@ function step(aiState, worldState) {
         return val;
     }
 
-    map = listFromSlowList(map, convertRow);
+    map = listFromSlowList(map, convertMapRow);
     //map = matrixFromSlowMatrix(map);
-    //map = applyStatusesToMap(map, ghostsStatuses, fruitStatus);
+
+    ghostsStartingPositions = listFromSlowList(ghostsStartingPositions, id);
 
     /*
      * 0: Wall (`#`)
@@ -410,12 +415,16 @@ function step(aiState, worldState) {
         paths = matrixSet(paths, myPos, 0);
 
         var toDo = 0;
-        function prepareGhostStatus(gh) {
-            return [1, gh]; // new ghost state - 4-tuple (time-to-move, standard state...)
-            //TODO: track ghost id
-            //TODO: track real time-to-move for each ghost!
+        function prepareGhostsStatuses(ghs) {
+            var id = -1;
+            function prepareGhostStatus(gh) {
+                id = id + 1;
+                return [id, [1, gh]]; // new ghost state - 5-tuple (id, time-to-move, standard state...)
+                //TODO: track real time-to-move for each ghost!
+            }
+            return slowListMap(ghostsStatuses, prepareGhostStatus);
         }
-        var ghs = slowListMap(ghostsStatuses, prepareGhostStatus);
+        var ghs = prepareGhostsStatuses(ghostsStatuses);
         var myStatus = [lmVitality, 0];
         // (vitality, score)
         // TODO: track ghost eating multiplier!
@@ -460,6 +469,8 @@ function step(aiState, worldState) {
                         function updateGhostStatus(state) {
                             if (module) console.log("gh: ", myPos, myVitality, JSON.stringify(state));
 
+                            var gi = state[0];
+                            state = state[1];
                             var gt = state[0];
                             //if (gt >= t + dt) { //FIXME: actually need a while loop here, ghost can make 2 moves: 130 < 137
                             //    return gh;
@@ -484,7 +495,7 @@ function step(aiState, worldState) {
                                         alive = 0;
                                         if (module) console.log("moved on ghost!!", newPos);
                                     } else if (vit === 1) {
-                                        pos = [7,2]; //FIXME!!!
+                                        pos = listGet(ghostsStartingPositions, gi);
                                         vit = 2;
                                         d = 2;
                                         scoreBonus = scoreBonus + 200000;
@@ -554,15 +565,18 @@ function step(aiState, worldState) {
 
                             if (gt < t + dt) {
                                 handleMove();
-                                //FIMXE:depends on ghost id
-                                var gdt = 130;
+                                var gn = gi;
+                                while(gn > 4) gn = gn - 4;
+                                var gdt;
                                 if (vit) { // frightened or invisible
-                                    gdt = 195;
+                                    gdt = 195 + (gn * 3);
+                                } else {
+                                    gdt = 130 + (gn * 2);
                                 }
                                 gt = gt + gdt;
                             }
 
-                            return [gt, [vit, [pos, d]]];
+                            return [gi, [gt, [vit, [pos, d]]]];
                         }
 
                         var newGhs = slowListMap(ghs, updateGhostStatus);
@@ -634,8 +648,8 @@ function step(aiState, worldState) {
         if (val > bestSmell || val === bestSmell && mod(rand(), 2)) {
             bestSmell = val;
             bestD = d;
-            console.log(bestD);
-            console.log(bestSmell);
+            //console.log(bestD);
+            //console.log(bestSmell);
         }
         d = d + 1;
     }
