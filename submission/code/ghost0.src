@@ -1,0 +1,310 @@
+; Just move to the player in a closest direction
+$seed = 0
+$px = 1
+$py = 2
+$gx = 3
+$gy = 4
+$dx = 5
+$dy = 6
+$up_cell = 7
+$down_cell = 8
+$left_cell = 9
+$right_cell = 10
+$vit = 11
+$cur_dir = 12
+$once = 13
+$counter = 14
+$cur_cell = 15
+$prev_cell = 16
+$next_cell = 17
+
+$min_catch_distance = 6
+$catch_distance = 2
+$wall_cell = 0
+$home_cell = 6
+$fright_mode = 1
+$just_started = h
+
+start:
+    xor $just_started, $just_started
+    jeq .not_once, [$once], 1
+
+once:
+    mov [$seed], 23
+    int 3
+    mul a, 11
+    add [$seed], a
+    mov [$once], 1
+    mov $just_started, 1
+    jeq .after_once, 0, 0
+
+not_once:
+    int 3
+    int 5
+    ; If we moved more than by a one cell and we are at home -
+    ; the player was just eaten
+    sub a, [$gx]
+    jeq .after_once, a, 1
+    jeq .after_once, a, 255
+    sub b, [$gy]
+    jeq .after_once, a, 1
+    jeq .after_once, a, 255
+
+    ; check if the cell is home
+    int 3
+    int 5
+    int 7
+    xor a, $home_cell
+    jgt .after_once, a, 0
+    mov $just_started, 1
+
+after_once:
+
+    ; get player's coordinates
+    int 1
+    mov [$px], a
+    mov [$py], b
+
+    ; get ghost's coordinates
+    int 3
+    int 5
+    mov [$gx], a
+    mov [$gy], b
+
+    int 3
+    int 6
+    mov [$vit], a
+    mov [$cur_dir], b
+
+    ; get up cells
+    mov a, [$gx]
+    mov b, [$gy]
+    dec b
+    int 7
+    mov [$up_cell], a
+
+    ; down
+    mov a, [$gx]
+    mov b, [$gy]
+    inc b
+    int 7
+    mov [$down_cell], a
+
+    ; left
+    mov a, [$gx]
+    mov b, [$gy]
+    dec a
+    int 7
+    mov [$left_cell], a
+
+    ; right
+    mov a, [$gx]
+    mov b, [$gy]
+    inc a
+    int 7
+    mov [$right_cell], a
+
+    ; current, and hold previous
+    mov a, [$gx]
+    mov b, [$gy]
+    int 7
+    mov [$prev_cell], [$cur_cell]
+    mov [$cur_cell], a
+
+    ; If just started - ignore available directions
+    jeq .not_fright, $just_started, 1
+
+    ; count ways to go
+    xor a, a
+    jeq .free_up, [$up_cell], $wall_cell
+    inc a
+free_up:
+    jeq .free_down, [$down_cell], $wall_cell
+    inc a
+free_down:
+    jeq .free_left, [$left_cell], $wall_cell
+    inc a
+free_left:
+    jeq .free_right, [$right_cell], $wall_cell
+    inc a
+free_right:
+    jlt .no_way, a, 3
+
+    ; check fright mode
+    mov a, [$vit]
+    xor a, $fright_mode
+    jgt .not_fright, a, 0
+
+fright:
+    ; swap coordinates to run from the player
+    mov a, [$gx]
+    mov b, [$gy]
+    mov [$gx], [$px]
+    mov [$gx], [$py]
+    mov [$px], a
+    mov [$py], b
+
+not_fright:
+    ; compute dx
+    jgt .dx_gt_x, [$gx], [$px]
+
+dx_lte_x:
+    mov [$dx], [$px]
+    sub [$dx], [$gx]
+    jeq .dx_join, 0, 0
+
+dx_gt_x:
+    mov [$dx], [$gx]
+    sub [$dx], [$px]
+
+dx_join:
+    jgt .dy_gt_y, [$gy], [$py]
+
+dy_lte_y:
+    mov [$dy], [$py]
+    sub [$dy], [$gy]
+    jeq .we_have_dx_and_dy, 0, 0
+
+dy_gt_y:
+    mov [$dy], [$gy]
+    sub [$dy], [$px]
+
+we_have_dx_and_dy:
+    ; Check if total distance is small
+    mov a, [$dx]
+    add a, [$dy]
+    jgt .surround, a, $min_catch_distance
+
+just_catch_him:
+
+    ; Find biggest difference and try to compensate it
+    jgt .move_x, [$dx], [$dy]
+
+move_y:
+    ; move in y
+    jgt .move_y_gt_p, [$gy], [$py]
+
+move_y_lte_p:
+    ; move in x, if blocked
+    jeq .move_x, [$down_cell], 0
+
+    ; down
+    mov a, 2
+    mov [$next_cell], [$down_cell]
+    jeq .got_dir, 0, 0
+
+move_y_gt_p:
+    ; move in x, if blocked
+    jeq .move_x, [$up_cell], 0
+
+    ; up
+    mov a, 0
+    mov [$next_cell], [$up_cell]
+    jeq .got_dir, 0, 0
+
+move_x:
+    ; move in x
+    jgt .move_x_gt_p, [$gx], [$px]
+
+move_x_lte_p:
+    ; move in y, if blocked
+    jeq .move_y, [$right_cell], 0
+
+    ; right
+    mov a, 1
+    mov [$next_cell], [$right_cell]
+    jeq .got_dir, 0, 0
+
+move_x_gt_p:
+    ; move in y, if blocked
+    jeq .move_y, [$left_cell], 0
+
+    ; left
+    mov a, 3
+    mov [$next_cell], [$left_cell]
+
+    ; fall-through
+
+got_dir:
+    ; check if left the home
+    jeq .home, [$next_cell], $home_cell
+
+after_home:
+    ; Can't swap direction
+    mov b, a
+    add b, 2
+    and b, 3
+    jeq .swap_dir, [$cur_dir], b
+
+    ; Continue movement
+    jeq .no_way, [$cur_dir], a
+
+    ; Ok now, just move
+    int 0
+no_way:
+    hlt
+
+home:
+    inc [$seed]
+    mov a, [$seed]
+    and a, 3
+    jeq .after_home, 0, 0
+
+swap_dir:
+    jeq .move_y, [$cur_dir], 1
+    jeq .move_y, [$cur_dir], 3
+    jeq .move_x, [$cur_dir], 0
+    jeq .move_x, [$cur_dir], 2
+    hlt
+
+surround:
+    ; Calculate surround coordinate from a ghost index
+    int 3
+
+    ; randomize things a little (0,1,2,3) => (2,1,0,3)
+    add a, 2
+    mul a, 7
+
+    ; a %= 4
+surround_mod:
+    jlt .surround_mod_end, a, 4
+    sub a, 4
+    jeq .surround_mod, 0, 0
+
+surround_mod_end:
+    jeq .surround_up, a, 0
+    jeq .surround_right, a, 1
+    jeq .surround_down, a, 2
+
+surround_left:
+    sub [$px], $catch_distance
+    jeq .surround_join, 0, 0
+
+surround_down:
+    add [$py], $catch_distance
+    jeq .surround_join, 0, 0
+
+surround_right:
+    add [$px], $catch_distance
+    jeq .surround_join, 0, 0
+
+surround_up:
+    sub [$py], $catch_distance
+
+surround_join:
+    mov a, [$px]
+    and a, 128
+    jeq .px_not_negative, a, 0
+negative_px:
+    mov [$px], 0
+
+px_not_negative:
+    mov a, [$py]
+    and a, 128
+    jeq .py_not_negative, a, 0
+negative_py:
+    mov [$py], 0
+
+py_not_negative:
+    ; Move to the player
+    jeq .just_catch_him, 0, 0

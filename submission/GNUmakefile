@@ -7,6 +7,7 @@ submission.tar.gz: solution/lambdaman.gcc solution/ghost0.ghc README
 	tar -czf $@ solution code README
 
 solution/lambdaman.gcc: code/lambdaman.js
+	cd code/gcc && npm install
 	code/gcc/bin/gcc < $< > $@
 
 solution/ghost0.ghc: code/ghost0.src
