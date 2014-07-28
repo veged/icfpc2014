@@ -418,12 +418,8 @@ Compiler.prototype.visitLogic = function visitLogic(expr) {
   this.visitExpr(expr.right);
   if (op === '&&') {
     this.add([ 'MUL' ]);
-    this.add([ 'LDC', 1 ]);
-    this.add([ 'CEQ' ]);
   } else {
     this.add([ 'ADD' ]);
-    this.add([ 'LDC', 0 ]);
-    this.add([ 'CGT' ]);
   }
 }
 
