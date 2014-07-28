@@ -29,122 +29,202 @@ LDC 0 ; init_ctx=27
 LDC 0 ; init_ctx=28
 LDC 0 ; init_ctx=29
 LDC 0 ; init_ctx=30
-LDF 34
-AP 31
+LDC 0 ; init_ctx=31
+LDC 0 ; init_ctx=32
+LDC 0 ; init_ctx=33
+LDC 0 ; init_ctx=34
+LDC 0 ; init_ctx=35
+LDC 0 ; init_ctx=36
+LDC 0 ; init_ctx=37
+LDC 0 ; init_ctx=38
+LDC 0 ; init_ctx=39
+LDC 0 ; init_ctx=40
+LDC 0 ; init_ctx=41
+LDC 0 ; init_ctx=42
+LDC 0 ; init_ctx=43
+LDC 0 ; init_ctx=44
+LDC 0 ; init_ctx=45
+LDC 0 ; init_ctx=46
+LDC 0 ; init_ctx=47
+LDC 0 ; init_ctx=48
+LDC 0 ; init_ctx=49
+LDC 0 ; init_ctx=50
+LDC 0 ; init_ctx=51
+LDC 0 ; init_ctx=52
+LDF 56
+AP 53
 RTN
-LDF 100 ; (js: `function listGet(...`) (js: `function listGet(...`)
+LDF 186 ; (js: `function listGet(...`) (js: `if (module) { // ...`)
 ST 0 0
-LDF 148 ; (js: `function listSet(...`)
+LDF 228 ; (js: `function listSet(...`)
 ST 0 1
-LDF 247 ; (js: `function listLeng...`)
+LDF 327 ; (js: `function listLeng...`)
 ST 0 2
-LDF 250 ; (js: `function slowList...`)
+LDF 330 ; (js: `function slowList...`)
 ST 0 3
-LDF 272 ; (js: `function listFrom...`)
+LDF 352 ; (js: `function listFrom...`)
 ST 0 4
-LDF 292 ; (js: `function listIter...`)
+LDF 372 ; (js: `function listIter...`)
 ST 0 5
-LDF 308 ; (js: `function matrixSe...`)
+LDF 388 ; (js: `function matrixSe...`)
 ST 0 6
-LDF 324 ; (js: `function matrixGe...`)
+LDF 404 ; (js: `function matrixGe...`)
 ST 0 7
-LDF 334 ; (js: `function matrixIt...`)
+LDF 414 ; (js: `function matrixIt...`)
 ST 0 8
-LDF 347 ; (js: `function genList(...`)
+LDF 427 ; (js: `function genList(...`)
 ST 0 9
-LDF 359 ; (js: `function genMatri...`)
+LDF 439 ; (js: `function genMatri...`)
 ST 0 10
-LDF 370 ; (js: `function shiftDir...`)
+LDF 450 ; (js: `function shiftDir...`)
 ST 0 11
-LDF 419 ; (js: `function heapPop(...`)
+LDF 499 ; (js: `function heapPop(...`)
 ST 0 12
-LDF 535 ; (js: `function heapSize...`)
+LDF 615 ; (js: `function heapSize...`)
 ST 0 13
-LDF 544 ; (js: `function heapPush...`)
+LDF 624 ; (js: `function heapPush...`)
 ST 0 14
-LDF 630 ; (js: `function heapSort...`)
+LDF 710 ; (js: `function heapSort...`)
 ST 0 15
-LDF 678 ; (js: `function flatRow(...`)
+LDF 758 ; (js: `function flatRow(...`)
 ST 0 16
-LDF 693 ; (js: `function flatMatr...`)
+LDF 773 ; (js: `function flatMatr...`)
 ST 0 17
-LDF 705 ; (js: `function flatAndS...`)
+LDF 785 ; (js: `function flatAndS...`)
 ST 0 18
-LDF 717 ; (js: `function run(map,...`)
+LDF 797 ; (js: `function run(map,...`)
 ST 0 19
-LDF 718 ; (js: `function id(x, i)...`)
+LDF 798 ; (js: `function id(x, i)...`)
 ST 0 20
-LDF 720 ; (js: `function convertR...`)
+LDF 800 ; (js: `function convertR...`)
 ST 0 21
-LDF 731 ; (js: `function matrixFr...`)
+LDF 811 ; (js: `function matrixFr...`)
 ST 0 22
-LDF 736 ; (js: `function tplGet(t...`)
+LDF 816 ; (js: `function tplGet(t...`)
 ST 0 23
-LDF 772 ; (js: `function tplGette...`)
+LDF 850 ; (js: `function tplGette...`)
 ST 0 24
-LDF 780 ; (js: `function mod(n, d...`)
+LDF 858 ; (js: `function mod(n, d...`)
 ST 0 25
-LDF 788 ; (js: `function rand() {...`)
+LDF 866 ; (js: `function rand() {...`)
 ST 0 26
-LDF 801 ; (js: `function slowList...`)
+LDF 879 ; (js: `function slowList...`)
 ST 0 27
-LDF 817 ; (js: `function opposite...`)
+LDF 895 ; (js: `function opposite...`)
 ST 0 28
-LDF 831 ; (js: `function step(aiS...`)
+LDF 909 ; (js: `function convertM...`)
 ST 0 29
-LDC 42 ; literal (js: `var _next = 42;`)
+LDF 923 ; (js: `function genZero(...`)
 ST 0 30
-LDC 0 ; literal (js: `[0, step];`)
+LDF 925 ; (js: `function setMazeC...`)
+ST 0 31
+LDF 1121 ; (js: `function canGo(po...`)
+ST 0 32
+LDF 1160 ; (js: `function setMaze(...`)
+ST 0 33
+LDF 1247 ; (js: `function step(aiS...`)
+ST 0 34
+LD 1 0 ; (js: `var globalMap = g...`)
+CAR
+ST 0 35
+LDC 42 ; literal (js: `var _next = 42;`)
+ST 0 43
+LDC 0 ; literal (js: `var ghostsStartin...`)
+ST 0 44
+LD 0 35 ; (js: `globalMap = listF...`)
 LD 0 29
+LD 0 4
+AP 2
+ST 0 35
+LD 0 44 ; (js: `ghostsStartingPos...`)
+LD 0 20
+LD 0 4
+AP 2
+ST 0 44
+LD 0 35 ; (js: `var Y = listLengt...`)
+LD 0 2
+AP 1
+ST 0 45
+LD 0 35 ; (js: `var X = listLengt...`)
+LDC 0 ; literal
+LD 0 0
+AP 2
+LD 0 2
+AP 1
+ST 0 46
+LD 0 46 ; (js: `var emptySmell = ...`)
+LD 0 45
+LD 0 30
+LD 0 10
+AP 3
+ST 0 47
+LD 0 47 ; (js: `var emptyMaze = e...`)
+ST 0 48
+LD 0 47 ; (js: `var emptyPaths = ...`)
+ST 0 49
+LD 0 35 ; (js: `var map = globalMap;`)
+ST 0 50
+LDC 4 ; literal (js: `var _4FastList = ...`)
+LDC 0 ; literal
+LDC 0 ; literal
+CONS
+LDC 0 ; literal
+LDC 0 ; literal
+CONS
+CONS
+CONS
+ST 0 51
+LD 0 48 ; (js: `var maze = emptyM...`)
+ST 0 52
+LD 0 33 ; (js: `setMaze();`)
+AP 0
+ATOM
+TSEL 182 182 ; cleanup
+LDC 0 ; literal (js: `[0, step];`)
+LD 0 34
 CONS
 RTN
-LDC 0 ; init_ctx=0
-LDC 0 ; init_ctx=1
-LDC 0 ; init_ctx=2
-LDF 106
-AP 3
-RTN
-LD 1 0 ; (js: `var size = list2[0];`) (js: `{    var size = l...`)
+LD 0 0 ; (js: `listGet_size = li...`) (js: `{    listGet_size...`)
 CAR
-ST 0 0
-LD 1 0 ; (js: `var list = list2[1];`)
+ST 1 36
+LD 0 0 ; (js: `list = list[1];`)
 CDR
-ST 0 1
-LDC 1 ; (js: `while (size !== 1...`)
-LD 0 0
+ST 0 0
+LDC 1 ; (js: `while (listGet_si...`)
+LD 1 36
 LDC 1 ; literal
 CEQ
 SUB
-TSEL 118 146 ; while test
-LD 0 0 ; (js: `m = (size / 2) | 0;`) (js: `{        m = (siz...`)
+TSEL 198 226 ; while test
+LD 1 36 ; (js: `listGet_m = (list...`) (js: `{        listGet_...`)
 LDC 2 ; literal
 DIV
-ST 0 2
-LD 0 2 ; (js: `if (n < m) {     ...`)
-LD 1 1
+ST 1 37
+LD 1 37 ; (js: `if (n < listGet_m...`)
+LD 0 1
 CGT
-TSEL 126 133 ; if test
-LD 0 1 ; (js: `list = list[0];`) (js: `{            list...`)
+TSEL 206 213 ; if test
+LD 0 0 ; (js: `list = list[0];`) (js: `{            list...`)
 CAR
-ST 0 1
-LD 0 2 ; (js: `size = m;`)
 ST 0 0
+LD 1 37 ; (js: `listGet_size = li...`)
+ST 1 36
 LDC 0 ; if-cons-jump
-TSEL 144 144
-LD 0 1 ; (js: `list = list[1];`) (js: `{            list...`)
+TSEL 224 224
+LD 0 0 ; (js: `list = list[1];`) (js: `{            list...`)
 CDR
-ST 0 1
-LD 0 0 ; (js: `size = size - m;`)
-LD 0 2
-SUB
 ST 0 0
-LD 1 1 ; (js: `n = n - m;`)
-LD 0 2
+LD 1 36 ; (js: `listGet_size = li...`)
+LD 1 37
 SUB
-ST 1 1
+ST 1 36
+LD 0 1 ; (js: `n = n - listGet_m;`)
+LD 1 37
+SUB
+ST 0 1
 LDC 0
-TSEL 112 112
-LD 0 1 ; (js: `return list;`)
+TSEL 192 192
+LD 0 0 ; (js: `return list;`)
 RTN
 LDC 0 ; init_ctx=0
 LDC 0 ; init_ctx=1
@@ -152,34 +232,34 @@ LDC 0 ; init_ctx=2
 LDC 0 ; init_ctx=3
 LDC 0 ; init_ctx=4
 LDC 0 ; init_ctx=5
-LDF 157
+LDF 237
 AP 6
 RTN
-LD 1 0 ; (js: `var size = list[0];`) (js: `{    var size = l...`)
+LD 1 0 ; (js: `var listSet_size ...`) (js: `{    var listSet_...`)
 CAR
 ST 0 0
-LD 0 0 ; (js: `var s = size;`)
+LD 0 0 ; (js: `var listSet_s = l...`)
 ST 0 1
 LD 1 0 ; (js: `list = list[1];`)
 CDR
 ST 1 0
-LDC 0 ; literal (js: `var stack = 0;`)
+LDC 0 ; literal (js: `var listSet_stack...`)
 ST 0 2
-LD 0 1 ; (js: `while (s > 1) {  ...`)
+LD 0 1 ; (js: `while (listSet_s ...`)
 LDC 1 ; literal
 CGT
-TSEL 171 213 ; while test
-LD 0 1 ; (js: `var m = (s / 2) | 0;`) (js: `{        var m = ...`)
+TSEL 251 293 ; while test
+LD 0 1 ; (js: `var listSet_m = (...`) (js: `{        var list...`)
 LDC 2 ; literal
 DIV
 ST 0 3
-LD 0 3 ; (js: `if (n < m) {     ...`)
+LD 0 3 ; (js: `if (n < listSet_m...`)
 LD 1 1
 CGT
-TSEL 179 193 ; if test
-LD 0 3 ; (js: `s = m;`) (js: `{            s = ...`)
+TSEL 259 273 ; if test
+LD 0 3 ; (js: `listSet_s = listS...`) (js: `{            list...`)
 ST 0 1
-LDC 1 ; literal (js: `stack = [[1, list...`)
+LDC 1 ; literal (js: `listSet_stack = [...`)
 LD 1 0
 CDR
 CONS
@@ -190,16 +270,16 @@ LD 1 0 ; (js: `list = list[0];`)
 CAR
 ST 1 0
 LDC 0 ; if-cons-jump
-TSEL 211 211
-LD 0 1 ; (js: `s = s - m;`) (js: `{            s = ...`)
+TSEL 291 291
+LD 0 1 ; (js: `listSet_s = listS...`) (js: `{            list...`)
 LD 0 3
 SUB
 ST 0 1
-LD 1 1 ; (js: `n = n - m;`)
+LD 1 1 ; (js: `n = n - listSet_m;`)
 LD 0 3
 SUB
 ST 1 1
-LDC 0 ; literal (js: `stack = [[0, list...`)
+LDC 0 ; literal (js: `listSet_stack = [...`)
 LD 1 0
 CAR
 CONS
@@ -210,38 +290,38 @@ LD 1 0 ; (js: `list = list[1];`)
 CDR
 ST 1 0
 LDC 0
-TSEL 167 167
-LD 1 2 ; (js: `var res = x;`)
+TSEL 247 247
+LD 1 2 ; (js: `var listSet_res = x;`)
 ST 0 4
-LD 0 2 ; (js: `while (typeof sta...`)
+LD 0 2 ; (js: `while (typeof lis...`)
 ATOM
 LDC 0
 CEQ
-TSEL 220 243 ; while test
-LD 0 2 ; (js: `var head = stack[0];`) (js: `{        var head...`)
+TSEL 300 323 ; while test
+LD 0 2 ; (js: `var head = listSe...`) (js: `{        var head...`)
 CAR
 ST 0 5
 LD 0 5 ; (js: `if (head[0]) {   ...`)
 CAR
-TSEL 226 233 ; if test
-LD 0 4 ; (js: `res = [res, head[...`) (js: `{            res ...`)
+TSEL 306 313 ; if test
+LD 0 4 ; (js: `listSet_res = [li...`) (js: `{            list...`)
 LD 0 5
 CDR
 CONS
 ST 0 4
 LDC 0 ; if-cons-jump
-TSEL 238 238
-LD 0 5 ; (js: `res = [head[1], r...`) (js: `{            res ...`)
+TSEL 318 318
+LD 0 5 ; (js: `listSet_res = [he...`) (js: `{            list...`)
 CDR
 LD 0 4
 CONS
 ST 0 4
-LD 0 2 ; (js: `stack = stack[1];`)
+LD 0 2 ; (js: `listSet_stack = l...`)
 CDR
 ST 0 2
 LDC 0
-TSEL 215 215
-LD 0 0 ; (js: `return [size, res];`)
+TSEL 295 295
+LD 0 0 ; (js: `return [listSet_s...`)
 LD 0 4
 CONS
 RTN
@@ -249,7 +329,7 @@ LD 0 0 ; (js: `return list[0];`) (js: `{    return list[...`)
 CAR
 RTN
 LDC 0 ; init_ctx=0
-LDF 254
+LDF 334
 AP 1
 RTN
 LDC 0 ; literal (js: `var n = 0;`) (js: `{    var n = 0;  ...`)
@@ -258,7 +338,7 @@ LD 1 0 ; (js: `while (typeof lis...`)
 ATOM
 LDC 0
 CEQ
-TSEL 261 270 ; while test
+TSEL 341 350 ; while test
 LD 1 0 ; (js: `list = list[1];`) (js: `{        list = l...`)
 CDR
 ST 1 0
@@ -267,15 +347,15 @@ LDC 1 ; literal
 ADD
 ST 0 0
 LDC 0
-TSEL 256 256
+TSEL 336 336
 LD 0 0 ; (js: `return n;`)
 RTN
 LDC 0 ; init_ctx=0
 LDC 0 ; init_ctx=1
-LDF 277
+LDF 357
 AP 2
 RTN
-LDF 1038 ; (js: `function _listFro...`) (js: `{    function _li...`)
+LDF 1392 ; (js: `function _listFro...`) (js: `{    function _li...`)
 ST 0 0
 LD 1 0 ; (js: `var len = slowLis...`)
 LD 2 3
@@ -291,10 +371,10 @@ CAR
 CONS
 RTN
 LDC 0 ; init_ctx=0
-LDF 296
+LDF 376
 AP 1
 RTN
-LDF 1087 ; (js: `function _listIte...`) (js: `{    var i = 0;  ...`)
+LDF 1441 ; (js: `function _listIte...`) (js: `{    var i = 0;  ...`)
 ST 0 0
 LD 1 0 ; (js: `_listIterate(list...`)
 CDR
@@ -304,7 +384,7 @@ LDC 0 ; literal
 LD 0 0
 AP 3
 ATOM
-TSEL 307 307 ; cleanup
+TSEL 387 387 ; cleanup
 RTN
 LD 0 0 ; (js: `return listSet(mx...`) (js: `{    return listS...`)
 LD 0 1
@@ -333,23 +413,23 @@ LD 1 0
 AP 2
 RTN
 LDC 0 ; init_ctx=0
-LDF 338
+LDF 418
 AP 1
 RTN
-LDF 1128 ; (js: `function rowItera...`) (js: `{    function row...`)
+LDF 1482 ; (js: `function rowItera...`) (js: `{    function row...`)
 ST 0 0
 LD 1 0 ; (js: `listIterate(mx, r...`)
 LD 0 0
 LD 2 5
 AP 2
 ATOM
-TSEL 346 346 ; cleanup
+TSEL 426 426 ; cleanup
 RTN
 LDC 0 ; init_ctx=0
-LDF 351
+LDF 431
 AP 1
 RTN
-LDF 1141 ; (js: `function _genList...`) (js: `{    function _ge...`)
+LDF 1495 ; (js: `function _genList...`) (js: `{    function _ge...`)
 ST 0 0
 LD 1 0 ; (js: `return [n, _genLi...`)
 LD 1 0
@@ -358,10 +438,10 @@ AP 1
 CONS
 RTN
 LDC 0 ; init_ctx=0
-LDF 363
+LDF 443
 AP 1
 RTN
-LDF 1166 ; (js: `function genListF...`) (js: `{    function gen...`)
+LDF 1520 ; (js: `function genListF...`) (js: `{    function gen...`)
 ST 0 0
 LD 1 1 ; (js: `return genList(Y,...`)
 LD 0 0
@@ -371,11 +451,11 @@ RTN
 LD 0 1 ; (js: `if ((d / 2) | 0) ...`) (js: `{    if ((d / 2) ...`)
 LDC 2 ; literal
 DIV
-TSEL 374 398 ; if test
+TSEL 454 478 ; if test
 LD 0 1 ; (js: `if (d === 2) { //...`) (js: `{        if (d ==...`)
 LDC 2 ; literal
 CEQ
-TSEL 378 388 ; if test
+TSEL 458 468 ; if test
 LD 0 0 ; (js: `return [pos[0], p...`) (js: `{ //down         ...`)
 CAR
 LD 0 0
@@ -385,7 +465,7 @@ ADD
 CONS
 RTN
 LDC 0 ; if-cons-jump
-TSEL 396 396
+TSEL 476 476
 LD 0 0 ; (js: `return [pos[0] - ...`) (js: `{ //left         ...`)
 CAR
 LDC 1 ; literal
@@ -395,9 +475,9 @@ CDR
 CONS
 RTN
 LDC 0 ; if-cons-jump
-TSEL 418 418
+TSEL 498 498
 LD 0 1 ; (js: `if (d) { //right ...`) (js: `{        if (d) {...`)
-TSEL 400 410 ; if test
+TSEL 480 490 ; if test
 LD 0 0 ; (js: `return [pos[0] + ...`) (js: `{ //right        ...`)
 CAR
 LDC 1 ; literal
@@ -407,7 +487,7 @@ CDR
 CONS
 RTN
 LDC 0 ; if-cons-jump
-TSEL 418 418
+TSEL 498 498
 LD 0 0 ; (js: `return [pos[0], p...`) (js: `{ //up           ...`)
 CAR
 LD 0 0
@@ -425,7 +505,7 @@ LDC 0 ; init_ctx=4
 LDC 0 ; init_ctx=5
 LDC 0 ; init_ctx=6
 LDC 0 ; init_ctx=7
-LDF 430
+LDF 510
 AP 8
 RTN
 LD 1 0 ; (js: `var val = heap[0];`) (js: `{    var val = he...`)
@@ -443,29 +523,29 @@ ST 0 3
 LD 0 3 ; (js: `if (typeof ptr[0]...`)
 CAR
 ATOM
-TSEL 446 460 ; if test
+TSEL 526 540 ; if test
 LD 0 3 ; (js: `if (typeof ptr[1]...`) (js: `{        if (type...`)
 CDR
 ATOM
-TSEL 450 456 ; if test
+TSEL 530 536 ; if test
 LD 0 1 ; (js: `return [x, 0];`) (js: `{            retu...`)
 LDC 0 ; literal
 CONS
 RTN
 LDC 0 ; if-cons-jump
-TSEL 458 458
+TSEL 538 538
 LDC 1 ; literal (js: `p = 1;`) (js: `{            p = ...`)
 ST 0 4
 LDC 0 ; if-cons-jump
-TSEL 490 490
+TSEL 570 570
 LD 0 3 ; (js: `if (typeof ptr[1]...`) (js: `{        if (type...`)
 CDR
 ATOM
-TSEL 464 468 ; if test
+TSEL 544 548 ; if test
 LDC 0 ; literal (js: `p = 0;`) (js: `{            p = ...`)
 ST 0 4
 LDC 0 ; if-cons-jump
-TSEL 490 490
+TSEL 570 570
 LD 0 3 ; (js: `var x0 = ptr[0][0...`) (js: `{            var ...`)
 CAR
 CAR
@@ -481,15 +561,15 @@ CAR
 LD 0 6
 CAR
 CGT
-TSEL 484 488 ; if test
+TSEL 564 568 ; if test
 LDC 0 ; literal (js: `p = 0;`) (js: `{                ...`)
 ST 0 4
 LDC 0 ; if-cons-jump
-TSEL 490 490
+TSEL 570 570
 LDC 1 ; literal (js: `p = 1;`) (js: `{                ...`)
 ST 0 4
 LD 0 4 ; (js: `if (p) {        r...`)
-TSEL 492 514 ; if test
+TSEL 572 594 ; if test
 LD 0 3 ; (js: `res = heapPop(ptr...`) (js: `{        res = he...`)
 CDR
 LD 2 12
@@ -511,7 +591,7 @@ CONS
 CONS
 RTN
 LDC 0 ; if-cons-jump
-TSEL 534 534
+TSEL 614 614
 LD 0 3 ; (js: `res = heapPop(ptr...`) (js: `{        res = he...`)
 CAR
 LD 2 12
@@ -535,7 +615,7 @@ RTN
 RTN
 LD 0 0 ; (js: `if (typeof heap =...`) (js: `{    if (typeof h...`)
 ATOM
-TSEL 538 540 ; if test
+TSEL 618 620 ; if test
 LDC 0 ; literal (js: `return 0;`)
 RTN
 LD 0 0 ; (js: `return heap[0][1];`)
@@ -547,12 +627,12 @@ LDC 0 ; init_ctx=1
 LDC 0 ; init_ctx=2
 LDC 0 ; init_ctx=3
 LDC 0 ; init_ctx=4
-LDF 552
+LDF 632
 AP 5
 RTN
 LD 1 0 ; (js: `if (typeof heap =...`) (js: `{    if (typeof h...`)
 ATOM
-TSEL 555 563 ; if test
+TSEL 635 643 ; if test
 LD 1 1 ; (js: `return [[x, 1], [...`) (js: `{        return [...`)
 LDC 1 ; literal
 CONS
@@ -578,7 +658,7 @@ CAR
 LD 1 1
 CAR
 CGT
-TSEL 581 587 ; if test
+TSEL 661 667 ; if test
 LD 1 1 ; (js: `var z = x;`) (js: `{        var z = ...`)
 ST 0 4
 LD 0 1 ; (js: `x = y;`)
@@ -594,7 +674,7 @@ CDR
 LD 2 13
 AP 1
 CGT
-TSEL 597 614 ; if test
+TSEL 677 694 ; if test
 LD 0 1 ; (js: `return [[y, size ...`) (js: `{        return [...`)
 LD 0 2
 LDC 1 ; literal
@@ -611,7 +691,7 @@ CONS
 CONS
 RTN
 LDC 0 ; if-cons-jump
-TSEL 629 629
+TSEL 709 709
 LD 0 1 ; (js: `return [[y, size ...`) (js: `{        return [...`)
 LD 0 2
 LDC 1 ; literal
@@ -631,7 +711,7 @@ RTN
 LDC 0 ; init_ctx=0
 LDC 0 ; init_ctx=1
 LDC 0 ; init_ctx=2
-LDF 636
+LDF 716
 AP 3
 RTN
 LDC 0 ; literal (js: `var heap = 0;`) (js: `{    // descendin...`)
@@ -640,7 +720,7 @@ LD 1 0 ; (js: `while (typeof arr...`)
 ATOM
 LDC 0
 CEQ
-TSEL 643 654 ; while test
+TSEL 723 734 ; while test
 LD 0 0 ; (js: `heap = heapPush(h...`) (js: `{        heap = h...`)
 LD 1 0
 CAR
@@ -651,7 +731,7 @@ LD 1 0 ; (js: `arr = arr[1];`)
 CDR
 ST 1 0
 LDC 0
-TSEL 638 638
+TSEL 718 718
 LDC 0 ; literal (js: `var res = 0;`)
 ST 0 1
 LD 0 0 ; (js: `while (heapSize(h...`)
@@ -659,7 +739,7 @@ LD 2 13
 AP 1
 LDC 0 ; literal
 CGT
-TSEL 662 676 ; while test
+TSEL 742 756 ; while test
 LD 0 0 ; (js: `var pop = heapPop...`) (js: `{        var pop ...`)
 LD 2 12
 AP 1
@@ -673,14 +753,14 @@ LD 0 2 ; (js: `heap = pop[1];`)
 CDR
 ST 0 0
 LDC 0
-TSEL 656 656
+TSEL 736 736
 LD 0 1 ; (js: `return res;`)
 RTN
 LDC 0 ; init_ctx=0
-LDF 682
+LDF 762
 AP 1
 RTN
-LDF 1171 ; (js: `function _flatRow...`) (js: `{    function _fl...`)
+LDF 1525 ; (js: `function _flatRow...`) (js: `{    function _fl...`)
 ST 0 0
 LD 1 0 ; (js: `return _flatRow(r...`)
 CDR
@@ -692,10 +772,10 @@ LD 0 0
 AP 4
 RTN
 LDC 0 ; init_ctx=0
-LDF 697
+LDF 777
 AP 1
 RTN
-LDF 1209 ; (js: `function processR...`) (js: `{    function pro...`)
+LDF 1563 ; (js: `function processR...`) (js: `{    function pro...`)
 ST 0 0
 LD 1 0 ; (js: `return flatRow(mx...`)
 LD 0 0
@@ -704,7 +784,7 @@ LD 2 16
 AP 3
 RTN
 LDC 0 ; init_ctx=0
-LDF 709
+LDF 789
 AP 1
 RTN
 LD 1 0 ; (js: `var val = flatMat...`) (js: `{    var val = fl...`)
@@ -719,7 +799,7 @@ RTN
 LD 0 0 ; (js: `return x;`) (js: `{    return x;}`)
 RTN
 LDC 0 ; init_ctx=0
-LDF 724
+LDF 804
 AP 1
 RTN
 LD 1 0 ; (js: `var val = listFro...`) (js: `{    var val = li...`)
@@ -737,12 +817,12 @@ RTN
 LD 0 2 ; (js: `if(i === 0) {    ...`) (js: `{    if(i === 0) ...`)
 LDC 0 ; literal
 CEQ
-TSEL 740 745 ; if test
+TSEL 820 825 ; if test
 LD 0 0 ; (js: `return tpl[0];`) (js: `{        return t...`)
 CAR
 RTN
 LDC 0 ; if-cons-jump
-TSEL 771 771
+TSEL 849 849
 LD 0 2 ; (js: `if(i === 1 && len...`)
 LDC 1 ; literal
 CEQ
@@ -750,14 +830,12 @@ LD 0 1
 LDC 2 ; literal
 CEQ
 MUL
-LDC 1
-CEQ
-TSEL 755 760 ; if test
+TSEL 833 838 ; if test
 LD 0 0 ; (js: `return tpl[1];`) (js: `{        return t...`)
 CDR
 RTN
 LDC 0 ; if-cons-jump
-TSEL 771 771
+TSEL 849 849
 LD 0 0 ; (js: `return tplGet(tpl...`) (js: `{        return t...`)
 CDR
 LD 0 1
@@ -771,10 +849,10 @@ AP 3
 RTN
 RTN
 LDC 0 ; init_ctx=0
-LDF 776
+LDF 854
 AP 1
 RTN
-LDF 1221 ; (js: `function getter(i...`) (js: `{    function get...`)
+LDF 1575 ; (js: `function getter(i...`) (js: `{    function get...`)
 ST 0 0
 LD 0 0 ; (js: `return getter;`)
 RTN
@@ -786,13 +864,13 @@ LD 0 1
 MUL
 SUB
 RTN
-LD 1 30 ; (js: `_next = (_next * ...`) (js: `{    _next = (_ne...`)
+LD 1 43 ; (js: `_next = (_next * ...`) (js: `{    _next = (_ne...`)
 LDC 1103515245 ; literal
 MUL
 LDC 12345 ; literal
 ADD
-ST 1 30
-LD 1 30 ; (js: `return mod(((_nex...`)
+ST 1 43
+LD 1 43 ; (js: `return mod(((_nex...`)
 LDC 65536 ; literal
 DIV
 LDC 32768 ; literal
@@ -801,7 +879,7 @@ AP 2
 RTN
 LD 0 0 ; (js: `if (typeof list =...`) (js: `{    if (typeof l...`)
 ATOM
-TSEL 804 806 ; if test
+TSEL 882 884 ; if test
 LD 0 0 ; (js: `return list;`)
 RTN
 LD 0 0 ; (js: `return [f(list[0]...`)
@@ -822,12 +900,350 @@ ST 0 0
 LD 0 0 ; (js: `if (d >= 4)      ...`)
 LDC 4 ; literal
 CGTE
-TSEL 825 829 ; if test
+TSEL 903 907 ; if test
 LD 0 0 ; (js: `d = d - 4;`)
 LDC 4 ; literal
 SUB
 ST 0 0
 LD 0 0 ; (js: `return d;`)
+RTN
+LDC 0 ; init_ctx=0
+LDC 0 ; init_ctx=1
+LDF 914
+AP 2
+RTN
+LDF 1581 ; (js: `function convertM...`) (js: `{function convert...`)
+ST 0 0
+LD 1 0 ; (js: `var val = listFro...`)
+LD 0 0
+LD 2 4
+AP 2
+ST 0 1
+LD 0 1 ; (js: `return val;`)
+RTN
+LDC 0 ; literal (js: `return 0;`) (js: `{    return 0;}`)
+RTN
+LDC 0 ; init_ctx=0
+LDC 0 ; init_ctx=1
+LDC 0 ; init_ctx=2
+LDC 0 ; init_ctx=3
+LDC 0 ; init_ctx=4
+LDF 933
+AP 5
+RTN
+LD 2 52 ; (js: `var mz = matrixGe...`) (js: `{    var mz = mat...`)
+LD 1 0
+LD 2 7
+AP 2
+ST 0 0
+LDC 0 ; literal (js: `var ds = 0;`)
+ST 0 1
+LD 0 0 ; (js: `if (typeof mz ===...`)
+ATOM
+LDC 0
+CEQ
+TSEL 945 950 ; if test
+LD 0 0 ; (js: `ds = listGet(mz, d);`) (js: `{        ds = lis...`)
+LD 1 1
+LD 2 0
+AP 2
+ST 0 1
+LD 1 1 ; (js: `var dl = d + 1;`)
+LDC 1 ; literal
+ADD
+ST 0 2
+LD 0 2 ; (js: `if (dl === 4)    ...`)
+LDC 4 ; literal
+CEQ
+TSEL 958 960 ; if test
+LDC 0 ; literal (js: `dl = 0;`)
+ST 0 2
+LD 1 1 ; (js: `var dr = d - 1;`)
+LDC 1 ; literal
+SUB
+ST 0 3
+LD 0 3 ; (js: `if (dr === -1)   ...`)
+LDC 0
+LDC 1 ; literal
+SUB
+CEQ
+TSEL 970 972 ; if test
+LDC 3 ; literal (js: `dr = 3;`)
+ST 0 3
+LD 1 1 ; (js: `var db = opposite...`)
+LD 2 28
+AP 1
+ST 0 4
+LD 2 50 ; (js: `if (matrixGet(map...`)
+LD 1 0
+LD 1 1
+LD 2 11
+AP 2
+LD 2 7
+AP 2
+LDC 0 ; literal
+CEQ
+TSEL 986 1042 ; if test
+LD 2 50 ; (js: `if (matrixGet(map...`) (js: `{ // wall        ...`)
+LD 1 0
+LD 0 2
+LD 2 11
+AP 2
+LD 2 7
+AP 2
+LDC 0 ; literal
+CEQ
+TSEL 996 1018 ; if test
+LD 2 50 ; (js: `if (matrixGet(map...`) (js: `{            if (...`)
+LD 1 0
+LD 0 3
+LD 2 11
+AP 2
+LD 2 7
+AP 2
+LDC 0 ; literal
+CEQ
+TSEL 1006 1012 ; if test
+LD 0 4 ; (js: `ds = [db, 0];`) (js: `{                ...`)
+LDC 0 ; literal
+CONS
+ST 0 1
+LDC 0 ; if-cons-jump
+TSEL 1016 1016
+LD 0 3 ; (js: `ds = [dr, 0];`) (js: `{                ...`)
+LDC 0 ; literal
+CONS
+ST 0 1
+LDC 0 ; if-cons-jump
+TSEL 1040 1040
+LD 2 50 ; (js: `if (matrixGet(map...`) (js: `{            if (...`)
+LD 1 0
+LD 0 3
+LD 2 11
+AP 2
+LD 2 7
+AP 2
+LDC 0 ; literal
+CEQ
+TSEL 1028 1034 ; if test
+LD 0 2 ; (js: `ds = [dl, 0];`) (js: `{                ...`)
+LDC 0 ; literal
+CONS
+ST 0 1
+LDC 0 ; if-cons-jump
+TSEL 1040 1040
+LD 0 3 ; (js: `ds = [dr, [dl, 0]];`) (js: `{                ...`)
+LD 0 2
+LDC 0 ; literal
+CONS
+CONS
+ST 0 1
+LDC 0 ; if-cons-jump
+TSEL 1102 1102
+LD 2 50 ; (js: `if (matrixGet(map...`) (js: `{        if (matr...`)
+LD 1 0
+LD 0 2
+LD 2 11
+AP 2
+LD 2 7
+AP 2
+LDC 0 ; literal
+CEQ
+TSEL 1052 1076 ; if test
+LD 2 50 ; (js: `if (matrixGet(map...`) (js: `{            if (...`)
+LD 1 0
+LD 0 3
+LD 2 11
+AP 2
+LD 2 7
+AP 2
+LDC 0 ; literal
+CEQ
+TSEL 1062 1068 ; if test
+LD 1 1 ; (js: `ds = [d, 0];`) (js: `{                ...`)
+LDC 0 ; literal
+CONS
+ST 0 1
+LDC 0 ; if-cons-jump
+TSEL 1074 1074
+LD 1 1 ; (js: `ds = [d, [dr, 0]];`) (js: `{                ...`)
+LD 0 3
+LDC 0 ; literal
+CONS
+CONS
+ST 0 1
+LDC 0 ; if-cons-jump
+TSEL 1102 1102
+LD 2 50 ; (js: `if (matrixGet(map...`) (js: `{            if (...`)
+LD 1 0
+LD 0 3
+LD 2 11
+AP 2
+LD 2 7
+AP 2
+LDC 0 ; literal
+CEQ
+TSEL 1086 1094 ; if test
+LD 1 1 ; (js: `ds = [d, [dl, 0]];`) (js: `{                ...`)
+LD 0 2
+LDC 0 ; literal
+CONS
+CONS
+ST 0 1
+LDC 0 ; if-cons-jump
+TSEL 1102 1102
+LD 1 1 ; (js: `ds = [d, [dl, [dr...`) (js: `{                ...`)
+LD 0 2
+LD 0 3
+LDC 0 ; literal
+CONS
+CONS
+CONS
+ST 0 1
+LD 0 0 ; (js: `if (typeof mz ===...`)
+ATOM
+TSEL 1105 1107 ; if test
+LD 2 51 ; (js: `mz = _4FastList;`) (js: `{        mz = _4F...`)
+ST 0 0
+LD 0 0 ; (js: `mz = listSet(mz, ...`)
+LD 1 1
+LD 0 1
+LD 2 1
+AP 3
+ST 0 0
+LD 2 52 ; (js: `maze = matrixSet(...`)
+LD 1 0
+LD 0 0
+LD 2 6
+AP 3
+ST 2 52
+LDC 0 ; literal (js: `return 0;`)
+RTN
+LDC 0 ; init_ctx=0
+LDF 1125
+AP 1
+RTN
+LD 2 50 ; (js: `var cell = matrix...`) (js: `{    var cell = m...`)
+LD 1 0
+LD 2 7
+AP 2
+ST 0 0
+LD 0 0 ; (js: `if (cell === 1 ||...`)
+LDC 1 ; literal
+CEQ
+LD 0 0
+LDC 5 ; literal
+CEQ
+ADD
+LD 0 0
+LDC 6 ; literal
+CEQ
+ADD
+TSEL 1142 1144 ; if test
+LDC 127 ; literal (js: `return 127;`)
+RTN
+LD 0 0 ; (js: `if (cell === 2 ||...`)
+LDC 2 ; literal
+CEQ
+LD 0 0
+LDC 3 ; literal
+CEQ
+ADD
+LD 0 0
+LDC 4 ; literal
+CEQ
+ADD
+TSEL 1156 1158 ; if test
+LDC 137 ; literal (js: `return 137;`)
+RTN
+LDC 0 ; literal (js: `return 0;`)
+RTN
+LDC 0 ; init_ctx=0
+LDC 0 ; init_ctx=1
+LDC 0 ; init_ctx=2
+LDC 0 ; init_ctx=3
+LDC 0 ; init_ctx=4
+LDF 1168
+AP 5
+RTN
+LDC 0 ; literal (js: `var x = 0;`) (js: `{    var x = 0;  ...`)
+ST 0 0
+LD 2 46 ; (js: `while (x < X) {  ...`)
+LD 0 0
+CGT
+TSEL 1174 1245 ; while test
+LDC 0 ; literal (js: `var y = 0;`) (js: `{        var y = ...`)
+ST 0 1
+LD 2 45 ; (js: `while (y < Y) {  ...`)
+LD 0 1
+CGT
+TSEL 1180 1239 ; while test
+LD 0 0 ; (js: `var pos = [x,y];`) (js: `{            var ...`)
+LD 0 1
+CONS
+ST 0 2
+LD 0 2 ; (js: `if (canGo(pos)) {...`)
+LD 2 32
+AP 1
+TSEL 1188 1233 ; if test
+LDC 0 ; literal (js: `var d = 0;`) (js: `{                ...`)
+ST 0 3
+LDC 4 ; literal (js: `while (d < 4) {  ...`)
+LD 0 3
+CGT
+TSEL 1194 1233 ; while test
+LD 0 2 ; (js: `var prevPos = shi...`) (js: `{                ...`)
+LD 0 3
+LD 2 28
+AP 1
+LD 2 11
+AP 2
+ST 0 4
+LD 0 4 ; (js: `if (prevPos[0] >=...`)
+CAR
+LDC 0 ; literal
+CGTE
+LD 2 46
+LD 0 4
+CAR
+CGT
+MUL
+LD 0 4
+CDR
+LDC 0 ; literal
+CGTE
+MUL
+LD 2 45
+LD 0 4
+CDR
+CGT
+MUL
+TSEL 1221 1227 ; if test
+LD 0 2 ; (js: `setMazeCell(pos, d);`) (js: `{                ...`)
+LD 0 3
+LD 2 31
+AP 2
+ATOM
+TSEL 1227 1227 ; cleanup
+LD 0 3 ; (js: `d = d + 1;`)
+LDC 1 ; literal
+ADD
+ST 0 3
+LDC 0
+TSEL 1190 1190
+LD 0 1 ; (js: `y = y + 1;`)
+LDC 1 ; literal
+ADD
+ST 0 1
+LDC 0
+TSEL 1176 1176
+LD 0 0 ; (js: `x = x + 1;`)
+LDC 1 ; literal
+ADD
+ST 0 0
+LDC 0
+TSEL 1170 1170
+LDC 0 ; literal (js: `return 0;`)
 RTN
 LDC 0 ; init_ctx=0
 LDC 0 ; init_ctx=1
@@ -847,205 +1263,143 @@ LDC 0 ; init_ctx=14
 LDC 0 ; init_ctx=15
 LDC 0 ; init_ctx=16
 LDC 0 ; init_ctx=17
-LDC 0 ; init_ctx=18
-LDC 0 ; init_ctx=19
-LDC 0 ; init_ctx=20
-LDC 0 ; init_ctx=21
-LDC 0 ; init_ctx=22
-LDC 0 ; init_ctx=23
-LDC 0 ; init_ctx=24
-LDC 0 ; init_ctx=25
-LDC 0 ; init_ctx=26
-LDC 0 ; init_ctx=27
-LDF 862
-AP 28
+LDF 1268
+AP 18
 RTN
-LDF 1227 ; (js: `function convertM...`) (js: `{    var _4FastLi...`)
+LDF 1593 ; (js: `function bounty(c...`) (js: `{    worldState =...`)
 ST 0 0
-LDF 1241 ; (js: `function canGo(po...`)
+LDF 1665 ; (js: `function calcPath...`)
 ST 0 1
-LDF 1290 ; (js: `function bounty(c...`)
+LDF 1898 ; (js: `function calcSmel...`)
 ST 0 2
-LDF 1366 ; (js: `function genPath(...`)
-ST 0 3
-LDF 1370 ; (js: `function genSmell...`)
-ST 0 4
-LDF 1372 ; (js: `function genMaze(...`)
-ST 0 5
-LDF 1374 ; (js: `function calcPath...`)
-ST 0 6
-LDF 1611 ; (js: `function calcSmel...`)
-ST 0 7
-LDC 4 ; literal (js: `var _4FastList = ...`)
-LDC 0 ; literal
-LDC 0 ; literal
-CONS
-LDC 0 ; literal
-LDC 0 ; literal
-CONS
-CONS
-CONS
-ST 0 8
 LD 1 1 ; (js: `worldState = tplG...`)
 LDC 4 ; literal
 LD 2 24
 AP 2
 ST 1 1
-LDC 0 ; literal (js: `var map = worldSt...`)
-LD 1 1
-AP 1
-ST 0 9
-LDC 1 ; literal
+LDC 1 ; literal (js: `var lmStatus = tp...`)
 LD 1 1
 AP 1
 LDC 5 ; literal
 LD 2 24
 AP 2
-ST 0 10
+ST 0 3
 LDC 0 ; literal
-LD 0 10
+LD 0 3
 AP 1
-ST 0 11
+ST 0 4
 LDC 2 ; literal
 LD 1 1
 AP 1
-ST 0 12
+ST 0 5
 LDC 3 ; literal
 LD 1 1
 AP 1
-ST 0 13
-LDC 0 ; literal
-ST 0 14
-LD 0 9 ; (js: `map = listFromSlo...`)
-LD 0 0
-LD 2 4
-AP 2
-ST 0 9
-LD 0 14 ; (js: `ghostsStartingPos...`)
-LD 2 20
-LD 2 4
-AP 2
-ST 0 14
-LD 0 9 ; (js: `var Y = listLengt...`)
-LD 2 2
-AP 1
-ST 0 15
-LD 0 9 ; (js: `var X = listLengt...`)
-LDC 0 ; literal
-LD 2 0
-AP 2
-LD 2 2
-AP 1
-ST 0 16
-LD 0 16 ; (js: `var paths = genMa...`)
-LD 0 15
-LD 0 3
-LD 2 10
-AP 3
-ST 0 17
+ST 0 6
+LD 2 49 ; (js: `var paths = empty...`)
+ST 0 7
 LDC 0 ; literal (js: `var flatPaths = 0;`)
-ST 0 18
-LD 0 16 ; (js: `var smell = genMa...`)
-LD 0 15
-LD 0 4
-LD 2 10
-AP 3
-ST 0 19
-LD 0 16 ; (js: `var maze = genMat...`)
-LD 0 15
-LD 0 5
-LD 2 10
-AP 3
-ST 0 20
+ST 0 8
+LD 2 47 ; (js: `var smell = empty...`)
+ST 0 9
 LDC 1 ; literal (js: `var myPos = lmSta...`)
-LD 0 10
+LD 0 3
 AP 1
-ST 0 21
-LD 0 21 ; (js: `var myOrigPos = m...`)
-ST 0 22
-LD 0 6 ; (js: `calcPaths();`)
+ST 0 10
+LD 0 10 ; (js: `var myOrigPos = m...`)
+ST 0 11
+LD 0 1 ; (js: `calcPaths();`)
 AP 0
 ATOM
-TSEL 969 969 ; cleanup
-LD 0 7 ; (js: `calcSmell();`)
+TSEL 1314 1314 ; cleanup
+LD 0 2 ; (js: `calcSmell();`)
 AP 0
 ATOM
-TSEL 973 973 ; cleanup
+TSEL 1318 1318 ; cleanup
 LDC 0 ; literal (js: `var d = 0;`)
-ST 0 23
-LDC 0 ; (js: `var bestSmell = -1;`)
-LDC 1 ; literal
+ST 0 12
+LDC 0 ; (js: `var bestSmell = -...`)
+LDC 1000000000 ; literal
 SUB
-ST 0 24
+ST 0 13
 LDC 0 ; literal (js: `var bestD = 0;`)
-ST 0 25
+ST 0 14
 LDC 4 ; literal (js: `while (d < 4) {  ...`)
-LD 0 23
+LD 0 12
 CGT
-TSEL 985 1030 ; while test
-LD 0 22 ; (js: `var xxx = shiftDi...`) (js: `{        var xxx ...`)
-LD 0 23
+TSEL 1330 1369 ; while test
+LD 0 11 ; (js: `var newPos = shif...`) (js: `{        var newP...`)
+LD 0 12
 LD 2 11
 AP 2
-ST 0 26
-LD 0 19 ; (js: `var val = matrixG...`)
-LD 0 26
+ST 0 15
+LD 0 9 ; (js: `var val = matrixG...`)
+LD 0 15
 LD 2 7
 AP 2
-ST 0 27
-LD 0 26 ; (js: `if (canGo(xxx) > ...`)
-LD 0 1
+ST 0 16
+LD 0 15 ; (js: `if (canGo(newPos)...`)
+LD 2 32
 AP 1
 LDC 0 ; literal
 CGT
-LD 0 27
-LD 0 24
+LD 0 16
+LD 0 13
 CGT
-LD 0 27
-LD 0 24
+LD 0 16
+LD 0 13
 CEQ
 LD 2 26
 AP 0
 LDC 16384 ; literal
 CGT
 MUL
-LDC 1
-CEQ
 ADD
-LDC 0
-CGT
 MUL
-LDC 1
-CEQ
-TSEL 1020 1024 ; if test
-LD 0 27 ; (js: `bestSmell = val;`) (js: `{            best...`)
-ST 0 24
-LD 0 23 ; (js: `bestD = d;`)
-ST 0 25
-LD 0 23 ; (js: `d = d + 1;`)
+TSEL 1359 1363 ; if test
+LD 0 16 ; (js: `bestSmell = val;`) (js: `{            best...`)
+ST 0 13
+LD 0 12 ; (js: `bestD = d;`)
+ST 0 14
+LD 0 12 ; (js: `d = d + 1;`)
 LDC 1 ; literal
 ADD
-ST 0 23
+ST 0 12
 LDC 0
-TSEL 981 981
-LD 0 17 ; (js: `return [[paths, [...`)
-LD 0 19
+TSEL 1326 1326
+LD 0 11 ; (js: `var bestPos = shi...`)
+LD 0 14
+LD 2 11
+AP 2
+ST 0 17
+LD 0 17 ; (js: `if (canGo(bestPos...`)
+LD 2 32
+AP 1
+TSEL 1378 1384 ; if test
+LD 2 50 ; (js: `map = matrixSet(m...`) (js: `{        map = ma...`)
+LD 0 17
+LDC 1 ; literal
+LD 2 6
+AP 3
+ST 2 50
+LD 0 7 ; (js: `return [[paths, [...`)
 LD 0 9
+LD 2 50
 CONS
 CONS
-LD 0 25
+LD 0 14
 CONS
 RTN
 LDC 0 ; init_ctx=0
 LDC 0 ; init_ctx=1
 LDC 0 ; init_ctx=2
-LDF 1044
+LDF 1398
 AP 3
 RTN
 LD 1 1 ; (js: `if (n === 1) {   ...`) (js: `{        if (n ==...`)
 LDC 1 ; literal
 CEQ
-TSEL 1048 1057 ; if test
+TSEL 1402 1411 ; if test
 LD 1 0 ; (js: `return [f(arr[0],...`) (js: `{            retu...`)
 CAR
 LD 1 2
@@ -1086,21 +1440,21 @@ CDR
 CONS
 RTN
 LDC 0 ; init_ctx=0
-LDF 1091
+LDF 1445
 AP 1
 RTN
 LD 1 1 ; (js: `if(length === 1) ...`) (js: `{        if(lengt...`)
 LDC 1 ; literal
 CEQ
-TSEL 1095 1103 ; if test
+TSEL 1449 1457 ; if test
 LD 1 0 ; (js: `f(list, i);`) (js: `{            f(li...`)
 LD 1 2
 LD 3 1
 AP 2
 ATOM
-TSEL 1101 1101 ; cleanup
+TSEL 1455 1455 ; cleanup
 LDC 0 ; if-cons-jump
-TSEL 1127 1127
+TSEL 1481 1481
 LD 1 1 ; (js: `var halfLength = ...`) (js: `{            var ...`)
 LDC 2 ; literal
 DIV
@@ -1112,7 +1466,7 @@ LD 1 2
 LD 2 0
 AP 3
 ATOM
-TSEL 1115 1115 ; cleanup
+TSEL 1469 1469 ; cleanup
 LD 1 0 ; (js: `_listIterate(list...`)
 CDR
 LD 1 1
@@ -1124,29 +1478,29 @@ ADD
 LD 2 0
 AP 3
 ATOM
-TSEL 1127 1127 ; cleanup
+TSEL 1481 1481 ; cleanup
 RTN
 LDC 0 ; init_ctx=0
-LDF 1132
+LDF 1486
 AP 1
 RTN
-LDF 1735 ; (js: `function cellIter...`) (js: `{        function...`)
+LDF 2016 ; (js: `function cellIter...`) (js: `{        function...`)
 ST 0 0
 LD 1 0 ; (js: `listIterate(row, ...`)
 LD 0 0
 LD 4 5
 AP 2
 ATOM
-TSEL 1140 1140 ; cleanup
+TSEL 1494 1494 ; cleanup
 RTN
 LDC 0 ; init_ctx=0
-LDF 1145
+LDF 1499
 AP 1
 RTN
 LD 1 0 ; (js: `if (n === 1)     ...`) (js: `{        if (n ==...`)
 LDC 1 ; literal
 CEQ
-TSEL 1149 1152 ; if test
+TSEL 1503 1506 ; if test
 LD 3 1 ; (js: `return f();`)
 AP 0
 RTN
@@ -1170,13 +1524,13 @@ LD 3 9
 AP 2
 RTN
 LDC 0 ; init_ctx=0
-LDF 1175
+LDF 1529
 AP 1
 RTN
 LD 1 2 ; (js: `if (n === 1) {   ...`) (js: `{        if (n ==...`)
 LDC 1 ; literal
 CEQ
-TSEL 1179 1185 ; if test
+TSEL 1533 1539 ; if test
 LD 1 1 ; (js: `return f(x, row, a);`) (js: `{            retu...`)
 LD 1 0
 LD 1 3
@@ -1208,10 +1562,10 @@ LD 2 0
 AP 4
 RTN
 LDC 0 ; init_ctx=0
-LDF 1213
+LDF 1567
 AP 1
 RTN
-LDF 1743 ; (js: `function processC...`) (js: `{        function...`)
+LDF 2024 ; (js: `function processC...`) (js: `{        function...`)
 ST 0 0
 LD 1 1 ; (js: `return flatRow(d,...`)
 LD 0 0
@@ -1225,135 +1579,80 @@ LD 0 0
 LD 3 23
 AP 3
 RTN
-LDC 0 ; init_ctx=0
-LDC 0 ; init_ctx=1
-LDF 1232
-AP 2
-RTN
-LDF 1760 ; (js: `function convertM...`) (js: `{        function...`)
-ST 0 0
-LD 1 0 ; (js: `var val = listFro...`)
-LD 0 0
-LD 4 4
-AP 2
-ST 0 1
-LD 0 1 ; (js: `return val;`)
-RTN
-LDC 0 ; init_ctx=0
-LDF 1245
-AP 1
-RTN
-LD 2 9 ; (js: `var cell = matrix...`) (js: `{        var cell...`)
-LD 1 0
-LD 4 7
-AP 2
-ST 0 0
-LD 0 0 ; (js: `if (cell === 1 ||...`)
-LDC 1 ; literal
-CEQ
-LD 0 0
-LDC 5 ; literal
-CEQ
-ADD
-LDC 0
-CGT
-LD 0 0
+LD 0 0 ; (js: `if (x === 6) {   ...`) (js: `{    if (x === 6)...`)
 LDC 6 ; literal
 CEQ
-ADD
-LDC 0
-CGT
-TSEL 1266 1268 ; if test
-LDC 127 ; literal (js: `return 127;`)
-RTN
-LD 0 0 ; (js: `if (cell === 2 ||...`)
-LDC 2 ; literal
-CEQ
-LD 0 0
-LDC 3 ; literal
-CEQ
-ADD
-LDC 0
-CGT
-LD 0 0
-LDC 4 ; literal
-CEQ
-ADD
-LDC 0
-CGT
-TSEL 1284 1286 ; if test
-LDC 137 ; literal (js: `return 137;`)
-RTN
-LDC 0 ; (js: `return -1;`)
-LDC 1 ; literal
-SUB
+TSEL 1585 1591 ; if test
+LD 0 1 ; (js: `ghostsStartingPos...`) (js: `{        ghostsSt...`)
+LD 2 1
+CONS
+LD 3 44
+CONS
+ST 3 44
+LD 0 0 ; (js: `return x;`)
 RTN
 LDC 0 ; init_ctx=0
-LDF 1294
+LDF 1597
 AP 1
 RTN
 LD 1 0 ; (js: `if (cell === 2) {...`) (js: `{        var b;  ...`)
 LDC 2 ; literal
 CEQ
-TSEL 1298 1302 ; if test
+TSEL 1601 1605 ; if test
 LDC 100 ; literal (js: `b = 100;`) (js: `{            b = ...`)
 ST 0 0
 LDC 0 ; if-cons-jump
-TSEL 1358 1358
+TSEL 1657 1657
 LD 1 0 ; (js: `if (cell === 3) {...`)
 LDC 3 ; literal
 CEQ
-TSEL 1306 1324 ; if test
-LD 2 13 ; (js: `if (fruitStatus >...`) (js: `{            if (...`)
+TSEL 1609 1625 ; if test
+LD 2 6 ; (js: `if (fruitStatus >...`) (js: `{            if (...`)
 LDC 0 ; literal
 CGT
 LD 1 1
-LD 2 11
+LD 2 4
 CGT
 MUL
-LDC 1
-CEQ
-TSEL 1316 1320 ; if test
+TSEL 1617 1621 ; if test
 LDC 10000 ; literal (js: `b = 10000;`) (js: `{                ...`)
 ST 0 0
 LDC 0 ; if-cons-jump
-TSEL 1322 1322
+TSEL 1623 1623
 LDC 10 ; literal (js: `b = 10;`) (js: `{                ...`)
 ST 0 0
 LDC 0 ; if-cons-jump
-TSEL 1358 1358
+TSEL 1657 1657
 LD 1 0 ; (js: `if (cell === 4 &&...`)
 LDC 4 ; literal
 CEQ
-LD 2 13
+LD 2 6
 LDC 0 ; literal
 CGT
 MUL
-LDC 1
-CEQ
-TSEL 1334 1338 ; if test
+TSEL 1633 1637 ; if test
 LDC 10000 ; literal (js: `b = 10000;`) (js: `{            b = ...`)
 ST 0 0
 LDC 0 ; if-cons-jump
-TSEL 1358 1358
+TSEL 1657 1657
 LD 1 0 ; (js: `if (cell === 7) {...`)
 LDC 7 ; literal
 CEQ
-TSEL 1342 1346 ; if test
+TSEL 1641 1645 ; if test
 LDC 10000 ; literal (js: `b = 10000;`) (js: `{            b = ...`)
 ST 0 0
 LDC 0 ; if-cons-jump
-TSEL 1358 1358
+TSEL 1657 1657
 LD 1 0 ; (js: `if (cell === 8) {...`)
 LDC 8 ; literal
 CEQ
-TSEL 1350 1356 ; if test
+TSEL 1649 1655 ; if test
 LDC 0 ; (js: `b = -10;`) (js: `{            b = ...`)
 LDC 10 ; literal
 SUB
 ST 0 0
 LDC 0 ; if-cons-jump
-TSEL 1358 1358
+TSEL 1657 1657
 LDC 1 ; literal (js: `b = 1;`) (js: `{            b = ...`)
 ST 0 0
 LD 0 0 ; (js: `return ((b * 1000...`)
@@ -1363,14 +1662,6 @@ LD 1 1
 LDC 1 ; literal
 ADD
 DIV
-RTN
-LDC 0 ; (js: `return -1;`) (js: `{        return -...`)
-LDC 1 ; literal
-SUB
-RTN
-LDC 0 ; literal (js: `return 0;`) (js: `{        return 0...`)
-RTN
-LDC 0 ; literal (js: `return 0;`) (js: `{        return 0...`)
 RTN
 LDC 0 ; init_ctx=0
 LDC 0 ; init_ctx=1
@@ -1391,34 +1682,34 @@ LDC 0 ; init_ctx=15
 LDC 0 ; init_ctx=16
 LDC 0 ; init_ctx=17
 LDC 0 ; init_ctx=18
-LDF 1396
+LDF 1687
 AP 19
 RTN
-LDF 1772 ; (js: `function prepareG...`) (js: `{        paths = ...`)
+LDF 2041 ; (js: `function prepareG...`) (js: `{        paths = ...`)
 ST 0 0
-LD 2 17 ; (js: `paths = matrixSet...`)
-LD 2 21
+LD 2 7 ; (js: `paths = matrixSet...`)
+LD 2 10
 LDC 0 ; literal
 LD 4 6
 AP 3
-ST 2 17
+ST 2 7
 LDC 0 ; literal (js: `flatPaths = [[0, ...`)
-LD 2 21
+LD 2 10
 CONS
-LD 2 18
+LD 2 8
 CONS
-ST 2 18
+ST 2 8
 LDC 0 ; literal (js: `var toDo = 0;`)
 ST 0 2
-LD 2 12 ; (js: `var ghs = prepare...`)
+LD 2 5 ; (js: `var ghs = prepare...`)
 LD 0 0
 AP 1
 ST 0 3
-LD 2 11 ; (js: `var myStatus = [l...`)
+LD 2 4 ; (js: `var myStatus = [l...`)
 LDC 0 ; literal
 CONS
 ST 0 4
-LD 2 21 ; (js: `var state = [myPo...`)
+LD 2 10 ; (js: `var state = [myPo...`)
 LD 0 3
 LD 0 4
 CONS
@@ -1438,13 +1729,11 @@ LD 4 13
 AP 1
 LDC 0 ; literal
 CGT
-LDC 150 ; literal
+LDC 180 ; literal
 LD 0 6
 CGT
 MUL
-LDC 1
-CEQ
-TSEL 1447 1609 ; while test
+TSEL 1736 1894 ; while test
 LD 0 6 ; (js: `heapOps = heapOps...`) (js: `{            heap...`)
 LDC 1 ; literal
 ADD
@@ -1464,7 +1753,7 @@ CDR
 ST 0 5
 LD 0 5 ; (js: `myPos = state[0];`)
 CAR
-ST 2 21
+ST 2 10
 LD 0 5 ; (js: `state = state[1];`)
 CDR
 ST 0 5
@@ -1485,48 +1774,44 @@ ST 0 10
 LDC 4 ; literal (js: `while (d < 4) {  ...`)
 LD 0 10
 CGT
-TSEL 1488 1607 ; while test
-LD 2 21 ; (js: `var newPos = shif...`) (js: `{                ...`)
+TSEL 1777 1892 ; while test
+LD 2 10 ; (js: `var newPos = shif...`) (js: `{                ...`)
 LD 0 10
 LD 4 11
 AP 2
 ST 0 11
 LD 0 11 ; (js: `var dt = canGo(ne...`)
-LD 2 1
+LD 4 32
 AP 1
 ST 0 12
-LD 0 12 ; (js: `if (dt >= 0 && ma...`)
+LD 0 12 ; (js: `if (dt > 0 && mat...`)
 LDC 0 ; literal
-CGTE
-LD 2 17
+CGT
+LD 2 7
 LD 0 11
 LD 4 7
 AP 2
-LDC 0
-LDC 1 ; literal
-SUB
+LDC 0 ; literal
 CEQ
 MUL
-LDC 1
-CEQ
-TSEL 1512 1601 ; if test
-LDF 1788 ; (js: `function updateGh...`) (js: `{                ...`)
+TSEL 1797 1886 ; if test
+LDF 2057 ; (js: `function updateGh...`) (js: `{                ...`)
 ST 0 1
 LDC 0 ; literal (js: `var frighten = 0;`)
 ST 0 13
 LD 0 9 ; (js: `var myNewVitality...`)
 ST 0 14
-LD 2 9 ; (js: `if (matrixGet(map...`)
+LD 4 50 ; (js: `if (matrixGet(map...`)
 LD 0 11
 LD 4 7
 AP 2
 LDC 3 ; literal
 CEQ
-TSEL 1525 1535 ; if test
+TSEL 1810 1820 ; if test
 LD 0 9 ; (js: `if (!myVitality) ...`) (js: `{                ...`)
 LDC 0
 CEQ
-TSEL 1529 1531 ; if test
+TSEL 1814 1816 ; if test
 LDC 1 ; literal (js: `frighten = 1;`) (js: `{                ...`)
 ST 0 13
 LDC 127 ; literal (js: `myNewVitality = 1...`)
@@ -1543,31 +1828,31 @@ LD 4 27
 AP 2
 ST 0 17
 LD 0 16 ; (js: `if (scoreBonus) {...`)
-TSEL 1546 1552 ; if test
-LD 2 19 ; (js: `smell = matrixSet...`) (js: `{                ...`)
+TSEL 1831 1837 ; if test
+LD 2 9 ; (js: `smell = matrixSet...`) (js: `{                ...`)
 LD 0 11
 LD 0 16
 LD 4 6
 AP 3
-ST 2 19
-LD 2 17 ; (js: `paths = matrixSet...`)
+ST 2 9
+LD 2 7 ; (js: `paths = matrixSet...`)
 LD 0 11
 LD 0 8
 LD 0 12
 ADD
 LD 4 6
 AP 3
-ST 2 17
+ST 2 7
 LD 0 8 ; (js: `flatPaths = [[t +...`)
 LD 0 12
 ADD
 LD 0 11
 CONS
-LD 2 18
+LD 2 8
 CONS
-ST 2 18
+ST 2 8
 LD 0 15 ; (js: `if (alive) {     ...`)
-TSEL 1570 1599 ; if test
+TSEL 1855 1884 ; if test
 LD 0 14 ; (js: `myNewVitality = m...`) (js: `{                ...`)
 LD 0 12
 SUB
@@ -1575,7 +1860,7 @@ ST 0 14
 LDC 0 ; literal (js: `if (myNewVitality...`)
 LD 0 14
 CGT
-TSEL 1578 1580 ; if test
+TSEL 1863 1865 ; if test
 LDC 0 ; literal (js: `myNewVitality = 0;`)
 ST 0 14
 LD 0 14 ; (js: `var myNewStatus =...`)
@@ -1596,7 +1881,7 @@ LD 4 14
 AP 2
 ST 0 2
 LDC 0 ; if-cons-jump
-TSEL 1601 1601
+TSEL 1886 1886
 LDC 1 ; literal (js: `alive = 1;`) (js: `{                ...`)
 ST 0 15
 LD 0 10 ; (js: `d = d + 1;`)
@@ -1604,9 +1889,11 @@ LDC 1 ; literal
 ADD
 ST 0 10
 LDC 0
-TSEL 1484 1484
+TSEL 1773 1773
 LDC 0
-TSEL 1435 1435
+TSEL 1726 1726
+LD 0 6 ; (js: `console.log(heapO...`)
+DBUG
 LDC 0 ; literal (js: `return 0;`)
 RTN
 LDC 0 ; init_ctx=0
@@ -1619,10 +1906,10 @@ LDC 0 ; init_ctx=6
 LDC 0 ; init_ctx=7
 LDC 0 ; init_ctx=8
 LDC 0 ; init_ctx=9
-LDF 1624
+LDF 1911
 AP 10
 RTN
-LD 2 18 ; (js: `var sortedPaths =...`) (js: `{        var sort...`)
+LD 2 8 ; (js: `var sortedPaths =...`) (js: `{        var sort...`)
 LD 4 15
 AP 1
 ST 0 0
@@ -1630,55 +1917,53 @@ LD 0 0 ; (js: `while (typeof sor...`)
 ATOM
 LDC 0
 CEQ
-TSEL 1633 1733 ; while test
+TSEL 1920 2014 ; while test
 LD 0 0 ; (js: `var pos = sortedP...`) (js: `{            var ...`)
 CAR
 CDR
 ST 0 1
-LD 2 17 ; (js: `var t0 = matrixGe...`)
+LD 2 7 ; (js: `var t0 = matrixGe...`)
 LD 0 1
 LD 4 7
 AP 2
 ST 0 2
-LD 2 9 ; (js: `var cell = matrix...`)
+LD 4 50 ; (js: `var cell = matrix...`)
 LD 0 1
 LD 4 7
 AP 2
 ST 0 3
-LD 2 19 ; (js: `var myVal = matri...`)
+LD 2 9 ; (js: `var myVal = matri...`)
 LD 0 1
 LD 4 7
 AP 2
 LD 0 3
 LD 0 2
-LD 2 2
+LD 2 0
 AP 2
 ADD
 ST 0 4
-LD 2 19 ; (js: `smell = matrixSet...`)
+LD 2 9 ; (js: `smell = matrixSet...`)
 LD 0 1
 LD 0 4
 LD 4 6
 AP 3
-ST 2 19
+ST 2 9
 LDC 0 ; literal (js: `var d = 0;`)
 ST 0 5
 LDC 4 ; literal (js: `while (d < 4) {  ...`)
 LD 0 5
 CGT
-TSEL 1669 1728 ; while test
+TSEL 1956 2009 ; while test
 LD 0 1 ; (js: `var newPos = shif...`) (js: `{                ...`)
 LD 0 5
 LD 4 11
 AP 2
 ST 0 6
 LD 0 6 ; (js: `if (canGo(newPos)...`)
-LD 2 1
+LD 4 32
 AP 1
-LDC 0 ; literal
-CGT
-TSEL 1680 1722 ; if test
-LD 2 17 ; (js: `var t = matrixGet...`) (js: `{                ...`)
+TSEL 1965 2003 ; if test
+LD 2 7 ; (js: `var t = matrixGet...`) (js: `{                ...`)
 LD 0 6
 LD 4 7
 AP 2
@@ -1694,12 +1979,10 @@ LDC 137 ; literal
 SUB
 CEQ
 ADD
-LDC 0
-CGT
-TSEL 1699 1722 ; if test
+TSEL 1982 2003 ; if test
 LD 0 4 ; (js: `var newVal = myVal;`) (js: `{                ...`)
 ST 0 8
-LD 2 19 ; (js: `var oldVal = matr...`)
+LD 2 9 ; (js: `var oldVal = matr...`)
 LD 0 6
 LD 4 7
 AP 2
@@ -1711,26 +1994,24 @@ LD 0 8
 LD 0 9
 CGT
 ADD
-LDC 0
-CGT
-TSEL 1716 1722 ; if test
-LD 2 19 ; (js: `smell = matrixSet...`) (js: `{                ...`)
+TSEL 1997 2003 ; if test
+LD 2 9 ; (js: `smell = matrixSet...`) (js: `{                ...`)
 LD 0 6
 LD 0 8
 LD 4 6
 AP 3
-ST 2 19
+ST 2 9
 LD 0 5 ; (js: `d = d + 1;`)
 LDC 1 ; literal
 ADD
 ST 0 5
 LDC 0
-TSEL 1665 1665
+TSEL 1952 1952
 LD 0 0 ; (js: `sortedPaths = sor...`)
 CDR
 ST 0 0
 LDC 0
-TSEL 1628 1628
+TSEL 1915 1915
 LDC 0 ; literal (js: `return 0;`)
 RTN
 LD 0 0 ; (js: `f(v, i, j);`) (js: `{            f(v,...`)
@@ -1739,12 +2020,12 @@ LD 0 1
 LD 4 1
 AP 3
 ATOM
-TSEL 1742 1742 ; cleanup
+TSEL 2023 2023 ; cleanup
 RTN
 LD 0 1 ; (js: `if (r >= 0) {    ...`) (js: `{            if (...`)
 LDC 0 ; literal
 CGTE
-TSEL 1747 1757 ; if test
+TSEL 2028 2038 ; if test
 LD 0 1 ; (js: `return [[r, [x, y...`) (js: `{                ...`)
 LD 0 0
 LD 2 0
@@ -1754,34 +2035,22 @@ LD 0 2
 CONS
 RTN
 LDC 0 ; if-cons-jump
-TSEL 1759 1759
+TSEL 2040 2040
 LD 0 2 ; (js: `return tail;`) (js: `{                ...`)
 RTN
 RTN
-LD 0 0 ; (js: `if (x === 6) {   ...`) (js: `{            if (...`)
-LDC 6 ; literal
-CEQ
-TSEL 1764 1770 ; if test
-LD 0 1 ; (js: `ghostsStartingPos...`) (js: `{                ...`)
-LD 2 1
-CONS
-LD 3 14
-CONS
-ST 3 14
-LD 0 0 ; (js: `return x;`)
-RTN
 LDC 0 ; init_ctx=0
 LDC 0 ; init_ctx=1
-LDF 1777
+LDF 2046
 AP 2
 RTN
-LDF 1910 ; (js: `function prepareG...`) (js: `{            var ...`)
+LDF 2177 ; (js: `function prepareG...`) (js: `{            var ...`)
 ST 0 0
 LDC 0 ; (js: `var id = -1;`)
 LDC 1 ; literal
 SUB
 ST 0 1
-LD 4 12 ; (js: `return slowListMa...`)
+LD 4 5 ; (js: `return slowListMa...`)
 LD 0 0
 LD 6 27
 AP 2
@@ -1797,16 +2066,16 @@ LDC 0 ; init_ctx=7
 LDC 0 ; init_ctx=8
 LDC 0 ; init_ctx=9
 LDC 0 ; init_ctx=10
-LDF 1802
+LDF 2071
 AP 11
 RTN
-LDF 1920 ; (js: `function handleCo...`) (js: `{                ...`)
+LDF 2187 ; (js: `function handleCo...`) (js: `{                ...`)
 ST 0 0
-LDF 1969 ; (js: `function ghostStr...`)
+LDF 2234 ; (js: `function ghostStr...`)
 ST 0 1
-LDF 2106 ; (js: `function findGhos...`)
+LDF 2371 ; (js: `function findGhos...`)
 ST 0 2
-LDF 2166 ; (js: `function handleMo...`)
+LDF 2427 ; (js: `function handleMo...`)
 ST 0 3
 LD 1 0 ; (js: `var gi = state[0];`)
 CAR
@@ -1833,7 +2102,7 @@ LD 1 0 ; (js: `var d = state[1];`)
 CDR
 ST 0 8
 LD 2 13 ; (js: `if (frighten) {  ...`)
-TSEL 1836 1844 ; if test
+TSEL 2105 2113 ; if test
 LDC 1 ; literal (js: `vit = 1;`) (js: `{                ...`)
 ST 0 6
 LD 0 8 ; (js: `d = oppositeDir(d);`)
@@ -1841,45 +2110,43 @@ LD 6 28
 AP 1
 ST 0 8
 LDC 0 ; if-cons-jump
-TSEL 1854 1854
+TSEL 2121 2121
 LD 0 6 ; (js: `if (vit && myNewV...`)
 LD 2 14
 LDC 0 ; literal
 CEQ
 MUL
-LDC 1
-CEQ
-TSEL 1852 1854 ; if test
+TSEL 2119 2121 ; if test
 LDC 0 ; literal (js: `vit = 0;`) (js: `{                ...`)
 ST 0 6
 LD 0 0 ; (js: `handleCollision();`)
 AP 0
 ATOM
-TSEL 1858 1858 ; cleanup
+TSEL 2125 2125 ; cleanup
 LD 2 8 ; (js: `if (gt < t + dt) ...`)
 LD 2 12
 ADD
 LD 0 5
 CGT
-TSEL 1864 1900 ; if test
+TSEL 2131 2167 ; if test
 LD 0 3 ; (js: `handleMove();`) (js: `{                ...`)
 AP 0
 ATOM
-TSEL 1868 1868 ; cleanup
+TSEL 2135 2135 ; cleanup
 LD 0 4 ; (js: `var gn = gi;`)
 ST 0 9
 LD 0 9 ; (js: `while(gn > 4) gn ...`)
 LDC 4 ; literal
 CGT
-TSEL 1874 1880 ; while test
+TSEL 2141 2147 ; while test
 LD 0 9 ; (js: `gn = gn - 4;`)
 LDC 4 ; literal
 SUB
 ST 0 9
 LDC 0
-TSEL 1870 1870
+TSEL 2137 2137
 LD 0 6 ; (js: `if (vit) { // fri...`)
-TSEL 1882 1890 ; if test
+TSEL 2149 2157 ; if test
 LDC 195 ; literal (js: `gdt = 195 + (gn *...`) (js: `{ // frightened o...`)
 LD 0 9
 LDC 3 ; literal
@@ -1887,7 +2154,7 @@ MUL
 ADD
 ST 0 10
 LDC 0 ; if-cons-jump
-TSEL 1896 1896
+TSEL 2163 2163
 LDC 130 ; literal (js: `gdt = 130 + (gn *...`) (js: `{                ...`)
 LD 0 9
 LDC 2 ; literal
@@ -1929,27 +2196,25 @@ LD 3 11
 CDR
 CEQ
 MUL
-LDC 1
-CEQ
-TSEL 1934 1967 ; if test
+TSEL 2199 2232 ; if test
 LD 1 6 ; (js: `if (vit === 0) { ...`) (js: `{                ...`)
 LDC 0 ; literal
 CEQ
-TSEL 1938 1947 ; if test
+TSEL 2203 2212 ; if test
 LDC 0 ; literal (js: `alive = 0;`) (js: `{                ...`)
 ST 3 15
 LDC 8 ; literal (js: `scoreBonus = boun...`)
 LD 3 8
-LD 5 2
+LD 5 0
 AP 2
 ST 3 16
 LDC 0 ; if-cons-jump
-TSEL 1967 1967
+TSEL 2232 2232
 LD 1 6 ; (js: `if (vit === 1) { ...`)
 LDC 1 ; literal
 CEQ
-TSEL 1951 1967 ; if test
-LD 5 14 ; (js: `pos = listGet(gho...`) (js: `{                ...`)
+TSEL 2216 2232 ; if test
+LD 7 44 ; (js: `pos = listGet(gho...`) (js: `{                ...`)
 LD 1 4
 LD 7 0
 AP 2
@@ -1961,7 +2226,7 @@ ST 1 8
 LD 3 16 ; (js: `scoreBonus = scor...`)
 LDC 7 ; literal
 LD 3 8
-LD 5 2
+LD 5 0
 AP 2
 ADD
 ST 3 16
@@ -1973,7 +2238,7 @@ LDC 0 ; init_ctx=2
 LDC 0 ; init_ctx=3
 LDC 0 ; init_ctx=4
 LDC 0 ; init_ctx=5
-LDF 1978
+LDF 2243
 AP 6
 RTN
 LDC 0 ; literal (js: `d = shiftDir([0,0...`) (js: `{                ...`)
@@ -2004,7 +2269,7 @@ ST 0 3
 LDC 0 ; literal (js: `if (dX < 0) {    ...`)
 LD 0 2
 CGT
-TSEL 2007 2015 ; if test
+TSEL 2272 2280 ; if test
 LDC 0 ; literal (js: `dX = 0 - dX;`) (js: `{                ...`)
 LD 0 2
 SUB
@@ -2016,7 +2281,7 @@ ST 0 0
 LDC 0 ; literal (js: `if (dY < 0) {    ...`)
 LD 0 3
 CGT
-TSEL 2019 2027 ; if test
+TSEL 2284 2292 ; if test
 LDC 0 ; literal (js: `dY = 0 - dY;`) (js: `{                ...`)
 LD 0 3
 SUB
@@ -2028,65 +2293,65 @@ ST 0 1
 LD 0 3 ; (js: `if (dX < dY) {   ...`)
 LD 0 2
 CGT
-TSEL 2031 2063 ; if test
+TSEL 2296 2328 ; if test
 LD 0 1 ; (js: `if (dy > 0) {    ...`) (js: `{                ...`)
 LDC 0 ; literal
 CGT
-TSEL 2035 2039 ; if test
+TSEL 2300 2304 ; if test
 LDC 2 ; literal (js: `s = 2;`) (js: `{                ...`)
 ST 0 5
 LDC 0 ; if-cons-jump
-TSEL 2061 2061
+TSEL 2326 2326
 LD 0 0 ; (js: `if (dx > 0) {    ...`)
 LDC 0 ; literal
 CGT
-TSEL 2043 2047 ; if test
+TSEL 2308 2312 ; if test
 LDC 1 ; literal (js: `s = 1;`) (js: `{                ...`)
 ST 0 5
 LDC 0 ; if-cons-jump
-TSEL 2061 2061
+TSEL 2326 2326
 LDC 0 ; literal (js: `if (dx < 0) {    ...`)
 LD 0 0
 CGT
-TSEL 2051 2057 ; if test
+TSEL 2316 2322 ; if test
 LDC 0 ; (js: `s = -1;`) (js: `{                ...`)
 LDC 1 ; literal
 SUB
 ST 0 5
 LDC 0 ; if-cons-jump
-TSEL 2061 2061
+TSEL 2326 2326
 LDC 0 ; (js: `s = -2;`) (js: `{                ...`)
 LDC 2 ; literal
 SUB
 ST 0 5
 LDC 0 ; if-cons-jump
-TSEL 2093 2093
+TSEL 2358 2358
 LD 0 0 ; (js: `if (dx > 0) {    ...`) (js: `{                ...`)
 LDC 0 ; literal
 CGT
-TSEL 2067 2071 ; if test
+TSEL 2332 2336 ; if test
 LDC 2 ; literal (js: `s = 2;`) (js: `{                ...`)
 ST 0 5
 LDC 0 ; if-cons-jump
-TSEL 2093 2093
+TSEL 2358 2358
 LD 0 1 ; (js: `if (dy > 0) {    ...`)
 LDC 0 ; literal
 CGT
-TSEL 2075 2079 ; if test
+TSEL 2340 2344 ; if test
 LDC 1 ; literal (js: `s = 1;`) (js: `{                ...`)
 ST 0 5
 LDC 0 ; if-cons-jump
-TSEL 2093 2093
+TSEL 2358 2358
 LDC 0 ; literal (js: `if (dy < 0) {    ...`)
 LD 0 1
 CGT
-TSEL 2083 2089 ; if test
+TSEL 2348 2354 ; if test
 LDC 0 ; (js: `s = -1;`) (js: `{                ...`)
 LDC 1 ; literal
 SUB
 ST 0 5
 LDC 0 ; if-cons-jump
-TSEL 2093 2093
+TSEL 2358 2358
 LDC 0 ; (js: `s = -2;`) (js: `{                ...`)
 LDC 2 ; literal
 SUB
@@ -2094,13 +2359,13 @@ ST 0 5
 LD 2 6 ; (js: `if (vit === 1) { ...`)
 LDC 1 ; literal
 CEQ
-TSEL 2097 2103 ; if test
+TSEL 2362 2368 ; if test
 LDC 0 ; literal (js: `return 0 - s;`) (js: `{                ...`)
 LD 0 5
 SUB
 RTN
 LDC 0 ; if-cons-jump
-TSEL 2105 2105
+TSEL 2370 2370
 LD 0 5 ; (js: `return s;`) (js: `{                ...`)
 RTN
 RTN
@@ -2108,13 +2373,13 @@ LDC 0 ; init_ctx=0
 LDC 0 ; init_ctx=1
 LDC 0 ; init_ctx=2
 LDC 0 ; init_ctx=3
-LDF 2113
+LDF 2378
 AP 4
 RTN
 LD 1 0 ; (js: `if (typeof ds[1] ...`) (js: `{                ...`)
 CDR
 ATOM
-TSEL 2117 2120 ; if test
+TSEL 2382 2385 ; if test
 LD 1 0 ; (js: `return ds[0];`) (js: `{                ...`)
 CAR
 RTN
@@ -2128,7 +2393,7 @@ LD 1 0 ; (js: `while (typeof ds ...`)
 ATOM
 LDC 0
 CEQ
-TSEL 2131 2164 ; while test
+TSEL 2396 2425 ; while test
 LD 1 0 ; (js: `var d = ds[0];`) (js: `{                ...`)
 CAR
 ST 0 2
@@ -2147,12 +2412,8 @@ AP 0
 LDC 16384 ; literal
 CGT
 MUL
-LDC 1
-CEQ
 ADD
-LDC 0
-CGT
-TSEL 2155 2159 ; if test
+TSEL 2416 2420 ; if test
 LD 0 2 ; (js: `bestD = d;`) (js: `{                ...`)
 ST 0 0
 LD 0 3 ; (js: `bestScore = val;`)
@@ -2161,206 +2422,24 @@ LD 1 0 ; (js: `ds = ds[1];`)
 CDR
 ST 1 0
 LDC 0
-TSEL 2126 2126
+TSEL 2391 2391
 LD 0 0 ; (js: `return bestD;`)
 RTN
 LDC 0 ; init_ctx=0
 LDC 0 ; init_ctx=1
-LDC 0 ; init_ctx=2
-LDC 0 ; init_ctx=3
-LDC 0 ; init_ctx=4
-LDF 2174
-AP 5
+LDF 2432
+AP 2
 RTN
-LD 6 20 ; (js: `var mz = matrixGe...`) (js: `{                ...`)
+LD 8 52 ; (js: `var mz = matrixGe...`) (js: `{                ...`)
 LD 2 7
 LD 8 7
 AP 2
 ST 0 0
-LDC 0 ; literal (js: `var ds = 0;`)
-ST 0 1
-LD 0 0 ; (js: `if (typeof mz ===...`)
-ATOM
-LDC 0
-CEQ
-TSEL 2186 2191 ; if test
-LD 0 0 ; (js: `ds = listGet(mz, d);`) (js: `{                ...`)
+LD 0 0 ; (js: `var ds = listGet(...`)
 LD 2 8
 LD 8 0
 AP 2
 ST 0 1
-LD 0 1 ; (js: `if (typeof ds ===...`)
-ATOM
-TSEL 2194 2363 ; if test
-LD 2 8 ; (js: `var dl = d + 1;`) (js: `{                ...`)
-LDC 1 ; literal
-ADD
-ST 0 2
-LD 0 2 ; (js: `if (dl === 4)    ...`)
-LDC 4 ; literal
-CEQ
-TSEL 2202 2204 ; if test
-LDC 0 ; literal (js: `dl = 0;`)
-ST 0 2
-LD 2 8 ; (js: `var dr = d - 1;`)
-LDC 1 ; literal
-SUB
-ST 0 3
-LD 0 3 ; (js: `if (dr === -1)   ...`)
-LDC 0
-LDC 1 ; literal
-SUB
-CEQ
-TSEL 2214 2216 ; if test
-LDC 3 ; literal (js: `dr = 3;`)
-ST 0 3
-LD 2 8 ; (js: `var db = opposite...`)
-LD 8 28
-AP 1
-ST 0 4
-LD 6 9 ; (js: `if (matrixGet(map...`)
-LD 2 7
-LD 2 8
-LD 8 11
-AP 2
-LD 8 7
-AP 2
-LDC 0 ; literal
-CEQ
-TSEL 2230 2286 ; if test
-LD 6 9 ; (js: `if (matrixGet(map...`) (js: `{ // wall        ...`)
-LD 2 7
-LD 0 2
-LD 8 11
-AP 2
-LD 8 7
-AP 2
-LDC 0 ; literal
-CEQ
-TSEL 2240 2262 ; if test
-LD 6 9 ; (js: `if (matrixGet(map...`) (js: `{                ...`)
-LD 2 7
-LD 0 3
-LD 8 11
-AP 2
-LD 8 7
-AP 2
-LDC 0 ; literal
-CEQ
-TSEL 2250 2256 ; if test
-LD 0 4 ; (js: `ds = [db, 0];`) (js: `{                ...`)
-LDC 0 ; literal
-CONS
-ST 0 1
-LDC 0 ; if-cons-jump
-TSEL 2260 2260
-LD 0 3 ; (js: `ds = [dr, 0];`) (js: `{                ...`)
-LDC 0 ; literal
-CONS
-ST 0 1
-LDC 0 ; if-cons-jump
-TSEL 2284 2284
-LD 6 9 ; (js: `if (matrixGet(map...`) (js: `{                ...`)
-LD 2 7
-LD 0 3
-LD 8 11
-AP 2
-LD 8 7
-AP 2
-LDC 0 ; literal
-CEQ
-TSEL 2272 2278 ; if test
-LD 0 2 ; (js: `ds = [dl, 0];`) (js: `{                ...`)
-LDC 0 ; literal
-CONS
-ST 0 1
-LDC 0 ; if-cons-jump
-TSEL 2284 2284
-LD 0 3 ; (js: `ds = [dr, [dl, 0]];`) (js: `{                ...`)
-LD 0 2
-LDC 0 ; literal
-CONS
-CONS
-ST 0 1
-LDC 0 ; if-cons-jump
-TSEL 2346 2346
-LD 6 9 ; (js: `if (matrixGet(map...`) (js: `{                ...`)
-LD 2 7
-LD 0 2
-LD 8 11
-AP 2
-LD 8 7
-AP 2
-LDC 0 ; literal
-CEQ
-TSEL 2296 2320 ; if test
-LD 6 9 ; (js: `if (matrixGet(map...`) (js: `{                ...`)
-LD 2 7
-LD 0 3
-LD 8 11
-AP 2
-LD 8 7
-AP 2
-LDC 0 ; literal
-CEQ
-TSEL 2306 2312 ; if test
-LD 2 8 ; (js: `ds = [d, 0];`) (js: `{                ...`)
-LDC 0 ; literal
-CONS
-ST 0 1
-LDC 0 ; if-cons-jump
-TSEL 2318 2318
-LD 2 8 ; (js: `ds = [d, [dr, 0]];`) (js: `{                ...`)
-LD 0 3
-LDC 0 ; literal
-CONS
-CONS
-ST 0 1
-LDC 0 ; if-cons-jump
-TSEL 2346 2346
-LD 6 9 ; (js: `if (matrixGet(map...`) (js: `{                ...`)
-LD 2 7
-LD 0 3
-LD 8 11
-AP 2
-LD 8 7
-AP 2
-LDC 0 ; literal
-CEQ
-TSEL 2330 2338 ; if test
-LD 2 8 ; (js: `ds = [d, [dl, 0]];`) (js: `{                ...`)
-LD 0 2
-LDC 0 ; literal
-CONS
-CONS
-ST 0 1
-LDC 0 ; if-cons-jump
-TSEL 2346 2346
-LD 2 8 ; (js: `ds = [d, [dl, [dr...`) (js: `{                ...`)
-LD 0 2
-LD 0 3
-LDC 0 ; literal
-CONS
-CONS
-CONS
-ST 0 1
-LD 0 0 ; (js: `if (typeof mz ===...`)
-ATOM
-TSEL 2349 2351 ; if test
-LD 6 8 ; (js: `mz = _4FastList;`) (js: `{                ...`)
-ST 0 0
-LD 0 0 ; (js: `mz = listSet(mz, ...`)
-LD 2 8
-LD 0 1
-LD 8 1
-AP 3
-ST 0 0
-LD 6 20 ; (js: `maze = matrixSet(...`)
-LD 2 7
-LD 0 0
-LD 8 6
-AP 3
-ST 6 20
 LD 0 1 ; (js: `d = findGhostStra...`)
 LD 2 2
 AP 1
@@ -2373,6 +2452,6 @@ ST 2 7
 LD 2 0 ; (js: `handleCollision();`)
 AP 0
 ATOM
-TSEL 2376 2376 ; cleanup
+TSEL 2455 2455 ; cleanup
 LDC 0 ; literal (js: `return 0;`)
 RTN
