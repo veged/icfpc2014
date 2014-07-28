@@ -9,8 +9,5 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "linearscan": "^0.3.5",
-    "phi.js": "^0.1.4",
-    "ssa-ir": "^0.3.3"
   }
 }
