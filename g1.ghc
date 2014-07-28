@@ -11,9 +11,12 @@ $down_cell = 8
 $left_cell = 9
 $right_cell = 10
 $vit = 11
-$dir = 12
+$cur_dir = 12
 $once = 13
 $counter = 14
+$cur_cell = 15
+$prev_cell = 16
+$next_cell = 17
 
 $min_catch_distance = 6
 $catch_distance = 3
@@ -46,7 +49,7 @@ not_once:
     int 3
     int 6
     mov [$vit], a
-    mov [$dir], b
+    mov [$cur_dir], b
 
     ; get up cells
     mov a, [$gx]
@@ -76,6 +79,13 @@ not_once:
     int 7
     mov [$right_cell], a
 
+    ; current, and hold previous
+    mov a, [$gx]
+    mov b, [$gy]
+    int 7
+    mov [$prev_cell], [$cur_cell]
+    mov [$cur_cell], a
+
     ; count ways to go
     xor a, a
     jeq .free_up, [$up_cell], $wall_cell
@@ -91,12 +101,6 @@ free_left:
     inc a
 free_right:
     jlt .no_way, a, 3
-
-    ; check if left the home
-    mov a, [$gx]
-    mov b, [$gy]
-    int 7
-    jeq .home, a, $home_cell
 
     ; check fright mode
     jeq .not_fright, [$vit], 0
@@ -156,7 +160,8 @@ move_y_lte_p:
 
     ; down
     mov a, 2
-    jeq .dir, 0, 0
+    mov [$next_cell], [$down_cell]
+    jeq .got_dir, 0, 0
 
 move_y_gt_p:
     ; move in x, if blocked
@@ -164,7 +169,8 @@ move_y_gt_p:
 
     ; up
     mov a, 0
-    jeq .dir, 0, 0
+    mov [$next_cell], [$up_cell]
+    jeq .got_dir, 0, 0
 
 move_x:
     ; move in x
@@ -176,7 +182,8 @@ move_x_lte_p:
 
     ; right
     mov a, 1
-    jeq .dir, 0, 0
+    mov [$next_cell], [$right_cell]
+    jeq .got_dir, 0, 0
 
 move_x_gt_p:
     ; move in y, if blocked
@@ -184,36 +191,40 @@ move_x_gt_p:
 
     ; left
     mov a, 3
-    jeq .dir, 0, 0
+    mov [$next_cell], [$left_cell]
 
-home:
-    inc [$seed]
-    mov a, [$seed]
-    and a, 3
+    ; fall-through
 
-    int 0
-    hlt
+got_dir:
+    ; check if left the home
+    jeq .home, [$next_cell], $home_cell
 
-dir:
-    ; Continue movement
-    jeq .no_way, [$dir], a
-
+after_home:
     ; Can't swap direction
     mov b, a
     add b, 2
     and b, 3
-    jeq .swap_dir, [$dir], b
+    jeq .swap_dir, [$cur_dir], b
+
+    ; Continue movement
+    jeq .no_way, [$cur_dir], a
 
     ; Ok now, just move
     int 0
 no_way:
     hlt
 
+home:
+    inc [$seed]
+    mov a, [$seed]
+    and a, 3
+    jeq .after_home, 0, 0
+
 swap_dir:
-    jeq .move_y, [$dir], 1
-    jeq .move_y, [$dir], 3
-    jeq .move_x, [$dir], 0
-    jeq .move_x, [$dir], 2
+    jeq .move_y, [$cur_dir], 1
+    jeq .move_y, [$cur_dir], 3
+    jeq .move_x, [$cur_dir], 0
+    jeq .move_x, [$cur_dir], 2
     hlt
 
 surround:
