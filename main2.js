@@ -87,6 +87,27 @@ if (module) { // Node.js
 
 var globalMap = global[0][0];
 
+var listGet_size;
+var listGet_m;
+
+function listGet(list, n) {
+    listGet_size = list[0];
+    list = list[1];
+    while (listGet_size !== 1) {
+        listGet_m = (listGet_size / 2) | 0;
+        if (n < listGet_m) {
+            list = list[0];
+            listGet_size = listGet_m;
+        } else {
+            list = list[1];
+            listGet_size = listGet_size - listGet_m;
+            n = n - listGet_m;
+        }
+    }
+    return list;
+}
+
+/*
 function listGet(list2, n) {
     var size = list2[0];
     var list = list2[1];
@@ -104,7 +125,48 @@ function listGet(list2, n) {
     }
     return list;
 }
+*/
 
+var listSet_size;
+var listSet_s;
+var listSet_stack;
+var listSet_m;
+var listSet_res;
+
+function listSet(list, n, x) {
+    var listSet_size = list[0];
+    var listSet_s = listSet_size;
+    list = list[1];
+    var listSet_stack = 0;
+
+    while (listSet_s > 1) {
+        var listSet_m = (listSet_s / 2) | 0;
+        if (n < listSet_m) {
+            listSet_s = listSet_m;
+            listSet_stack = [[1, list[1]], listSet_stack];
+            list = list[0];
+        } else {
+            listSet_s = listSet_s - listSet_m;
+            n = n - listSet_m;
+            listSet_stack = [[0, list[0]], listSet_stack];
+            list = list[1];
+        }
+    }
+
+    var listSet_res = x;
+
+    while (typeof listSet_stack === 'object') {
+        var head = listSet_stack[0];
+        if (head[0]) {
+            listSet_res = [listSet_res, head[1]];
+        } else {
+            listSet_res = [head[1], listSet_res];
+        }
+        listSet_stack = listSet_stack[1];
+    }
+    return [listSet_size, listSet_res];
+}
+/*
 function listSet(list, n, x) {
     var size = list[0];
     var s = size;
@@ -138,6 +200,7 @@ function listSet(list, n, x) {
     }
     return [size, res];
 }
+*/
 
 function listLength(list) {
     return list[0];
@@ -616,7 +679,7 @@ function step(aiState, worldState) {
         toDo = heapPush(toDo, [0, state]);
         var heapOps = 0;
 
-        while (heapSize(toDo) > 0 && heapOps < 150) {
+        while (heapSize(toDo) > 0 && heapOps < 180) {
             heapOps = heapOps + 1;
             var popRes = heapPop(toDo);
             var state = popRes[0];
