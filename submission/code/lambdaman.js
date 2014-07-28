@@ -988,6 +988,11 @@ function step(aiState, worldState) {
 
     var myPos = lmStatus(1);
     var myOrigPos = myPos;
+
+    if (matrixGet(map, myOrigPos) === 2 || matrixGet(map, myOrigPos) === 3) {
+        map = matrixSet(map, myOrigPos, 1); //!! we keep track of map state manually
+    }
+
     calcPaths();
     calcSmell();
 
@@ -1005,10 +1010,6 @@ function step(aiState, worldState) {
     }
 
     var bestPos = shiftDir(myOrigPos, bestD);
-    if (canGo(bestPos)) {
-        map = matrixSet(map, bestPos, 1); //!! we keep track of map state manually
-    }
-    //console.log(map);
 
     return [[paths, [smell, map]], bestD];
 }
