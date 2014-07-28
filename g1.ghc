@@ -258,7 +258,6 @@ swap_dir:
     hlt
 
 surround:
-    int 8
     ; Calculate surround coordinate from a ghost index
     int 3
 
