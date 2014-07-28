@@ -159,6 +159,12 @@ ScopeEntry.prototype.constVal = function constVal() {
 };
 
 ScopeEntry.prototype.parentScope = function parentScope() {
+  if (this.global) {
+    for (var i = this.scope; i && i.parent; i = i.parent) {
+      /* no-op */
+    }
+    return i;
+  }
   if (this.parent)
     return this.parent.parentScope();
 

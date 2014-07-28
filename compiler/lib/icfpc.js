@@ -507,8 +507,13 @@ Compiler.prototype.visitMember = function visitMember(stmt) {
   if (obj.type === 'Identifier' && obj.name === 'global') {
     var slot = obj._scope;
     assert(slot);
-    this.add([ 'LD', slot.depth, stmt.property.value ]);
-    return;
+    if (slot.isGlobal()) {
+      var root = slot.parentScope();
+      this.add([
+        'LD', slot.depth + root.context ? 1 : 0, stmt.property.value
+      ]);
+      return;
+    }
   }
 
   var idx = stmt.property.value;
