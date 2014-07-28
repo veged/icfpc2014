@@ -14,8 +14,11 @@ $vit = 11
 $dir = 12
 $once = 13
 $counter = 14
+
 $min_catch_distance = 6
 $catch_distance = 3
+$wall_cell = 0
+$home_cell = 6
 
 start:
     jeq .not_once, [$once], 1
@@ -75,16 +78,16 @@ not_once:
 
     ; count ways to go
     xor a, a
-    jeq .free_up, [$up_cell], 0
+    jeq .free_up, [$up_cell], $wall_cell
     inc a
 free_up:
-    jeq .free_down, [$down_cell], 0
+    jeq .free_down, [$down_cell], $wall_cell
     inc a
 free_down:
-    jeq .free_left, [$left_cell], 0
+    jeq .free_left, [$left_cell], $wall_cell
     inc a
 free_left:
-    jeq .free_right, [$right_cell], 0
+    jeq .free_right, [$right_cell], $wall_cell
     inc a
 free_right:
     jlt .no_way, a, 3
@@ -93,7 +96,7 @@ free_right:
     mov a, [$gx]
     mov b, [$gy]
     int 7
-    jeq .home, a, 6
+    jeq .home, a, $home_cell
 
     ; check fright mode
     jeq .not_fright, [$vit], 0
