@@ -640,7 +640,7 @@ function step(aiState, worldState) {
             } else {
                 b = 10; // dislike wasting power pills, only when proved to catch a ghost or hunting a fruit
             }
-        } else if (cell === 4 && fruitStatus > 0) {
+        } else if (cell === 4 && fruitStatus > t) {
             b = 10000; // TODO: use map size
         } else if (cell === 7) {
             b = 10000; // frightened ghost

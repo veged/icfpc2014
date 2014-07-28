@@ -1627,7 +1627,7 @@ LD 1 0 ; (js: `if (cell === 4 &&...`)
 LDC 4 ; literal
 CEQ
 LD 2 6
-LDC 0 ; literal
+LD 1 1
 CGT
 MUL
 TSEL 1633 1637 ; if test
