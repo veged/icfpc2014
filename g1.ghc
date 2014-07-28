@@ -14,6 +14,8 @@ $vit = 11
 $dir = 12
 $once = 13
 $counter = 14
+$min_catch_distance = 6
+$catch_distance = 3
 
 start:
     jeq .not_once, [$once], 1
@@ -124,13 +126,20 @@ dx_join:
 dy_lte_y:
     mov [$dy], [$py]
     sub [$dy], [$gy]
-    jeq .dy_join, 0, 0
+    jeq .we_have_dx_and_dy, 0, 0
 
 dy_gt_y:
     mov [$dy], [$gy]
     sub [$dy], [$px]
 
-dy_join:
+we_have_dx_and_dy:
+    ; Check if total distance is small
+    mov a, [$dx]
+    add a, [$dy]
+    jgt .surround, a, $min_catch_distance
+
+just_catch_him:
+
     ; Find biggest difference and try to compensate it
     jgt .move_x, [$dx], [$dy]
 
@@ -203,3 +212,44 @@ swap_dir:
     jeq .move_x, [$dir], 0
     jeq .move_x, [$dir], 2
     hlt
+
+surround:
+    ; Calculate surround coordinate from a ghost index
+    int 3
+    and a, 3
+    jeq .surround_up, a, 0
+    jeq .surround_right, a, 1
+    jeq .surround_down, a, 2
+
+surround_left:
+    sub [$px], $catch_distance
+    jeq .surround_join, 0, 0
+
+surround_down:
+    add [$py], $catch_distance
+    jeq .surround_join, 0, 0
+
+surround_right:
+    add [$px], $catch_distance
+    jeq .surround_join, 0, 0
+
+surround_up:
+    sub [$py], $catch_distance
+
+surround_join:
+    mov a, [$px]
+    and a, 128
+    jeq .px_not_negative, a, 0
+negative_px:
+    mov [$px], 0
+
+px_not_negative:
+    mov a, [$py]
+    and a, 128
+    jeq .py_not_negative, a, 0
+negative_py:
+    mov [$py], 0
+
+py_not_negative:
+    ; Move to the player
+    jeq .just_catch_him, 0, 0
