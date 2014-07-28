@@ -19,9 +19,10 @@ $prev_cell = 16
 $next_cell = 17
 
 $min_catch_distance = 6
-$catch_distance = 3
+$catch_distance = 2
 $wall_cell = 0
 $home_cell = 6
+$fright_mode = 1
 $just_started = h
 
 start:
@@ -130,7 +131,9 @@ free_right:
     jlt .no_way, a, 3
 
     ; check fright mode
-    jeq .not_fright, [$vit], 0
+    mov a, [$vit]
+    xor a, $fright_mode
+    jgt .not_fright, a, 0
 
 fright:
     ; swap coordinates to run from the player
@@ -255,9 +258,21 @@ swap_dir:
     hlt
 
 surround:
+    int 8
     ; Calculate surround coordinate from a ghost index
     int 3
-    and a, 3
+
+    ; randomize things a little (0,1,2,3) => (2,1,0,3)
+    add a, 2
+    mul a, 7
+
+    ; a %= 4
+surround_mod:
+    jlt .surround_mod_end, a, 4
+    sub a, 4
+    jeq .surround_mod, 0, 0
+
+surround_mod_end:
     jeq .surround_up, a, 0
     jeq .surround_right, a, 1
     jeq .surround_down, a, 2
