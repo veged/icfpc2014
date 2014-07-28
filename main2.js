@@ -548,6 +548,7 @@ function setMaze() {
         }
         x = x + 1;
     }
+    return 0;
 }
 
 setMaze();
