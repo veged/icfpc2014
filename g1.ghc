@@ -22,8 +22,10 @@ $min_catch_distance = 6
 $catch_distance = 3
 $wall_cell = 0
 $home_cell = 6
+$just_started = h
 
 start:
+    xor $just_started, $just_started
     jeq .not_once, [$once], 1
 
 once:
@@ -32,8 +34,30 @@ once:
     mul a, 11
     add [$seed], a
     mov [$once], 1
+    mov $just_started, 1
+    jeq .after_once, 0, 0
 
 not_once:
+    int 3
+    int 5
+    ; If we moved more than by a one cell and we are at home -
+    ; the player was just eaten
+    sub a, [$gx]
+    jeq .after_once, a, 1
+    jeq .after_once, a, 255
+    sub b, [$gy]
+    jeq .after_once, a, 1
+    jeq .after_once, a, 255
+
+    ; check if the cell is home
+    int 3
+    int 5
+    int 7
+    xor a, $home_cell
+    jgt .after_once, a, 0
+    mov $just_started, 1
+
+after_once:
 
     ; get player's coordinates
     int 1
@@ -85,6 +109,9 @@ not_once:
     int 7
     mov [$prev_cell], [$cur_cell]
     mov [$cur_cell], a
+
+    ; If just started - ignore available directions
+    jeq .not_fright, $just_started, 1
 
     ; count ways to go
     xor a, a

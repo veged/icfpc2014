@@ -30,9 +30,9 @@ read(function(src) {
     var line = lines[i];
 
     // Constant
-    var match = line.match(/^\$([\w\d]+)\s*=\s*(\d+)$/);
+    var match = line.match(/^\$([\w\d]+)\s*=\s*([\w\d]+)$/);
     if (match) {
-      constants[match[1]] = match[2] | 0;
+      constants[match[1]] = match[2];
       lines.splice(i, 1);
       i--;
       continue;
